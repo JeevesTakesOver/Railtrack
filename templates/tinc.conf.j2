@@ -1,0 +1,8 @@
+Name={{ tinc_node }}
+Device=/dev/net/tun
+Mode=switch
+{% for host in tinc_nodes %}
+ConnectTo={{ host }}
+{% endfor %}
+Cipher=aes-256-cbc
+Digest=SHA512

@@ -1,0 +1,3 @@
+#!/bin/sh
+ifconfig $INTERFACE {{ tinc_ip }} netmask {{ tinc_netmask }}
+route add -net {{ tinc_network }}  netmask {{ tinc_netmask }} gw {{ tinc_node_ip }} dev $INTERFACE

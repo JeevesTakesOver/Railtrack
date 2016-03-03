@@ -1,0 +1,12 @@
+{
+    "consul" : {
+        "addr": "127.0.0.1:8500",
+        "dc": "{{ dc }}"
+    },
+    "mappings" : [{
+        "onchange": "service tinc reload",
+        "prefix": "{{ prefix }}",
+        "path": "{{ path }}"
+    }]
+}
+

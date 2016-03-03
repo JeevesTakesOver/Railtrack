@@ -1,0 +1,6 @@
+venv
+*.pyc
+.vagrant/
+venv
+direnv
+.envrc

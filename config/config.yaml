@@ -1,0 +1,221 @@
+# vim: ai ts=2 sts=2 et sw=2 ft=yaml fdm=indent et foldlevel=0
+#
+# config.yaml
+
+ec2_common: &ec2_common
+  key_pair: <%= ENV['KEY_PAIR_NAME'] %>
+  key_filename: <%= ENV['KEY_FILENAME'] %>
+  access_key_id: <%= ENV['AWS_ACCESS_KEY_ID'] %>
+  secret_access_key: <%= ENV['AWS_SECRET_ACCESS_KEY'] %>
+  disk_name: '/dev/sda1'
+  disk_size: '8'
+  instance_type: 't1.micro'
+  security_groups: [ 'ssh', 'tinc']
+  ami: 'something'
+  description: 'core-vpn boxes'
+  instance_name: 'core-vpn-box'
+  tags: {'name': 'core-vpn-boxes'}
+  username: 'vagrant'
+  region: 'eu-west-1'
+
+tinc_common: &tinc_common
+  env: 'development'
+  tinc_netmask: '255.255.0.0'
+  tinc_network_name: 'core-vpn'
+  tinc_network: '169.254.0.0'
+
+regions:
+  us-east-1: &us_east_1
+    <<: *ec2_common
+    ami: 'ami-7b290711'
+    region: 'us-east-1'
+
+  eu-central-1: &eu_central_1
+    <<: *ec2_common
+    ami: 'ami-229c844e'
+    region: 'eu-central-1'
+
+  eu-west-1: &eu_west_1
+    <<: *ec2_common
+    ami: 'ami-943583e7'
+    region: 'eu-west-1'
+
+  ap-southeast-1: &ap_southeast_1
+    <<: *ec2_common
+    ami: 'ami-ea7db289'
+    region: 'ap-southeast-1'
+
+  ap-northeast-1: &ap_northeast_1
+    <<: *ec2_common
+    ami: 'ami-0b102a65'
+    region: 'ap-northeast-1'
+
+  ap-southeast-2: &ap_southeast_2
+    <<: *ec2_common
+    ami: 'ami-7ca88c1f'
+    region: 'ap-southeast-2'
+
+  sa-east-1: &sa_east_1
+    <<: *ec2_common
+    ami: 'ami-4822a224'
+    region: 'sa-east-1'
+
+  us-west-1: &us_west_1
+    <<: *ec2_common
+    ami: 'ami-e21d6b82'
+    region: 'us-west-1'
+
+  us-west-2: &us_west_2
+    <<: *ec2_common
+    ami: 'ami-d235d3b2'
+    region: 'us-west-2'
+
+consul:
+  encrypt: &consul_encryption_key 'WrR5ddqjK9M2JMCeVlD3vQ=='
+
+roles:
+  core-vpn-node:
+    <<: *tinc_common
+    servers:
+      core_network_01: &core_network_01
+        <<: *us_east_1
+        tinc_node: 'core_network_01'
+        region: 'us-east-1'
+        tinc_ip: &core_network_01_tinc_ip '169.254.0.1'
+        public_ip_address: &core_network_01_public_ip_address '192.168.56.101'
+        public_dns_name: &core_network_01_public_dns_name 'core01'
+        tinc_private_key: <%= ENV['TINC_KEY_FILENAME_CORE_NETWORK_01'] %>
+        tinc_public_key: &core_network_01_tinc_public_key |
+          -----BEGIN RSA PUBLIC KEY-----
+          MIICCgKCAgEAozzeSS7NSQsb3s9vJS1rJAV3Z4c9ib422bAEOeK8oGcKjTKxFtaE
+          9FNGT+wmvwqYz/I81YlB4MIcHojLx94PGXq8lef1awtiekpS23yeanwLFN0esPET
+          Dsj51nWQ65QVcxN8cp6UODGlq8SYF8ikkkNiLyeDJabDKf8RQk5B1HhUHLbhyxJc
+          FyqRiEXsBELCKVqBZEGTYeKqx8IatIfpIY0v9ddapsUQsELwSY3dLxI55sHDV5zk
+          0wU3gpq1Ht6I030nxCPJ9gXXOTF6pwWUdYZyGXGnVbVRMPcxu4jfukuxf8jIWDwe
+          2Iw+PRUPOl11/4sjULtqd71l8eh90I4FTAG20sHixatb4APYm7v4UXDrs57IU3PF
+          NGOSYSQFDLPxRWpmtn/tY3IC5ILNXjvjWRdWIqrzz1ozzthvsqYMyqBZf8RQFN9j
+          PKfK/oakrAhbBBZ4unKQD7Li3gfzUmDANy1mQXEkIjpfCLiq1C3lKkf1VnTPr9DJ
+          315Acc8p6TIr+olFZVM7Fg6wCflrswJVYXy3wd9U+pfDK4d6/1va8K+2zQH9c2gE
+          jy+PxPRYL0yn8EhPGc6z9Q7jFVuKOkgRDLDMmheLUAAYvhJj6d6MSDbWR5zShIds
+          84wj88+90J2P+CrPbnhn7N78dfxTshR0wTAZQgUvJsqgDkRLovOTxmECAwEAAQ==
+          -----END RSA PUBLIC KEY-----
+
+      core_network_02: &core_network_02
+        <<: *us_west_2
+        tinc_node: 'core_network_02'
+        region: 'us-west-2'
+        tinc_ip: &core_network_02_tinc_ip '169.254.0.2'
+        public_ip_address: &core_network_02_public_ip_address '192.168.56.102'
+        public_dns_name: &core_network_02_public_dns_name 'core02'
+        tinc_private_key: <%= ENV['TINC_KEY_FILENAME_CORE_NETWORK_02'] %>
+        tinc_public_key: &core_network_02_tinc_public_key |
+          -----BEGIN RSA PUBLIC KEY-----
+          MIICCgKCAgEA1pZWhTHR20c98RkwbHjvrVlDziK49c4nlaz1IxG3byLCKCVxNWt5
+          YQFC+cPI+paMO3zWTWAF05b7yKfDLYfWXJU79EBL4kkYldAzTrUawMRYSJtItbrS
+          LtEvfPBP0L82FgB/Jz7MyGU6tgnPOtMoDkO6fSLCbVKBraIAfs+uxYFjjjp7nRFA
+          Atj/8iKDYOoF5Rpkd3jDpRnBUMU5jfJJiMnKK6v0cWWPmRCySdP4nkBseeibi3r3
+          apuZMS59eGsBQRkJCpmGU3aQKPVYO79l+W+cWJyNspoEe7/i8uQT0fhQDInnycZu
+          lrDlfY3/CkSyH0qkg9RDfE5DFfrLS4cuLdmu1ishWRLR3ANwxAExc5j7sgmveBnD
+          Bj6aGG+xRirdrbyODMUxRewjkbSCZDjjIsWHPaGcK0WK+8Ri/o+xucsFnrCclEfd
+          Xj7+uxdvq/8IMNGsUADhy4rjwdizNnsqPdfeJGIAgBi1of1tqpttEyLyzq0OQ27+
+          jVkO7IXfq/EQR0c8hdU/D9DTD6mkVy71ScExKwcY9nUn40ssvu2cmkktuM0lq/JV
+          WAxzMgL9PVcuHgd5IeusgW9qZk2wkqlKdYQIRhVgy1JFlqvMNYSqN28iIPuWWUuq
+          oTzQuL7LdRO9TC6gS+JCrP03GAqpNS+q84BIXT/DJpi2+nJGkREbHd8CAwEAAQ==
+          -----END RSA PUBLIC KEY-----
+
+      core_network_03: &core_network_03
+        <<: *eu_west_1
+        tinc_node: 'core_network_03'
+        region: 'eu-west-1'
+        tinc_ip: &core_network_03_tinc_ip '169.254.0.3'
+        public_ip_address: &core_network_03_public_ip_address '192.168.56.103'
+        public_dns_name: &core_network_03_public_dns_name 'core03'
+        tinc_private_key: <%= ENV['TINC_KEY_FILENAME_CORE_NETWORK_03'] %>
+        tinc_public_key: &core_network_03_tinc_public_key |
+          -----BEGIN RSA PUBLIC KEY-----
+          MIICCgKCAgEAlimDWppur7zym2LHca10GRipVSVTz4XSPE4bEEsjI3pGkUAt1s/9
+          FlGJ3IiMtCOkbOsG3eaNK6zbYisl/n+j29EAe47U3ESzz2Mq2R4loJEJHLbuCknu
+          edmUMtTT4dUIM4iJSAIQwqr7bTMID470xITkkK9yxG0LUtE0Wo73PW9Y6lm4nwKU
+          9fQwCbkUAtXRR8k5z95v+l4P5G395qeG0MdZ4TlVWu+PzdMeV/uAl/tiWyGDWfkD
+          6bZBsrb+89skR302ibEIf/WCWa0Gnrd5bC8SwAWI47VocF0pybWD9ImvhB4TkYHf
+          mRp2k+cWxqi9IU/lCz1PTME9CaFteadYkE6mijcGPEC62QnF+jLE85vulwr9g0Lf
+          yOKGgC0gqw0PgjShoQalcvD+9c+I76mEiX6NnNxIIJ5m/+Jgdn4dwh3rNc9R/R+k
+          4Gs5dgf8u/1VAmXdkXpTjN/aJtwt7FOo1lkY5cYL8lIxV3xwOnYd6m3cL9dwCK97
+          4mLTcJFjsRZSmTUXm9xCqZ/EYmSXviEodulvsnl8fO/1JjVxxNaV25LE71nSvF9F
+          k3ud6ALnTFlKl+UrtWY199ODqK1S8lbTkso/ebLAN0zDdXXbD9KVpsSAUuNQRwop
+          gpyzPAVIL9gQX373tY8y7al4cVg6hq2FHxJlAWtikFQA3dXRVH4Ix0sCAwEAAQ==
+          -----END RSA PUBLIC KEY-----
+
+
+tinc_networks:
+  core-vpn:
+    tinc_network_name: &tinc_network_name 'core-vpn'
+    tinc_netmask: '255.255.0.0'
+    tinc_network: '169.254.0.0'
+    servers:
+      core_network_01: *core_network_01
+      core_network_02: *core_network_02
+      core_network_03: *core_network_03
+
+consul_servers:
+  encrypt: 'WrR5ddqjK9M2JMCeVlD3vQ=='
+  version: '0.6.3'
+  datacenter: 'tinc'
+  servers:
+    core_network_01:
+      <<: *core_network_01
+      consul_ip: *core_network_01_tinc_ip
+      consul_interface: *tinc_network_name
+    core_network_02:
+      <<: *core_network_02
+      consul_ip: *core_network_02_tinc_ip
+      consul_interface: *tinc_network_name
+    core_network_03:
+      <<: *core_network_03
+      consul_ip: *core_network_03_tinc_ip
+      consul_interface: *tinc_network_name
+
+
+git2consul: &git2consul
+  <<: *tinc_common
+  tinc_node: 'git2consul'
+  <<: *eu_west_1
+  region: 'eu-west-1'
+  datacenter: 'tinc'
+  version: '0.6.3'
+  encrypt: *consul_encryption_key
+  tinc_ip: '169.254.0.10'
+  public_ip_address: '192.168.56.110'
+  public_dns_name:  'git2consul'
+  tinc_private_key: <%= ENV['TINC_KEY_FILENAME_GIT2CONSUL'] %>
+  tinc_public_key: |
+    -----BEGIN RSA PUBLIC KEY-----
+    MIICCgKCAgEAuLiaWPdvzqfeUY8elIp+OTD0kGhSvRyO5zGbjlfdClpgz6hs8QVl
+    Rw0LXFvx6xTNWrNA9GYKGJQf67FIcPzRvUNIFjX5cRQSWrpUYMTfwlQCJTWxpRg9
+    Q5qQIXlVXkLN4+OJtOdMywMS+dMC85pCkqcAzUL8wZn9eBcr/yzQLUgwX8c+D7U3
+    JA/piB4mZRaHTVzNSdOgot+s2YvUHn2Mjf4GbK3s2QzwPGw4ad3AFWLSVILKyXVB
+    Xrc/plZg1doVtfCYuyli6S/mX0XAnWZGIUi5w6sY4m3h0KOAEYkTdiyPnc4Ov5Ak
+    dqAvCbXXbBBuXkUPK8eogBpAL4E4dZ2HEInVJ3UirseDs9aXcJHa7yIt9QxfH4lJ
+    9fBCh1GnuYDdNyjQqVXr6ybiq22LxiUenHcNmrKOyHXRj3NnFRNC8r/bhtuhzCpg
+    2a9HE4xH6SlQ1uayr5NtDTxclYA3UP/1JXAsmoxXMXUKDjxRaCTKVcAHMyNk6hHm
+    EK6jjIQ7FgCXfHL8uZc2/6x5zRDhZqkazDLCkzmdSllO/rexX5rZg1p6vkGIoH2g
+    L+iVNgTDjVgLY0JRLDXIeG7GqvdKfZOqN7S2p5I0F0hXbQCiLVeQdKDAvlJa16Pl
+    KdEq5ow3xRUBXwugqP1He2jt6xat5HgSbqoVglg4uG2sKCChH+V4KwUCAwEAAQ==
+    -----END RSA PUBLIC KEY-----
+
+  # I should just consume this from the 'tinc_roles'
+  tinc_servers:
+      core_network_01:
+        public_ip_address: *core_network_01_public_ip_address
+        tinc_ip: *core_network_01_tinc_ip
+        tinc_public_key: *core_network_01_tinc_public_key
+
+      core_network_02:
+        tinc_ip: *core_network_02_tinc_ip
+        public_ip_address: *core_network_02_public_ip_address
+        tinc_public_key: *core_network_02_tinc_public_key
+
+      core_network_03:
+        tinc_ip: *core_network_03_tinc_ip
+        public_ip_address: *core_network_03_public_ip_address
+        tinc_public_key: *core_network_03_tinc_public_key
