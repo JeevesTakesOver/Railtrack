@@ -6,6 +6,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import lib.clusters
 import lib.git2consul
+import lib.mycookbooks
+import tests.acceptance
 
 from fabric.api import task, env, execute
 
@@ -13,11 +15,6 @@ from bookshelf.api_v1 import (sleep_for_one_minute)
 
 from bookshelf.api_v2.ec2 import (connect_to_ec2, create_server_ec2)
 from bookshelf.api_v2.logging_helpers import log_green
-
-from lib.mycookbooks import (
-    parse_config,
-)
-
 
 @task
 def it():
@@ -211,6 +208,28 @@ def step_06_deploy_fsconsul():
         fsconsul_node.deploy_init_fsconsul()
 
 
+@task
+def run_tests():
+    tests.acceptance.test_that_patches_were_installed()
+    tests.acceptance.test_that_tinc_binaries_were_installed()
+    tests.acceptance.test_that_tinc_key_pairs_were_deployed()
+    tests.acceptance.test_that_tinc_conf_files_were_deployed()
+    tests.acceptance.test_that_tinc_interface_files_were_deployed()
+    tests.acceptance.test_that_tinc_nets_boot_files_were_deployed
+    tests.acceptance.test_that_tinc_peers_host_files_were_deployed
+    tests.acceptance.test_that_tinc_is_running()
+    tests.acceptance.test_that_tinc_peers_are_pingable()
+
+    tests.acceptance.test_that_consul_binaries_were_installed()
+    tests.acceptance.test_that_consul_user_exists()
+    tests.acceptance.test_that_consul_directories_exists()
+    tests.acceptance.test_that_consul_server_config_exists()
+    tests.acceptance.test_that_consul_web_ui_files_exists()
+    tests.acceptance.test_that_consul_server_init_exists()
+    tests.acceptance.test_that_consul_servers_are_running()
+    tests.acceptance.test_that_consul_peers_are_reachable()
+
+
 def get_consul_encryption_key():
     return cfg['consul']['encrypt']
 
@@ -218,7 +237,7 @@ def get_consul_encryption_key():
     ___main___
 """
 
-cfg = parse_config('config/config.yaml')
+cfg = lib.mycookbooks.parse_config('config/config.yaml')
 
 # tinc_network_name = cfg['roles']['core-vpn-node']['tinc_network_name']
 # tinc_network = cfg['roles']['core-vpn-node']['tinc_network']
