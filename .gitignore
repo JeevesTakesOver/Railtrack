@@ -4,3 +4,6 @@ venv
 venv
 direnv
 .envrc
+tags
+.cache
+.ropeproject
