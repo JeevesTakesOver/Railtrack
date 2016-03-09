@@ -16,6 +16,7 @@ from bookshelf.api_v1 import (sleep_for_one_minute)
 from bookshelf.api_v2.ec2 import (connect_to_ec2, create_server_ec2)
 from bookshelf.api_v2.logging_helpers import log_green
 
+
 @task
 def it():
     execute(step_02_deploy_tinc_cluster)
@@ -210,7 +211,7 @@ def step_06_deploy_fsconsul():
 
 @task
 def run_tests():
-    tests.acceptance.test_that_patches_were_installed()
+    tests.acceptance.test_that_patches_were_installed_on_tinc_nodes()
     tests.acceptance.test_that_tinc_binaries_were_installed()
     tests.acceptance.test_that_tinc_key_pairs_were_deployed()
     tests.acceptance.test_that_tinc_conf_files_were_deployed()
@@ -228,6 +229,9 @@ def run_tests():
     tests.acceptance.test_that_consul_server_init_exists()
     tests.acceptance.test_that_consul_servers_are_running()
     tests.acceptance.test_that_consul_peers_are_reachable()
+
+    tests.acceptance.test_that_patches_were_installed_on_git2consul_nodes()
+    tests.acceptance.test_that_tinc_binaries_were_installed_on_git2consul_box()
 
 
 def get_consul_encryption_key():
