@@ -69,6 +69,7 @@ class TincHost(Host):
             private_key_filename=self.private_key
         ):
 
+            apt_install(packages=['software-properties-common'])
             enable_apt_repositories('deb',
                                     'http://archive.ubuntu.com/ubuntu',
                                     '$(lsb_release -sc)',

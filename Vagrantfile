@@ -12,7 +12,7 @@
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://atlas.hashicorp.com/search.
-  #config.vm.box = "ubuntu/vivid64"
+  #config.vm.box = "boxcutter/ubuntu1504"
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
@@ -72,8 +72,14 @@
 #
 #
 Vagrant.configure("2") do |config|
+
+  config.hostmanager.enabled = true
+  config.hostmanager.manage_host = true
+  config.hostmanager.manage_guest = true
+  config.hostmanager.include_offline = true
+
   config.vm.define "core01" do |core01|
-    core01.vm.box = "ubuntu/vivid64"
+    core01.vm.box = "boxcutter/ubuntu1504"
     core01.vm.hostname = 'core01'
 
     core01.vm.network :private_network, ip: "192.168.56.101"
@@ -87,7 +93,7 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define "core02" do |core02|
-    core02.vm.box = "ubuntu/vivid64"
+    core02.vm.box = "boxcutter/ubuntu1504"
     core02.vm.hostname = 'core02'
 
     core02.vm.network :private_network, ip: "192.168.56.102"
@@ -101,7 +107,7 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define "core03" do |core03|
-    core03.vm.box = "ubuntu/vivid64"
+    core03.vm.box = "boxcutter/ubuntu1504"
     core03.vm.hostname = 'core03'
 
     core03.vm.network :private_network, ip: "192.168.56.103"
@@ -115,7 +121,7 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define "git2consul" do |git2consul|
-    git2consul.vm.box = "ubuntu/vivid64"
+    git2consul.vm.box = "boxcutter/ubuntu1504"
     git2consul.vm.hostname = 'git2consul'
 
     git2consul.vm.network :private_network, ip: "192.168.56.110"

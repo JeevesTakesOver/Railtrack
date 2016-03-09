@@ -13,6 +13,7 @@ from bookshelf.api_v2.os_helpers import (
     add_usr_local_bin_to_path
 )
 from bookshelf.api_v2.git import git_clone
+from bookshelf.api_v2.pkg import apt_install
 
 import lib.host
 import lib.tinc
@@ -39,6 +40,7 @@ class FSconsulHost(lib.host.Host):
             private_key_filename=self.private_key
         ):
             add_usr_local_bin_to_path()
+            apt_install(packages=['git'])
 
             with cd('/usr/local'):
                 if 'go' not in sudo('ls -l /usr/local/bin'):
