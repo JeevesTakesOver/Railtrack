@@ -201,7 +201,6 @@ class ConsulServer(ConsulHost):
 
     def start_bootstrap_cluster_process(self):
         """ starts the bootstrap cluster process  """
-        log_green('create consul server bootstrap config...')
         log_green('start bootstrap cluster process...')
         with settings(
             hide('stdout', 'running'),
