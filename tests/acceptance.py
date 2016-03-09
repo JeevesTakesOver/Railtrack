@@ -1,6 +1,4 @@
 
-import testinfra
-
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -16,7 +14,7 @@ from lib.mycookbooks import (
 )
 
 
-def test_that_patches_were_installed():
+def test_that_patches_were_installed_on_tinc_nodes():
     tinc_cluster = lib.clusters.TincCluster()
 
     line = '0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded'
@@ -269,3 +267,38 @@ def test_that_consul_peers_are_reachable():
             cmd = sudo('consul members | grep server | grep alive')
             for consul_peer in consul_node.consul_peers:
                 assert consul_peer.consul_ip in cmd.stdout
+
+
+def test_that_patches_were_installed_on_git2consul_nodes():
+    git2consul = lib.git2consul.Git2ConsulService()
+
+    line = '0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded'
+
+    with settings(
+        hide('stdout', 'running'),
+        host_string=git2consul.host_string,
+        private_key_filename=git2consul.private_key
+    ):
+        cmd = sudo('apt-get upgrade')
+        assert line in cmd.stdout
+        assert cmd.return_code == 0
+
+
+def test_that_tinc_binaries_were_installed_on_git2consul_box():
+    git2consul = lib.git2consul.Git2ConsulService()
+
+    line = '/usr/sbin/tincd'
+
+    with settings(
+        hide('stdout', 'running'),
+        host_string=git2consul.host_string,
+        private_key_filename=git2consul.private_key
+    ):
+        cmd = sudo('which tincd')
+        assert line in cmd.stdout
+
+
+
+
+
+
