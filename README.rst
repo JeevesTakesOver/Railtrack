@@ -55,7 +55,7 @@ On AWS:
 
 #. Generate Tinc KeyPairs for each VM.
 
-   #. Run the following locally:
+   * Run the following locally:
 
       .. code-block:: bash
 
@@ -64,14 +64,14 @@ On AWS:
          apt-get install tinc
          tincd -K 4096
 
-   #. Now save the resulting key into different files. Save ``/etc/tinc/rsa_key.priv`` and ``/etc/tinc/rsa_key.pub``, as:
+   * Now save the resulting key into different files. Save ``/etc/tinc/rsa_key.priv`` and ``/etc/tinc/rsa_key.pub``, as:
 
       - key-pairs/core01.priv
       - key-pairs/core02.priv
       - key-pairs/core03.priv
       - key-pairs/git2consul.priv
 
-      We will be adding the `.pub` keys to the config file.
+      We will be adding the ``.pub`` keys to the config file.
 
 #. Edit the ``config/config.yaml`` file:
 
