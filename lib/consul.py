@@ -247,15 +247,16 @@ class ConsulServer(ConsulHost):
 
 class ConsulClient(ConsulHost):
     """ An object representing a Consul Client service """
-    def __init__(self, ssh_credentials):
+    def __init__(self, ssh_credentials, consul_cluster):
         """ Generates a ConsulClient object
 
         params:
             object ssh_credentials: ssh credentials to login to the host
         """
         ConsulHost.__init__(self, ssh_credentials=ssh_credentials)
+        self.consul_peers = consul_cluster.consul_nodes
 
-    def create_consul_client_config(self, consul_nodes):
+    def create_consul_client_config(self):
         """ creates the consul client config file """
         log_green('create consul client config ...')
         with settings(
@@ -265,7 +266,7 @@ class ConsulClient(ConsulHost):
         ):
 
             consul_nodes_ip = [
-                item.tinc_ip for item in consul_nodes
+                item.consul_ip for item in self.consul_peers
             ]
 
             consul_client_file = '/etc/consul.d/client/config.json'

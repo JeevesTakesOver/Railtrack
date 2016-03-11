@@ -7,7 +7,31 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import lib.clusters
 import lib.git2consul
 import lib.mycookbooks
-import tests.acceptance
+from tests.acceptance import (
+    test_that_consul_binaries_were_installed_on,
+    test_that_consul_client_config_exists_on,
+    test_that_consul_client_init_exists_on,
+    test_that_consul_client_is_running_on,
+    test_that_consul_directories_exists_on,
+    test_that_consul_peers_are_reachable_on,
+    test_that_consul_server_config_exists_on,
+    test_that_consul_server_init_exists_on,
+    test_that_consul_server_is_running_on,
+    test_that_consul_user_exists_on,
+    test_that_consul_web_ui_files_exists_on,
+    test_that_patches_were_installed_on,
+    test_that_tinc_binaries_were_installed_on,
+    test_that_tinc_conf_files_were_deployed_on,
+    test_that_tinc_interface_files_were_deployed_on,
+    test_that_tinc_is_running_on,
+    test_that_tinc_key_pairs_were_deployed_on,
+    test_that_tinc_nets_boot_files_were_deployed_on,
+    test_that_tinc_peers_are_pingable_on,
+    test_that_tinc_peers_host_files_were_deployed_on,
+    test_that_fsconsul_binaries_were_installed_on,
+    test_that_fsconsul_init_exists_on,
+    test_that_fsconsul_service_is_running_on
+)
 
 from fabric.api import task, env, execute
 
@@ -145,7 +169,8 @@ def step_03_deploy_consul_cluster():
 @task
 def step_04_deploy_git2consul_tinc_client():
 
-    git2consul = lib.git2consul.Git2ConsulService()
+    consul_cluster = lib.clusters.ConsulCluster()
+    git2consul = lib.git2consul.Git2ConsulService(consul_cluster)
     tinc_cluster = lib.clusters.TincCluster()
 
     git2consul.install_patches()
@@ -182,8 +207,7 @@ def step_04_deploy_git2consul_tinc_client():
     git2consul.deploy_consul_binary()
     git2consul.create_user_consul()
     git2consul.create_consul_directories()
-    git2consul.create_consul_client_config(git2consul.tinc_cluster.tinc_nodes)
-    git2consul.create_consul_client_config(git2consul.tinc_cluster.tinc_nodes)
+    git2consul.create_consul_client_config()
     git2consul.download_consul_web_ui_files()
     git2consul.create_consul_client_init_script(git2consul.tinc_network)
     git2consul.restart_consul_client_service()
@@ -191,7 +215,8 @@ def step_04_deploy_git2consul_tinc_client():
 
 @task
 def step_05_deploy_git2consul():
-    git2consul = lib.git2consul.Git2ConsulService()
+    consul_cluster = lib.clusters.ConsulCluster()
+    git2consul = lib.git2consul.Git2ConsulService(consul_cluster)
 
     git2consul.install_git2consul()
     git2consul.create_git2consul_config()
@@ -210,28 +235,53 @@ def step_06_deploy_fsconsul():
 
 
 @task
-def run_tests():
-    tests.acceptance.test_that_patches_were_installed_on_tinc_nodes()
-    tests.acceptance.test_that_tinc_binaries_were_installed()
-    tests.acceptance.test_that_tinc_key_pairs_were_deployed()
-    tests.acceptance.test_that_tinc_conf_files_were_deployed()
-    tests.acceptance.test_that_tinc_interface_files_were_deployed()
-    tests.acceptance.test_that_tinc_nets_boot_files_were_deployed
-    tests.acceptance.test_that_tinc_peers_host_files_were_deployed
-    tests.acceptance.test_that_tinc_is_running()
-    tests.acceptance.test_that_tinc_peers_are_pingable()
+def acceptance_tests():
+    tinc_cluster = lib.clusters.TincCluster()
+    consul_cluster = lib.clusters.ConsulCluster()
+    git2consul = lib.git2consul.Git2ConsulService(consul_cluster)
+    fsconsul_cluster = lib.clusters.FSconsulCluster()
 
-    tests.acceptance.test_that_consul_binaries_were_installed()
-    tests.acceptance.test_that_consul_user_exists()
-    tests.acceptance.test_that_consul_directories_exists()
-    tests.acceptance.test_that_consul_server_config_exists()
-    tests.acceptance.test_that_consul_web_ui_files_exists()
-    tests.acceptance.test_that_consul_server_init_exists()
-    tests.acceptance.test_that_consul_servers_are_running()
-    tests.acceptance.test_that_consul_peers_are_reachable()
+    nodes = []
+    nodes.extend(tinc_cluster.tinc_nodes)
+    nodes.append(git2consul)
 
-    tests.acceptance.test_that_patches_were_installed_on_git2consul_nodes()
-    tests.acceptance.test_that_tinc_binaries_were_installed_on_git2consul_box()
+    for node in nodes:
+        test_that_patches_were_installed_on(node)
+        test_that_tinc_binaries_were_installed_on(node)
+        test_that_tinc_is_running_on(node)
+
+    for network in tinc_cluster.tinc_networks:
+        test_that_tinc_key_pairs_were_deployed_on(network)
+        test_that_tinc_conf_files_were_deployed_on(network)
+        test_that_tinc_interface_files_were_deployed_on(network)
+        test_that_tinc_nets_boot_files_were_deployed_on(network)
+        test_that_tinc_peers_host_files_were_deployed_on(network)
+        test_that_tinc_peers_are_pingable_on(network)
+
+    nodes = []
+    nodes.extend(consul_cluster.consul_nodes)
+    nodes.append(git2consul)
+
+    for node in nodes:
+        test_that_consul_binaries_were_installed_on(node)
+        test_that_consul_user_exists_on(node)
+        test_that_consul_directories_exists_on(node)
+        test_that_consul_web_ui_files_exists_on(node)
+        test_that_consul_peers_are_reachable_on(node)
+
+    nodes = consul_cluster.consul_nodes
+    for node in nodes:
+        test_that_consul_server_config_exists_on(node)
+        test_that_consul_server_init_exists_on(node)
+        test_that_consul_server_is_running_on(node)
+        test_that_fsconsul_binaries_were_installed_on(node)
+        test_that_fsconsul_init_exists_on(node)
+        test_that_fsconsul_service_is_running_on(node)
+
+    test_that_consul_client_config_exists_on(git2consul)
+    test_that_consul_client_init_exists_on(git2consul)
+    test_that_consul_client_is_running_on(git2consul)
+
 
 
 def get_consul_encryption_key():

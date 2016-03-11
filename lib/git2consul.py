@@ -21,13 +21,15 @@ class Git2ConsulHost(lib.consul.ConsulClient):
     """ A virtual git2consul host object providing methods for installing and
     maintaining the git2consul software
     """
-    def __init__(self, ssh_credentials):
+    def __init__(self, ssh_credentials, consul_cluster):
         """ Generates a Git2ConsulHost object
 
         params:
             object ssh_credentials: ssh credentials for the Host
         """
-        lib.consul.ConsulClient.__init__(self, ssh_credentials=ssh_credentials)
+        lib.consul.ConsulClient.__init__(self,
+                                         ssh_credentials=ssh_credentials,
+                                         consul_cluster=consul_cluster)
 
     def install_git2consul(self):
         """ installs the git2consul software """
@@ -68,7 +70,7 @@ class Git2ConsulHost(lib.consul.ConsulClient):
 class Git2ConsulService(Git2ConsulHost,
                         lib.tinc.TincEndpoint):
     """ A git2consul service object providing """
-    def __init__(self):
+    def __init__(self, consul_cluster):
         """ Generates a Git2ConsulService object """
         self.cfg = parse_config('config/config.yaml')
         self.public_dns_name = self.cfg['git2consul']['public_dns_name']
@@ -80,6 +82,7 @@ class Git2ConsulService(Git2ConsulHost,
         self.datacenter = self.cfg['git2consul']['datacenter']
         self.version = self.cfg['git2consul']['version']
         self.consul_encryption_key = self.cfg['git2consul']['encrypt']
+        self.consul_cluster = consul_cluster
         self.tinc_cluster = lib.clusters.TincCluster()
 
         ssh_credentials = lib.host.SshCredentials(
@@ -100,7 +103,9 @@ class Git2ConsulService(Git2ConsulHost,
         )
 
         lib.git2consul.Git2ConsulHost.__init__(
-            self, ssh_credentials=ssh_credentials
+            self,
+            ssh_credentials=ssh_credentials,
+            consul_cluster=consul_cluster
         )
 
     def create_git2consul_config(self):
