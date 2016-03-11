@@ -33,3 +33,6 @@ step05:
 
 step06:
 	venv/bin/fab -f tasks/fabfile.py step_06_deploy_fsconsul
+
+acceptance_tests:
+	fab -f tasks/fabfile.py acceptance_tests
