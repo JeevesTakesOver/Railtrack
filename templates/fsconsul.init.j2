@@ -10,7 +10,7 @@ ExecStart=/usr/local/bin/fsconsul -configFile=/etc/fsconsul.json
 ExecReload=/bin/kill -HUP $MAINPID
 ExecStop=/bin/kill $MAINPID
 KillMode=process
-Restart=on-failure
+Restart=always
 
 [Install]
 WantedBy=multi-user.target

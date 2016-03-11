@@ -9,7 +9,7 @@ ExecStart=/usr/local/bin/consul agent -config-dir /etc/consul.d/client -bind {{ 
 ExecReload=/bin/kill -HUP $MAINPID
 ExecStop=/bin/kill $MAINPID
 KillMode=process
-Restart=on-failure
+Restart=always
 
 [Install]
 WantedBy=multi-user.target
