@@ -181,6 +181,11 @@ git2consul: &git2consul
   tinc_node: 'git2consul'
   <<: *eu_west_1
   region: 'eu-west-1'
+  service_name: 'self_service_vpn'
+  git_url: 'https://github.com/Azulinho/self-service-vpn.git'
+  git_branch: 'core-vpn'
+  git_root: 'hosts'
+  pooling_interval: '1'
   datacenter: 'tinc'
   version: '0.6.3'
   encrypt: *consul_encryption_key
@@ -202,20 +207,3 @@ git2consul: &git2consul
     L+iVNgTDjVgLY0JRLDXIeG7GqvdKfZOqN7S2p5I0F0hXbQCiLVeQdKDAvlJa16Pl
     KdEq5ow3xRUBXwugqP1He2jt6xat5HgSbqoVglg4uG2sKCChH+V4KwUCAwEAAQ==
     -----END RSA PUBLIC KEY-----
-
-  # I should just consume this from the 'tinc_roles'
-  tinc_servers:
-      core_network_01:
-        public_ip_address: *core_network_01_public_ip_address
-        tinc_ip: *core_network_01_tinc_ip
-        tinc_public_key: *core_network_01_tinc_public_key
-
-      core_network_02:
-        tinc_ip: *core_network_02_tinc_ip
-        public_ip_address: *core_network_02_public_ip_address
-        tinc_public_key: *core_network_02_tinc_public_key
-
-      core_network_03:
-        tinc_ip: *core_network_03_tinc_ip
-        public_ip_address: *core_network_03_public_ip_address
-        tinc_public_key: *core_network_03_tinc_public_key
