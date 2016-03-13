@@ -272,7 +272,6 @@ def test_that_fsconsul_service_is_running_on(consul_node):
     ):
         line = 'fsconsul -configFile=/etc/fsconsul.json'
         cmd = sudo('ps -ef')
-        print consul_node.host_string
         assert line in cmd.stdout
 
 
@@ -299,4 +298,23 @@ def test_that_fsconsul_binaries_were_installed_on(consul_node):
         assert line in cmd.stdout
 
 
+def test_that_git2consul_init_exists_on(git2consul):
 
+    with settings(
+        hide('stdout', 'running'),
+        host_string=git2consul.host_string,
+        private_key_filename=git2consul.private_key
+    ):
+        cmd = sudo('ls -l /etc/systemd/system/')
+        assert 'git2consul.service' in cmd.stdout
+
+
+def test_that_git2consul_service_is_running_on(git2consul):
+
+    with settings(
+        hide('stdout', 'running'),
+        host_string=git2consul.host_string,
+        private_key_filename=git2consul.private_key
+    ):
+        cmd = sudo('systemctl status git2consul.service')
+        assert 'running' in cmd.stdout
