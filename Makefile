@@ -5,7 +5,10 @@ venv:
 	virtualenv venv ; . venv/bin/activate && pip install -r requirements.txt
 
 up:
-	vagrant up
+	vagrant up core01
+	vagrant up core02
+	vagrant up core03
+	vagrant up git2consul
 
 clean:
 	vagrant destroy -f ; rm -rf venv
@@ -36,3 +39,13 @@ step06:
 
 acceptance_tests:
 	fab -f tasks/fabfile.py acceptance_tests
+
+laptop_acceptance_tests:
+	vagrant ssh laptop -- ping -c 1 -t 1 169.254.0.1
+	vagrant ssh laptop -- ping -c 1 -t 1 169.254.0.2
+	vagrant ssh laptop -- ping -c 1 -t 1 169.254.0.3
+
+up_laptop:
+	vagrant up laptop
+
+vagrant_test_cycle: clean venv up it acceptance_tests up_laptop laptop_acceptance_tests

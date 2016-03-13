@@ -1,0 +1,2 @@
+#!/bin/sh
+avahi-autoipd -D $INTERFACE

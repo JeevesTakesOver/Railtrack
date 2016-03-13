@@ -133,4 +133,26 @@ Vagrant.configure("2") do |config|
       v.customize ["modifyvm", :id, "--name", "git2consul"]
     end
   end
+
+  config.vm.define "laptop" do |laptop|
+    laptop.vm.box = "boxcutter/ubuntu1504"
+    laptop.vm.hostname = 'laptop'
+
+    laptop.vm.network :private_network, ip: "192.168.56.200"
+    laptop.ssh.insert_key = false
+
+    laptop.vm.provider :virtualbox do |v|
+      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      v.customize ["modifyvm", :id, "--memory", 256]
+      v.customize ["modifyvm", :id, "--name", "laptop"]
+    end
+
+    laptop.vm.provision "shell", inline: <<-SHELL
+      sudo apt-get update
+      sudo apt-get install -y tinc rsync avahi-autoipd
+      sudo rsync -a /vagrant/laptop/etc/tinc/ /etc/tinc/
+      sudo service tinc restart
+    SHELL
+  end
+
 end
