@@ -1,14 +1,14 @@
 {
   "version": "1.0",
   "repos": [{
-    "name": "self_service_vpn",
-    "url": "https://github.com/Azulinho/self-service-vpn.git",
-    "branches": ["core-vpn"],
+    "name": "{{ service_name }}",
+    "url": "{{ git_url }}",
+    "branches": {{ git_branches }},
     "include_branch_name": "false",
-    "source_root": "hosts",
+    "source_root": "{{ git_root }}",
     "hooks": [{
       "type" : "polling",
-      "interval" : "1"
+      "interval" : "{{ pooling_interval }}"
     }]
   }]
 }

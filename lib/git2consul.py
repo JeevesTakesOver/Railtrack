@@ -41,7 +41,7 @@ class Git2ConsulHost(lib.consul.ConsulClient):
         ):
             with hide('stdout', 'running'):
                 sudo('apt-get update')
-                sudo('apt-get install -y npm nodejs nodejs-legacy')
+                sudo('apt-get install -y npm nodejs nodejs-legacy git')
                 sudo('npm install git2consul')
 
     def deploy_init_git2consul(self):
@@ -84,6 +84,11 @@ class Git2ConsulService(Git2ConsulHost,
         self.consul_encryption_key = self.cfg['git2consul']['encrypt']
         self.consul_cluster = consul_cluster
         self.tinc_cluster = lib.clusters.TincCluster()
+        self.git_url = self.cfg['git2consul']['git_url']
+        self.git_root = self.cfg['git2consul']['git_root']
+        self.pooling_interval = self.cfg['git2consul']['pooling_interval']
+        self.git_branches = self.cfg['git2consul']['git_branches']
+        self.service_name = self.cfg['git2consul']['service_name']
 
         ssh_credentials = lib.host.SshCredentials(
             public_dns_name=self.public_dns_name,
@@ -124,7 +129,13 @@ class Git2ConsulService(Git2ConsulHost,
                 destination=git2consul_bootstrap_file,
                 use_sudo=True,
                 use_jinja=True,
-                context={},
+                context={
+                    'service_name': self.service_name,
+                    'git_url': self.git_url,
+                    'git_branches': self.git_branches,
+                    'git_root': self.git_root,
+                    'pooling_interval': self.pooling_interval
+                },
             )
 
     def bootstrap_git2consul(self):

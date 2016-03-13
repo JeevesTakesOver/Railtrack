@@ -30,7 +30,9 @@ from tests.acceptance import (
     test_that_tinc_peers_host_files_were_deployed_on,
     test_that_fsconsul_binaries_were_installed_on,
     test_that_fsconsul_init_exists_on,
-    test_that_fsconsul_service_is_running_on
+    test_that_fsconsul_service_is_running_on,
+    test_that_git2consul_init_exists_on,
+    test_that_git2consul_service_is_running_on
 )
 
 from fabric.api import task, env, execute
@@ -282,6 +284,8 @@ def acceptance_tests():
     test_that_consul_client_init_exists_on(git2consul)
     test_that_consul_client_is_running_on(git2consul)
 
+    test_that_git2consul_service_is_running_on(git2consul)
+    test_that_git2consul_init_exists_on(git2consul)
 
 
 def get_consul_encryption_key():

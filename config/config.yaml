@@ -182,8 +182,8 @@ git2consul: &git2consul
   <<: *eu_west_1
   region: 'eu-west-1'
   service_name: 'self_service_vpn'
-  git_url: 'https://github.com/Azulinho/self-service-vpn.git'
-  git_branch: 'core-vpn'
+  git_url: 'https://github.com/JeevesTakesOver/menagerie.git'
+  git_branches: '["core-vpn"]'
   git_root: 'hosts'
   pooling_interval: '1'
   datacenter: 'tinc'
