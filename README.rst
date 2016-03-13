@@ -10,18 +10,119 @@ Railtrack
 * Manages Pets
 * Python based, built on Fabric
 
+
+The code in this repository provisions a fully meshed, geographically
+distributed, resilient, encrypted virtual network.
+
+Services can be added to the virtual network simply by binding the listening
+ports of those services to the local virtual network ip addresses.
+
+Management of the hosts allowed to access the virtual network is performed
+through git and pull requests.
+To add/remove a host of the virtual network, install the tinc client on that
+box, generate a private/public key, update the tinc config to connect to the
+central tinc nodes, and add the public key to the repository below:
+
+https://github.com/JeevesTakesOver/menagerie
+
+Each branch in the repository above represents a virtual network, with a
+different addressing space.
+
+
+Workflow
+========
+
+The expected workflow is that any team member can add new team members or
+services to the virtual network by commiting the tinc public keys of the tinc
+clients to the github repository and submit a pull request.
+This PR is peer reviewed and once approved, brings the new service online on
+the virtual network.
+
+Usage cases
+===========
+
+- A new starter which upon joining his team, submits a pull request asking for
+access to the company services by providing his public key.
+- Allow teams to be self-sufficient in adding/removing services to the virtual
+  network.
+- Full audits and history through git repository history.
+
+
 Requirements
 ============
 
 * python virtualenv
 * vagrant and virtualbox (for testing locally)
-* docker (for creating the tincd keys)
+
+Playing with Railtrack Locally/Testing using Vagrant
+====================================================
+
+To test locally using Vagrant and VirtualBox, install vagrant plugins and
+set the following environment variables:
+
+.. code-block:: bash
+
+   vagrant plugin install vagrant-hostmanager
+   vagrant plugin install hostupdater
+
+   export AWS_ACCESS_KEY_ID=VAGRANT
+   export AWS_SECRET_ACCESS_KEY=VAGRANT
+
+   export KEY_PAIR_NAME=vagrant-tinc-vpn
+   export KEY_FILENAME=$HOME/.vagrant.d/insecure_private_key
+
+   export TINC_KEY_FILENAME_CORE_NETWORK_01=key-pairs/core01.priv
+   export TINC_KEY_FILENAME_CORE_NETWORK_02=key-pairs/core02.priv
+   export TINC_KEY_FILENAME_CORE_NETWORK_03=key-pairs/core03.priv
+   export TINC_KEY_FILENAME_GIT2CONSUL=key-pairs/git2consul.priv
+
+   make vagrant_test_cycle
+
+This will create a set of virtual machines.
+
+central vpn boxes :
+- core01
+- core02
+- core03
+
+git2consul host:
+- git2consul
+
+road warrior - laptop box:
+- laptop
+
+
+After provisioning all hosts should be accessible from a private virtual
+network. Boxes core01,core02,core03,git2consul have fixed ip addresses while
+our laptop will get a dynamic ip address on connecting to the network.
+
+login to the laptop:
+
+.. code-block:: bash
+
+   vagrant ssh laptop
+   ifconfig -a
 
 
 Configuration and Deployment
 =============================
 
 On AWS:
+#. Generate private and public keys for the different hosts:
+
+.. code-block:: bash
+
+   openssl genrsa -out key_pairs/core01.priv 4096
+   openssl rsa -pubout -in core01.priv -out core01.pub
+
+   openssl genrsa -out key_pairs/core02.priv 4096
+   openssl rsa -pubout -in core02.priv -out core02.pub
+
+   openssl genrsa -out key_pairs/core03.priv 4096
+   openssl rsa -pubout -in core03.priv -out core03.pub
+
+   openssl genrsa -out key_pairs/git2consul.priv 4096
+   openssl rsa -pubout -in git2consul.priv -out git2consul.pub
 
 #. Set the following environment variables
 
@@ -51,27 +152,7 @@ On AWS:
 
    .. code-block:: bash
 
-      make step_01
-
-#. Generate Tinc KeyPairs for each VM.
-
-   * Run the following locally:
-
-     .. code-block:: bash
-
-        docker run -it ubuntu bash
-        apt-get update
-        apt-get install tinc
-        tincd -K 4096
-
-   * Now save the resulting key into different files. Save ``/etc/tinc/rsa_key.priv`` and ``/etc/tinc/rsa_key.pub``, as:
-
-     - key-pairs/core01.priv
-     - key-pairs/core02.priv
-     - key-pairs/core03.priv
-     - key-pairs/git2consul.priv
-
-     We will be adding the ``.pub`` keys to the config file.
+      make venv step_01
 
 #. Edit the ``config/config.yaml`` file:
 
@@ -84,21 +165,3 @@ On AWS:
    .. code-block:: bash
 
       make it
-
-Playing with Railtrack Locally/Testing
-======================================
-
-To test locally using Vagrant and VirtualBox, set the following environment variables:
-
-.. code-block:: bash
-
-   export AWS_ACCESS_KEY_ID=MY_AWS_KEY
-   export AWS_SECRET_ACCESS_KEY=MY_SECRET_KEY
-
-   export KEY_PAIR_NAME=vagrant-tinc-vpn
-   export KEY_FILENAME=$HOME/.vagrant.d/insecure_private_key
-
-   export TINC_KEY_FILENAME_CORE_NETWORK_01=key-pairs/core01.priv
-   export TINC_KEY_FILENAME_CORE_NETWORK_02=key-pairs/core02.priv
-   export TINC_KEY_FILENAME_CORE_NETWORK_03=key-pairs/core03.priv
-   export TINC_KEY_FILENAME_GIT2CONSUL=key-pairs/git2consul.priv
