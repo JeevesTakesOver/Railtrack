@@ -276,6 +276,9 @@ def acceptance_tests():
         test_that_consul_server_config_exists_on(node)
         test_that_consul_server_init_exists_on(node)
         test_that_consul_server_is_running_on(node)
+
+    nodes = fsconsul_cluster.fsconsul_nodes
+    for node in nodes:
         test_that_fsconsul_binaries_were_installed_on(node)
         test_that_fsconsul_init_exists_on(node)
         test_that_fsconsul_service_is_running_on(node)
