@@ -140,7 +140,7 @@ On AWS:
 
       export TINC_KEY_FILENAME_CORE_NETWORK_01=key-pairs/core01.priv
       export TINC_KEY_FILENAME_CORE_NETWORK_02=key-pairs/core02.priv     
-	  export TINC_KEY_FILENAME_CORE_NETWORK_03=key-pairs/core03.priv
+      export TINC_KEY_FILENAME_CORE_NETWORK_03=key-pairs/core03.priv
       export TINC_KEY_FILENAME_GIT2CONSUL=key-pairs/git2consul.priv
 
 #. Create the same EC2 Key-Pair in every region.
