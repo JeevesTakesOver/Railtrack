@@ -21,7 +21,7 @@ Management of the hosts allowed to access the virtual network is performed
 through git and pull requests.
 To add/remove a host of the virtual network, install the tinc client on that
 box, generate a private/public key, update the tinc config to connect to the
-central tinc nodes, and add the public key to the repository below:
+central tinc nodes, and add the public key to the following repository:
 
 https://github.com/JeevesTakesOver/menagerie
 
@@ -41,11 +41,10 @@ the virtual network.
 Usage cases
 ===========
 
-- A new starter which upon joining his team, submits a pull request asking for
+* A new starter which upon joining his team, submits a pull request asking for
 access to the company services by providing his public key.
-- Allow teams to be self-sufficient in adding/removing services to the virtual
-  network.
-- Full audits and history through git repository history.
+* Allow teams to be self-sufficient in adding/removing services to the virtual network.
+* Full audits and history through git repository history.
 
 
 Requirements
@@ -80,23 +79,27 @@ set the following environment variables:
 
 This will create a set of virtual machines.
 
-central vpn boxes :
-- core01
-- core02
-- core03
+central vpn boxes:
+
+* ``core01``
+* ``core02``
+* ``core03``
 
 git2consul host:
-- git2consul
+
+* ``git2consul``
 
 road warrior - laptop box:
-- laptop
+
+* ``laptop``
 
 
 After provisioning all hosts should be accessible from a private virtual
-network. Boxes core01,core02,core03,git2consul have fixed ip addresses while
-our laptop will get a dynamic ip address on connecting to the network.
+network.
+Boxes ``core01``, ``core02``, ``core03``, and ``git2consul`` have fixed IP addresses.
+``laptop`` will get a dynamic IP address on connecting to the network.
 
-login to the laptop:
+Run the following to login in to the laptop:
 
 .. code-block:: bash
 
@@ -108,36 +111,37 @@ Configuration and Deployment
 =============================
 
 On AWS:
+
 #. Generate private and public keys for the different hosts:
 
-.. code-block:: bash
+   .. code-block:: bash
 
-   openssl genrsa -out key_pairs/core01.priv 4096
-   openssl rsa -pubout -in core01.priv -out core01.pub
+      openssl genrsa -out key_pairs/core01.priv 4096
+      openssl rsa -pubout -in core01.priv -out core01.pub
 
-   openssl genrsa -out key_pairs/core02.priv 4096
-   openssl rsa -pubout -in core02.priv -out core02.pub
+      openssl genrsa -out key_pairs/core02.priv 4096
+      openssl rsa -pubout -in core02.priv -out core02.pub
 
-   openssl genrsa -out key_pairs/core03.priv 4096
-   openssl rsa -pubout -in core03.priv -out core03.pub
+      openssl genrsa -out key_pairs/core03.priv 4096
+      openssl rsa -pubout -in core03.priv -out core03.pub
 
-   openssl genrsa -out key_pairs/git2consul.priv 4096
-   openssl rsa -pubout -in git2consul.priv -out git2consul.pub
+      openssl genrsa -out key_pairs/git2consul.priv 4096
+      openssl rsa -pubout -in git2consul.priv -out git2consul.pub
 
 #. Set the following environment variables
 
    .. code-block:: bash
 
-       export AWS_ACCESS_KEY_ID=MY_AWS_KEY
-       export AWS_SECRET_ACCESS_KEY=MY_SECRET_KEY
+      export AWS_ACCESS_KEY_ID=MY_AWS_KEY
+      export AWS_SECRET_ACCESS_KEY=MY_SECRET_KEY
 
-       export KEY_PAIR_NAME=tinc-vpn
-       export KEY_FILENAME=tinc-vpn.pem
+      export KEY_PAIR_NAME=tinc-vpn
+      export KEY_FILENAME=tinc-vpn.pem
 
-       export TINC_KEY_FILENAME_CORE_NETWORK_01=key-pairs/core01.priv
-       export TINC_KEY_FILENAME_CORE_NETWORK_02=key-pairs/core02.priv
-       export TINC_KEY_FILENAME_CORE_NETWORK_03=key-pairs/core03.priv
-       export TINC_KEY_FILENAME_GIT2CONSUL=key-pairs/git2consul.priv
+      export TINC_KEY_FILENAME_CORE_NETWORK_01=key-pairs/core01.priv
+      export TINC_KEY_FILENAME_CORE_NETWORK_02=key-pairs/core02.priv     
+	  export TINC_KEY_FILENAME_CORE_NETWORK_03=key-pairs/core03.priv
+      export TINC_KEY_FILENAME_GIT2CONSUL=key-pairs/git2consul.priv
 
 #. Create the same EC2 Key-Pair in every region.
    In this example, it is named ``tinc-vpn``.
