@@ -41,9 +41,10 @@ the virtual network.
 Usage cases
 ===========
 
-* A new starter which upon joining his team, submits a pull request asking for
-access to the company services by providing his public key.
+* A new starter which upon joining his team, submits a pull request asking for access to the company services by providing his public key.
+
 * Allow teams to be self-sufficient in adding/removing services to the virtual network.
+
 * Full audits and history through git repository history.
 
 
@@ -139,7 +140,7 @@ On AWS:
       export KEY_FILENAME=tinc-vpn.pem
 
       export TINC_KEY_FILENAME_CORE_NETWORK_01=key-pairs/core01.priv
-      export TINC_KEY_FILENAME_CORE_NETWORK_02=key-pairs/core02.priv     
+      export TINC_KEY_FILENAME_CORE_NETWORK_02=key-pairs/core02.priv
       export TINC_KEY_FILENAME_CORE_NETWORK_03=key-pairs/core03.priv
       export TINC_KEY_FILENAME_GIT2CONSUL=key-pairs/git2consul.priv
 
