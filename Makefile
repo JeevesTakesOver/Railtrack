@@ -43,14 +43,39 @@ acceptance_tests: ## runs acceptance tests against the core nodes
 up_laptop: ## vagrant up the 'laptop' VM
 	vagrant up laptop
 
-laptop_acceptance_tests: ## runs acceptance tests on the 'laptop' box
+vagrant_acceptance_tests: ## runs acceptance tests on the 'laptop' box
 	sleep 60
-	vagrant ssh laptop -- ping -c 1 -t 1 169.254.0.1
-	vagrant ssh laptop -- ping -c 1 -t 1 169.254.0.2
-	vagrant ssh laptop -- ping -c 1 -t 1 169.254.0.3
+	vagrant ssh laptop -- ping -c 1 -w 20 169.254.0.1
+	vagrant ssh laptop -- ping -c 1 -w 20 169.254.0.2
+	vagrant ssh laptop -- ping -c 1 -w 20 169.254.0.3
+	vagrant ssh laptop -- ping -c 1 -w 20 169.254.0.10
+	vagrant ssh core01 -- sudo systemctl status tinc
+	vagrant ssh core01 -- sudo systemctl status consul-server
+	vagrant ssh core01 -- sudo systemctl status fsconsul
+	vagrant ssh core02 -- sudo systemctl status tinc
+	vagrant ssh core02 -- sudo systemctl status consul-server
+	vagrant ssh core02 -- sudo systemctl status fsconsul
+	vagrant ssh core03 -- sudo systemctl status tinc
+	vagrant ssh core03 -- sudo systemctl status consul-server
+	vagrant ssh core03 -- sudo systemctl status fsconsul
+	vagrant ssh git2consul -- sudo systemctl status tinc
+	vagrant ssh git2consul -- sudo systemctl status consul-client
+	vagrant ssh git2consul -- sudo systemctl status git2consul
+
+vagrant_reload: ## reloads all vagrant VMs
+	vagrant reload core01
+	sleep 60
+	vagrant reload core02
+	sleep 60
+	vagrant reload core03
+	sleep 60
+	vagrant reload git2consul
+	sleep 60
 
 vagrant_test_cycle: ## runs a full acceptance test cycle using Vagrant
-	@make clean venv up it acceptance_tests up_laptop laptop_acceptance_tests
+	@make clean venv up it acceptance_tests up_laptop vagrant_reload vagrant_acceptance_tests
+
+
 
 .PHONY: help
 
