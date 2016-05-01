@@ -192,6 +192,7 @@ class ConsulServer(ConsulHost):
                             context={'consul_interface': self.consul_interface,
                                      'node_ip': self.consul_ip})
             sudo('systemctl daemon-reload')
+            sudo('systemctl enable consul-server')
 
     def create_consul_bootstrap_config(self):
         """ creates the consul server bootstrap config """
@@ -316,6 +317,7 @@ class ConsulClient(ConsulHost):
                             context={'tinc_network_name': tinc_network_name,
                                      'node_ip': self.tinc_ip})
             sudo('systemctl daemon-reload')
+            sudo('systemctl enable consul-client')
 
     def restart_consul_client_service(self):
         """ restarts the consul client service """

@@ -64,7 +64,8 @@ class Git2ConsulHost(lib.consul.ConsulClient):
                          'groupname': self.username},
             )
             sudo('systemctl daemon-reload')
-            sudo('service git2consul restart')
+            sudo('systemctl enable git2consul')
+            sudo('systemctl restart git2consul')
 
 
 class Git2ConsulService(Git2ConsulHost,

@@ -101,7 +101,8 @@ class FSconsulHost(lib.host.Host):
             )
 
             sudo('systemctl daemon-reload')
-            sudo('service fsconsul restart')
+            sudo('systemctl enable fsconsul')
+            sudo('systemctl restart fsconsul')
 
 
 class FSconsulServer(FSconsulHost):
