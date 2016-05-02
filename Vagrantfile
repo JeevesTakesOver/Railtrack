@@ -9,9 +9,9 @@ Vagrant.configure("2") do |config|
   config.hostmanager.include_offline = true
 
   config.vm.define "core01" do |core01|
-    core01.vm.box = "boxcutter/ubuntu1504"
+    # https://github.com/chef/bento/issues/577#issuecomment-215133141
+    core01.vm.box = "gbarbieru/xenial"
     core01.vm.hostname = 'core01'
-
     core01.vm.network :private_network, ip: "192.168.56.101"
     core01.ssh.insert_key = false
 
@@ -39,7 +39,8 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define "core02" do |core02|
-    core02.vm.box = "boxcutter/ubuntu1504"
+    # https://github.com/chef/bento/issues/577#issuecomment-215133141
+    core02.vm.box = "gbarbieru/xenial"
     core02.vm.hostname = 'core02'
 
     core02.vm.network :private_network, ip: "192.168.56.102"
@@ -68,7 +69,8 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define "core03" do |core03|
-    core03.vm.box = "boxcutter/ubuntu1504"
+    # https://github.com/chef/bento/issues/577#issuecomment-215133141
+    core03.vm.box = "gbarbieru/xenial"
     core03.vm.hostname = 'core03'
 
     core03.vm.network :private_network, ip: "192.168.56.103"
@@ -97,7 +99,8 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define "git2consul" do |git2consul|
-    git2consul.vm.box = "boxcutter/ubuntu1504"
+    # https://github.com/chef/bento/issues/577#issuecomment-215133141
+    git2consul.vm.box = "gbarbieru/xenial"
     git2consul.vm.hostname = 'git2consul'
 
     git2consul.vm.network :private_network, ip: "192.168.56.110"
@@ -126,7 +129,8 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define "laptop" do |laptop|
-    laptop.vm.box = "boxcutter/ubuntu1504"
+    # https://github.com/chef/bento/issues/577#issuecomment-215133141
+    laptop.vm.box = "gbarbieru/xenial"
     laptop.vm.hostname = 'laptop'
 
     laptop.vm.network :private_network, ip: "192.168.56.200"
