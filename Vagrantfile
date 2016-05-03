@@ -8,6 +8,10 @@ Vagrant.configure("2") do |config|
   config.hostmanager.manage_guest = true
   config.hostmanager.include_offline = true
 
+  if Vagrant.has_plugin?("vagrant-cachier")
+    config.cache.scope = :box
+  end
+
   config.vm.define "core01" do |core01|
     # https://github.com/chef/bento/issues/577#issuecomment-215133141
     core01.vm.box = "gbarbieru/xenial"
