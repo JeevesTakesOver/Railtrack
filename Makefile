@@ -94,7 +94,7 @@ vagrant_test_cycle: ## runs a full acceptance test cycle using Vagrant
 	make venv
 	make up
 	echo "waiting for first-boot apt-get update to finish ..."
-	sleep 240
+	sleep 300
 	make it
 	make acceptance_tests
 	make up_laptop
