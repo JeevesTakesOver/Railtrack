@@ -22,7 +22,7 @@ Vagrant.configure("2") do |config|
     core01.vm.provider :virtualbox do |v|
       v.linked_clone = true
       v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-      v.customize ["modifyvm", :id, "--memory", 128]
+      v.customize ["modifyvm", :id, "--memory", 256]
       v.customize ["modifyvm", :id, "--name", "core01"]
     end
 
@@ -53,7 +53,7 @@ Vagrant.configure("2") do |config|
     core02.vm.provider :virtualbox do |v|
       v.linked_clone = true
       v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-      v.customize ["modifyvm", :id, "--memory", 128]
+      v.customize ["modifyvm", :id, "--memory", 256]
       v.customize ["modifyvm", :id, "--name", "core02"]
     end
     core02.vm.provision "shell", inline: <<-SHELL
@@ -83,7 +83,7 @@ Vagrant.configure("2") do |config|
     core03.vm.provider :virtualbox do |v|
       v.linked_clone = true
       v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-      v.customize ["modifyvm", :id, "--memory", 128]
+      v.customize ["modifyvm", :id, "--memory", 256]
       v.customize ["modifyvm", :id, "--name", "core03"]
     end
     core03.vm.provision "shell", inline: <<-SHELL
@@ -113,7 +113,7 @@ Vagrant.configure("2") do |config|
     git2consul.vm.provider :virtualbox do |v|
       v.linked_clone = true
       v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-      v.customize ["modifyvm", :id, "--memory", 128]
+      v.customize ["modifyvm", :id, "--memory", 256]
       v.customize ["modifyvm", :id, "--name", "git2consul"]
     end
     git2consul.vm.provision "shell", inline: <<-SHELL

@@ -79,13 +79,25 @@ vagrant_acceptance_tests: ## runs acceptance tests on the 'laptop' box
 
 vagrant_reload: ## reloads all vagrant VMs
 	echo "running make vagrant_reload ..."
-	vagrant reload core01
+	vagrant ssh core01 -- sync
+	vagrant halt core01 -f
 	sleep 60
-	vagrant reload core02
+	vagrant up core01
 	sleep 60
-	vagrant reload core03
+	vagrant ssh core02 -- sync
+	vagrant halt core02 -f
 	sleep 60
-	vagrant reload git2consul
+	vagrant up core02
+	sleep 60
+	vagrant ssh core03 -- sync
+	vagrant halt core03 -f
+	sleep 60
+	vagrant up core03
+	sleep 60
+	vagrant ssh git2consul -- sync
+	vagrant halt git2consul -f
+	sleep 60
+	vagrant up git2consul
 	sleep 60
 
 vagrant_test_cycle: ## runs a full acceptance test cycle using Vagrant
@@ -96,9 +108,9 @@ vagrant_test_cycle: ## runs a full acceptance test cycle using Vagrant
 	echo "waiting for first-boot apt-get update to finish ..."
 	sleep 300
 	make it
+	make vagrant_reload
 	make acceptance_tests
 	make up_laptop
-	make vagrant_reload
 	make vagrant_acceptance_tests
 
 
