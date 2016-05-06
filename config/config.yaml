@@ -158,7 +158,7 @@ tinc_networks:
       core_network_03: *core_network_03
 
 consul_servers:
-  encrypt: 'WrR5ddqjK9M2JMCeVlD3vQ=='
+  encrypt: *consul_encryption_key
   version: '0.6.3'
   datacenter: 'tinc'
   servers:
