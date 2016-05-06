@@ -253,7 +253,7 @@ class ConsulServer(ConsulHost):
         ):
             if 'bootstrapped.in_progress' in sudo('ls /etc/consul.d/'):
                 sudo("kill $( ps -ef | grep consul | grep -v grep | "
-                     "awk '{ print $2 }')")
+                     "awk '{ print $2 }') || echo")
 
                 sudo('service consul-server restart')
                 sudo('rm /etc/consul.d/bootstrapped.in_progress')
