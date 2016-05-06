@@ -118,16 +118,18 @@ On AWS:
    .. code-block:: bash
 
       openssl genrsa -out key_pairs/core01.priv 4096
-      openssl rsa -pubout -in core01.priv -out core01.pub
+      openssl rsa -pubout -in key_pairs/core01.priv -out key_pairs/core01.pub
 
       openssl genrsa -out key_pairs/core02.priv 4096
-      openssl rsa -pubout -in core02.priv -out core02.pub
+      openssl rsa -pubout -in key_pairs/core02.priv -out key_pairs/core02.pub
 
       openssl genrsa -out key_pairs/core03.priv 4096
-      openssl rsa -pubout -in core03.priv -out core03.pub
+      openssl rsa -pubout -in key_pairs/core03.priv -out key_pairs/core03.pub
 
       openssl genrsa -out key_pairs/git2consul.priv 4096
-      openssl rsa -pubout -in git2consul.priv -out git2consul.pub
+      openssl rsa -pubout -in key_pairs/git2consul.priv -out key_pairs/git2consul.pub
+
+      ssh-keygen -f key_pairs/tinc-vpn.pem
 
 #. Set the following environment variables
 
@@ -136,13 +138,13 @@ On AWS:
       export AWS_ACCESS_KEY_ID=MY_AWS_KEY
       export AWS_SECRET_ACCESS_KEY=MY_SECRET_KEY
 
-      export KEY_PAIR_NAME=tinc-vpn
-      export KEY_FILENAME=tinc-vpn.pem
+      export KEY_PAIR_NAME=key_pairs/tinc-vpn
+      export KEY_FILENAME=key_pairs/tinc-vpn.pem
 
-      export TINC_KEY_FILENAME_CORE_NETWORK_01=key-pairs/core01.priv
-      export TINC_KEY_FILENAME_CORE_NETWORK_02=key-pairs/core02.priv
-      export TINC_KEY_FILENAME_CORE_NETWORK_03=key-pairs/core03.priv
-      export TINC_KEY_FILENAME_GIT2CONSUL=key-pairs/git2consul.priv
+      export TINC_KEY_FILENAME_CORE_NETWORK_01=key_pairs/core01.priv
+      export TINC_KEY_FILENAME_CORE_NETWORK_02=key_pairs/core02.priv
+      export TINC_KEY_FILENAME_CORE_NETWORK_03=key_pairs/core03.priv
+      export TINC_KEY_FILENAME_GIT2CONSUL=key_pairs/git2consul.priv
 
 #. Create the same EC2 Key-Pair in every region.
    In this example, it is named ``tinc-vpn``.
