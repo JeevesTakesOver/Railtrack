@@ -147,5 +147,5 @@ class Git2ConsulService(Git2ConsulHost,
             host_string=self.host_string,
             private_key_filename=self.private_key
         ):
-            with cd('/home/%s/node_modules/git2consul' % self.username):
+            with cd('~%s/node_modules/git2consul' % self.username):
                 run('nodejs utils/config_seeder.js /etc/git2consul.json')
