@@ -8,10 +8,6 @@ Vagrant.configure("2") do |config|
   config.hostmanager.manage_guest = true
   config.hostmanager.include_offline = true
 
-  if Vagrant.has_plugin?("vagrant-cachier")
-    config.cache.scope = :box
-  end
-
   config.vm.define "core01" do |core01|
     # https://github.com/chef/bento/issues/577#issuecomment-215133141
     core01.vm.box = "gbarbieru/xenial"
@@ -24,6 +20,9 @@ Vagrant.configure("2") do |config|
       v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
       v.customize ["modifyvm", :id, "--memory", 256]
       v.customize ["modifyvm", :id, "--name", "core01"]
+      Vagrant::Util::Platform.linux? and v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
+
+
     end
 
     core01.vm.provision "shell", inline: <<-SHELL
@@ -55,6 +54,7 @@ Vagrant.configure("2") do |config|
       v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
       v.customize ["modifyvm", :id, "--memory", 256]
       v.customize ["modifyvm", :id, "--name", "core02"]
+      Vagrant::Util::Platform.linux? and v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
     end
     core02.vm.provision "shell", inline: <<-SHELL
       #!/bin/sh
@@ -85,6 +85,7 @@ Vagrant.configure("2") do |config|
       v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
       v.customize ["modifyvm", :id, "--memory", 256]
       v.customize ["modifyvm", :id, "--name", "core03"]
+      Vagrant::Util::Platform.linux? and v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
     end
     core03.vm.provision "shell", inline: <<-SHELL
       #!/bin/sh
@@ -115,6 +116,7 @@ Vagrant.configure("2") do |config|
       v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
       v.customize ["modifyvm", :id, "--memory", 256]
       v.customize ["modifyvm", :id, "--name", "git2consul"]
+      Vagrant::Util::Platform.linux? and v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
     end
     git2consul.vm.provision "shell", inline: <<-SHELL
       #!/bin/sh
@@ -145,6 +147,7 @@ Vagrant.configure("2") do |config|
       v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
       v.customize ["modifyvm", :id, "--memory", 256]
       v.customize ["modifyvm", :id, "--name", "laptop"]
+      Vagrant::Util::Platform.linux? and v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
     end
 
     laptop.vm.provision "shell", inline: <<-SHELL
@@ -160,6 +163,7 @@ Vagrant.configure("2") do |config|
       else
         echo 'swapfile found. No changes made.'
       fi
+      sleep 300 # wait for first apt-get update to finish
       sudo apt-get update
       sudo apt-get install -y tinc rsync avahi-autoipd
       sudo rsync -a /vagrant/laptop/etc/tinc/ /etc/tinc/

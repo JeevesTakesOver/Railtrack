@@ -2,13 +2,9 @@ clean: ## cleanup VMs and virtualenv
 	echo "running make clean..."
 	vagrant destroy -f ; rm -rf venv
 
-venv2: ## for archlinux: Creates a python2 virtualenv and installs python modules
-	echo "running make venv2 ..."
-	virtualenv2 venv ; . venv/bin/activate && pip install -r requirements.txt
-
 venv: ## Creates a python virtualenv and installs python modules
 	echo "running make venv ..."
-	virtualenv venv ; . venv/bin/activate && pip install -r requirements.txt
+	python -m virtualenv --python python2.7 venv ; . venv/bin/activate && pip install -r requirements.txt
 
 up: ## vagrant up for the core vagrant boxes
 	echo "running make up ..."
@@ -105,12 +101,13 @@ vagrant_test_cycle: ## runs a full acceptance test cycle using Vagrant
 	make clean
 	make venv
 	make up
+	make up_laptop
 	echo "waiting for first-boot apt-get update to finish ..."
 	sleep 300
 	make it
 	make vagrant_reload
+	sleep 300
 	make acceptance_tests
-	make up_laptop
 	make vagrant_acceptance_tests
 
 
