@@ -42,7 +42,7 @@ class Git2ConsulHost(lib.consul.ConsulClient):
             with hide('stdout', 'running'):
                 sudo('apt-get update')
                 sudo('apt-get install -y npm nodejs nodejs-legacy git')
-                sudo('npm install git2consul')
+                sudo('npm install git2consul@0.11.0')
 
     def deploy_init_git2consul(self):
         """ installs the git2consul init script """
