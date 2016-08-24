@@ -53,6 +53,22 @@ def test_that_patches_were_installed_on(node):
 
 
 @echo
+def test_that_cron_apt_is_installed_on(node):
+
+    line = 'cron-apt'
+
+    with settings(
+        hide('stdout', 'running'),
+        host_string=node.host_string,
+        private_key_filename=node.private_key
+    ):
+        print(" running on %s" % node.host_string)
+
+        cmd = sudo('dpkg -l')
+        assert line in cmd.stdout
+        assert cmd.return_code == 0
+
+@echo
 def test_that_tinc_binaries_were_installed_on(node):
 
     line = '/usr/sbin/tincd'

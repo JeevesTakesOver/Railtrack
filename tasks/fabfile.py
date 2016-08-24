@@ -34,6 +34,7 @@ from tests.acceptance import (
     test_that_consul_server_is_running_on,
     test_that_consul_user_exists_on,
     test_that_consul_web_ui_files_exists_on,
+    test_that_cron_apt_is_installed_on,
     test_that_patches_were_installed_on,
     test_that_tinc_binaries_were_installed_on,
     test_that_tinc_conf_files_were_deployed_on,
@@ -130,6 +131,7 @@ def step_02_deploy_tinc_cluster():
     tinc_cluster = lib.clusters.TincCluster()
     for tinc_node in tinc_cluster.tinc_nodes:
         tinc_node.install_patches()
+        tinc_node.install_cron_apt()
         tinc_node.install_tinc_software()
 
     for tinc_network in tinc_cluster.tinc_networks:
@@ -191,6 +193,7 @@ def step_04_deploy_git2consul_tinc_client():
     tinc_cluster = lib.clusters.TincCluster()
 
     git2consul.install_patches()
+    git2consul.install_cron_apt()
 
     git2consul.install_tinc_software()
 
@@ -264,6 +267,7 @@ def acceptance_tests():
 
     for node in nodes:
         test_that_patches_were_installed_on(node)
+        test_that_cron_apt_is_installed_on(node)
         test_that_tinc_binaries_were_installed_on(node)
         test_that_tinc_is_running_on(node)
 

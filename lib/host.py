@@ -23,6 +23,8 @@ from bookshelf.api_v2.os_helpers import (
     install_os_updates,
 )
 
+from bookshelf.api_v2.pkg import apt_install
+
 from bookshelf.api_v2.cloud import wait_for_ssh
 from bookshelf.api_v2.logging_helpers import log_green
 
@@ -83,3 +85,13 @@ class Host(object):
             install_os_updates(distribution='ubuntu14.04')
             upgrade_kernel_and_grub(do_reboot=True)
             wait_for_ssh(self.public_dns_name)
+
+    def install_cron_apt(self):
+        """ installs apt-cron which provides automatic security updates """
+        with settings(
+            hide('running', 'stdout'),
+            host_string=self.host_string,
+            private_key_filename=self.private_key
+        ):
+            log_green(self.host_string)
+            apt_install(packages=['cron-apt'])
