@@ -73,7 +73,9 @@ class Git2ConsulService(Git2ConsulHost,
     """ A git2consul service object providing """
     def __init__(self, consul_cluster):
         """ Generates a Git2ConsulService object """
-        self.cfg = parse_config('config/config.yaml')
+        self.cfg = parse_config(
+            os.getenv('CONFIG_YAML','config/config.yaml')
+        )
         self.public_dns_name = self.cfg['git2consul']['public_dns_name']
         self.username = self.cfg['git2consul']['username']
         self.private_key = self.cfg['git2consul']['key_filename']

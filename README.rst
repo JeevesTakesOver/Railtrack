@@ -75,6 +75,7 @@ set the following environment variables:
    export TINC_KEY_FILENAME_CORE_NETWORK_02=key-pairs/core02.priv
    export TINC_KEY_FILENAME_CORE_NETWORK_03=key-pairs/core03.priv
    export TINC_KEY_FILENAME_GIT2CONSUL=key-pairs/git2consul.priv
+   export CONFIG_YAML=config/config.yaml
 
    make vagrant_test_cycle
 
@@ -161,7 +162,7 @@ On AWS:
 
       make venv step_01
 
-#. Edit the ``config/config.yaml`` file:
+#. Edit the ``config/config.yaml`` file or set CONFIG_YAML to your config.yaml file:
 
    * Add new public DNS names, IP addresses of the EC2 instances.
    * Add the public key contents to the different blocks.

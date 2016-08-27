@@ -36,7 +36,9 @@ class TincCluster(object):
         tinc_nodes: List of lib.tinc.TincEndpoint objects (Running Tinc Daemons)
         tinc_networks: List of lib.tinc.TincNetwork objects (Virtual Tinc Networks)
         """
-        self.cfg = parse_config('config/config.yaml')
+        self.cfg = parse_config(
+            os.getenv('CONFIG_YAML', 'config/config.yaml')
+        )
         self.tinc_nodes = []
         self.tinc_networks = []
 
@@ -109,7 +111,9 @@ class ConsulCluster(object):
         consul_encryption_key: common encryption key to all consul daemons
         """
 
-        self.cfg = parse_config('config/config.yaml')
+        self.cfg = parse_config(
+            os.getenv('CONFIG_YAML', 'config/config.yaml')
+        )
         self.version = self.cfg['consul_servers']['version']
         self.datacenter = self.cfg['consul_servers']['datacenter']
         self.consul_encryption_key = self.cfg['consul_servers']['encrypt']
@@ -161,8 +165,9 @@ class FSconsulCluster(object):
         """
 
         self.consul_cluster = ConsulCluster()
-
-        self.cfg = parse_config('config/config.yaml')
+        self.cfg = parse_config(
+            os.getenv('CONFIG_YAML', 'config/config.yaml')
+        )
         self.fsconsul_nodes = []
         self.datacenter = self.cfg['git2consul']['datacenter']
 

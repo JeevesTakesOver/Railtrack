@@ -317,7 +317,9 @@ def get_consul_encryption_key():
     ___main___
 """
 
-cfg = lib.mycookbooks.parse_config('config/config.yaml')
+cfg = lib.mycookbooks.parse_config(
+    os.getenv('CONFIG_YAML', 'config/config.yaml')
+)
 
 # tinc_network_name = cfg['roles']['core-vpn-node']['tinc_network_name']
 # tinc_network = cfg['roles']['core-vpn-node']['tinc_network']
