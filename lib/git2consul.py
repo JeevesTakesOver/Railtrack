@@ -60,6 +60,7 @@ class Git2ConsulHost(lib.consul.ConsulClient):
                 destination=git2consul_init_file,
                 use_sudo=True,
                 use_jinja=True,
+                backup=False,
                 context={'username': self.username,
                          'groupname': self.username},
             )
