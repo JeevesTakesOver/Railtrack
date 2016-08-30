@@ -40,6 +40,7 @@ from tests.acceptance import (
     test_that_tinc_conf_files_were_deployed_on,
     test_that_tinc_interface_files_were_deployed_on,
     test_that_tinc_is_running_on,
+    test_that_fail2ban_is_running_on,
     test_that_tinc_key_pairs_were_deployed_on,
     test_that_tinc_nets_boot_files_were_deployed_on,
     test_that_tinc_peers_are_pingable_on,
@@ -132,6 +133,7 @@ def step_02_deploy_tinc_cluster():
     for tinc_node in tinc_cluster.tinc_nodes:
         tinc_node.install_patches()
         tinc_node.install_cron_apt()
+        tinc_node.install_fail2ban()
         tinc_node.install_tinc_software()
 
     for tinc_network in tinc_cluster.tinc_networks:
@@ -194,6 +196,7 @@ def step_04_deploy_git2consul_tinc_client():
 
     git2consul.install_patches()
     git2consul.install_cron_apt()
+    git2consul.install_fail2ban()
 
     git2consul.install_tinc_software()
 
@@ -270,6 +273,7 @@ def acceptance_tests():
         test_that_cron_apt_is_installed_on(node)
         test_that_tinc_binaries_were_installed_on(node)
         test_that_tinc_is_running_on(node)
+        test_that_fail2ban_is_running_on(node)
 
     for network in tinc_cluster.tinc_networks:
         test_that_tinc_key_pairs_were_deployed_on(network)
@@ -295,12 +299,14 @@ def acceptance_tests():
         test_that_consul_server_config_exists_on(node)
         test_that_consul_server_init_exists_on(node)
         test_that_consul_server_is_running_on(node)
+        test_that_fail2ban_is_running_on(node)
 
     nodes = fsconsul_cluster.fsconsul_nodes
     for node in nodes:
         test_that_fsconsul_binaries_were_installed_on(node)
         test_that_fsconsul_init_exists_on(node)
         test_that_fsconsul_service_is_running_on(node)
+        test_that_fail2ban_is_running_on(node)
 
     test_that_consul_client_config_exists_on(git2consul)
     test_that_consul_client_init_exists_on(git2consul)
@@ -308,6 +314,8 @@ def acceptance_tests():
 
     test_that_git2consul_service_is_running_on(git2consul)
     test_that_git2consul_init_exists_on(git2consul)
+
+    test_that_fail2ban_is_running_on(git2consul)
 
 
 def get_consul_encryption_key():

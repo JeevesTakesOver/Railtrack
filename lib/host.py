@@ -95,3 +95,13 @@ class Host(object):
         ):
             log_green(self.host_string)
             apt_install(packages=['cron-apt'])
+
+    def install_fail2ban(self):
+        """ installs fail2ban to block ssh brute-force attacks"""
+        with settings(
+            hide('running', 'stdout'),
+            host_string=self.host_string,
+            private_key_filename=self.private_key
+        ):
+            log_green(self.host_string)
+            apt_install(packages=['fail2ban'])
