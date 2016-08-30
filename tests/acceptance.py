@@ -68,6 +68,7 @@ def test_that_cron_apt_is_installed_on(node):
         assert line in cmd.stdout
         assert cmd.return_code == 0
 
+
 @echo
 def test_that_tinc_binaries_were_installed_on(node):
 
@@ -185,6 +186,23 @@ def test_that_tinc_is_running_on(node):
         assert 'tincd' in cmd.stdout
 
         cmd = sudo('service tinc status')
+        assert 'running' in cmd.stdout
+
+
+@echo
+def test_that_fail2ban_is_running_on(node):
+
+    with settings(
+        hide('stdout', 'running'),
+        host_string=node.host_string,
+        private_key_filename=node.private_key
+    ):
+        print(" running on %s" % node.host_string)
+
+        cmd = sudo('ps -ef | grep fail2ban | grep -v grep ')
+        assert 'fail2ban' in cmd.stdout
+
+        cmd = sudo('service fail2ban status')
         assert 'running' in cmd.stdout
 
 
