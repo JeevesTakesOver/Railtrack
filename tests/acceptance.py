@@ -47,7 +47,7 @@ def test_that_patches_were_installed_on(node):
     ):
         print(" running on %s" % node.host_string)
 
-        cmd = sudo('apt-get upgrade')
+        cmd = sudo('apt-get -u upgrade --assume-no')
         assert line in cmd.stdout
         assert cmd.return_code == 0
 
