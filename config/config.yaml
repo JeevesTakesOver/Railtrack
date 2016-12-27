@@ -176,6 +176,39 @@ consul_servers:
       consul_interface: *tinc_network_name
 
 
+dhcpd_servers:
+  servers: 
+    node1:
+      <<: *core_network_01
+      dhcpd_role: 'primary'
+      listen_ip: *core_network_01_tinc_ip
+      domain_name: 'tinc-core-vpn'
+      nameservers: '8.8.8.8,8.8.4.4'
+      pool_range: '169.254.20.0 169.254.254.254'
+      secret: '7d5PudjS/DJ5N4KovSnmST4/Fy2hzTYYM0KuanjjFwdcF3phlBDI5jrLVDTDuIgHcDy1c8h4WCnPWyPxfXMK3g=='
+      reverse_zone: '0.254.169.in-addr.arpa'
+      peer_address: *core_network_02_tinc_ip
+      subnet: '169.254.0.0'
+      netmask: '255.255.0.0'
+      failover_peer: 'tinc'
+      primary_ip: *core_network_01_tinc_ip
+      listen_interface: 'core-vpn'
+    node2:
+      <<: *core_network_02
+      dhcpd_role: 'secondary' 
+      listen_ip: *core_network_02_tinc_ip
+      domain_name: 'tinc-core-vpn'
+      nameservers: '8.8.8.8,8.8.4.4'
+      pool_range: '169.254.20.0 169.254.254.254'
+      secret: '7d5PudjS/DJ5N4KovSnmST4/Fy2hzTYYM0KuanjjFwdcF3phlBDI5jrLVDTDuIgHcDy1c8h4WCnPWyPxfXMK3g=='
+      reverse_zone: '0.254.169.in-addr.arpa'
+      peer_address: *core_network_01_tinc_ip
+      subnet: '169.254.0.0'
+      netmask: '255.255.0.0'
+      failover_peer: 'tinc'
+      primary_ip: *core_network_01_tinc_ip
+      listen_interface: 'core-vpn'
+
 git2consul: &git2consul
   <<: *tinc_common
   tinc_node: 'git2consul'
@@ -207,3 +240,5 @@ git2consul: &git2consul
     L+iVNgTDjVgLY0JRLDXIeG7GqvdKfZOqN7S2p5I0F0hXbQCiLVeQdKDAvlJa16Pl
     KdEq5ow3xRUBXwugqP1He2jt6xat5HgSbqoVglg4uG2sKCChH+V4KwUCAwEAAQ==
     -----END RSA PUBLIC KEY-----
+
+
