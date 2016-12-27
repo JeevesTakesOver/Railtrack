@@ -45,13 +45,19 @@ step06: ## Deploys the fsconsul service
 	echo "running make step06 ..."
 	venv/bin/fab -f tasks/fabfile.py step_06_deploy_fsconsul
 
+step07: ## Deploys the DHCPd service
+	echo "running make step07 ..."
+	venv/bin/fab -f tasks/fabfile.py step_07_deploy_dhcpd
+
 acceptance_tests: ## runs acceptance tests against the core nodes
 	echo "running make acceptance_tests ..."
 	venv/bin/fab -f tasks/fabfile.py acceptance_tests
 
 up_laptop: ## vagrant up the 'laptop' VM
 	echo "running make up_laptop ..."
-	vagrant up laptop
+	vagrant up laptop --no-provision
+	sleep 300
+	vagrant provision laptop
 
 vagrant_acceptance_tests: ## runs acceptance tests on the 'laptop' box
 	echo "running make vagrant_acceptance_tests ..."
@@ -72,6 +78,8 @@ vagrant_acceptance_tests: ## runs acceptance tests on the 'laptop' box
 	vagrant ssh git2consul -- sudo systemctl status tinc
 	vagrant ssh git2consul -- sudo systemctl status consul-client
 	vagrant ssh git2consul -- sudo systemctl status git2consul
+	vagrant ssh core01 -- sudo systemctl status isc-dhcp-server
+	vagrant ssh core02 -- sudo systemctl status isc-dhcp-server
 
 vagrant_reload: ## reloads all vagrant VMs
 	echo "running make vagrant_reload ..."
