@@ -49,7 +49,11 @@ from tests.acceptance import (
     test_that_fsconsul_init_exists_on,
     test_that_fsconsul_service_is_running_on,
     test_that_git2consul_init_exists_on,
-    test_that_git2consul_service_is_running_on
+    test_that_git2consul_service_is_running_on,
+    test_that_dhcpd_server_is_running_on,
+    test_that_dhcpd_binaries_were_installed_on,
+    test_that_dhcpd_server_config_exists_on,
+    test_that_dhcpd_server_init_exists_on,
 )
 
 from fabric.api import task, env, execute
@@ -67,6 +71,7 @@ def it():
     execute(step_04_deploy_git2consul_tinc_client)
     execute(step_05_deploy_git2consul)
     execute(step_06_deploy_fsconsul)
+    execute(step_07_deploy_dhcpd)
 
 
 @task
@@ -256,6 +261,14 @@ def step_06_deploy_fsconsul():
         fsconsul_node.deploy_conf_fsconsul()
         fsconsul_node.deploy_init_fsconsul()
 
+@task
+def step_07_deploy_dhcpd():
+    dhcpd_cluster = lib.clusters.DHCPdCluster()
+    for dhcpd_node in dhcpd_cluster.dhcpd_nodes:
+        dhcpd_node.deploy_dhcpd_binary()
+        dhcpd_node.deploy_conf_dhcpd()
+        dhcpd_node.restart_dhcpd()
+        #dhcpd_node.deploy_init_dhcpd()
 
 @task
 def acceptance_tests():
@@ -263,6 +276,7 @@ def acceptance_tests():
     consul_cluster = lib.clusters.ConsulCluster()
     git2consul = lib.git2consul.Git2ConsulService(consul_cluster)
     fsconsul_cluster = lib.clusters.FSconsulCluster()
+    dhcpd_cluster = lib.clusters.DHCPdCluster()
 
     nodes = []
     nodes.extend(tinc_cluster.tinc_nodes)
@@ -317,6 +331,14 @@ def acceptance_tests():
 
     test_that_fail2ban_is_running_on(git2consul)
 
+    nodes = dhcpd_cluster.dhcpd_nodes
+
+    for node in nodes:
+        test_that_dhcpd_binaries_were_installed_on(node)
+        test_that_dhcpd_server_config_exists_on(node)
+        test_that_dhcpd_server_init_exists_on(node)
+        test_that_dhcpd_server_is_running_on(node)
+        test_that_fail2ban_is_running_on(node)
 
 def get_consul_encryption_key():
     return cfg['consul']['encrypt']
