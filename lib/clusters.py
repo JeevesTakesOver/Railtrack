@@ -20,6 +20,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import lib.tinc
 import lib.consul
 import lib.fsconsul
+import lib.dhcpd
 
 from lib.mycookbooks import (
     parse_config,
@@ -196,3 +197,46 @@ class FSconsulCluster(object):
         # update consul_peers
         for fsconsul_node in self.fsconsul_nodes:
             fsconsul_node.consul_peers = set(self.fsconsul_nodes) - set([fsconsul_node])
+
+class DHCPdCluster(object):
+    """ A 'Cluster' object composed of primary and secondaries DHCPd servers,
+    """
+
+    def __init__(self):
+        """ consumes the config.yaml parameters files generating a set of
+        attributes that map to the different dhcpd objects.
+
+        dhcpd_nodes: List of DHCPd servers objects
+        """
+
+        self.cfg = parse_config(
+            os.getenv('CONFIG_YAML', 'config/config.yaml')
+        )
+        self.dhcpd_nodes = []
+
+        # some background on the DHCPd archictecture:
+        # each HA setup will have a primary one secondary
+
+        for k_node, v_node in self.cfg['dhcpd_servers']['servers'].items():
+            self.dhcpd_nodes.append(
+                lib.dhcpd.DHCPdServer(
+                    dhcpd_role=v_node['dhcpd_role'],
+                    listen_ip=v_node['listen_ip'],
+                    domain_name=v_node['domain_name'],
+                    nameservers=v_node['nameservers'],
+                    pool_range=v_node['pool_range'],
+                    secret=v_node['secret'],
+                    reverse_zone=v_node['reverse_zone'],
+                    peer_address=v_node['peer_address'],
+                    subnet=v_node['subnet'],
+                    netmask=v_node['netmask'],
+                    failover_peer=v_node['failover_peer'],
+                    primary_ip=v_node['primary_ip'],
+                    listen_interface=v_node['listen_interface'],
+                    ssh_credentials=lib.host.SshCredentials(
+                        public_dns_name=v_node['public_dns_name'],
+                        username=v_node['username'],
+                        private_key=v_node['key_filename']
+                    )
+                )
+            )
