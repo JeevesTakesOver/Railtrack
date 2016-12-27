@@ -461,3 +461,72 @@ def test_that_git2consul_service_is_running_on(git2consul):
 
         cmd = sudo('systemctl is-active git2consul')
         assert 'active' in cmd.stdout
+
+
+@echo
+def test_that_dhcpd_binaries_were_installed_on(dhcpd_server):
+
+    with settings(
+        hide('stdout', 'running'),
+        host_string=dhcpd_server.host_string,
+        private_key_filename=dhcpd_server.private_key
+    ):
+        print(" running on %s" % dhcpd_server.host_string)
+
+        cmd = sudo('systemctl is-active dhcpd')
+        assert 'active' in cmd.stdout
+
+
+@echo
+def test_that_dhcpd_server_is_running_on(dhcpd_node):
+
+    with settings(
+        hide('stdout', 'running'),
+        host_string=dhcpd_node.host_string,
+        private_key_filename=dhcpd_node.private_key
+    ):
+        print(" running on %s" % dhcpd_node.host_string)
+
+        cmd = sudo('systemctl is-active isc-dhcp-server')
+        assert 'active' in cmd.stdout
+
+
+@echo
+def test_that_dhcpd_binaries_were_installed_on(dhcpd_node):
+
+    line = 'dhcpd'
+    with settings(
+        hide('stdout', 'running'),
+        host_string=dhcpd_node.host_string,
+        private_key_filename=dhcpd_node.private_key
+    ):
+        print(" running on %s" % dhcpd_node.host_string)
+
+        cmd = sudo('which dhcpd')
+        assert line in cmd.stdout
+
+
+def test_that_dhcpd_server_config_exists_on(dhcpd_node):
+
+    with settings(
+        hide('stdout', 'running'),
+        host_string=dhcpd_node.host_string,
+        private_key_filename=dhcpd_node.private_key
+    ):
+        print(" running on %s" % dhcpd_node.host_string)
+
+        cmd = sudo('ls -l /etc/dhcp/dhcpd.conf ')
+        assert 'dhcpd.conf' in cmd.stdout
+
+
+def test_that_dhcpd_server_init_exists_on(dhcpd_node):
+
+    with settings(
+        hide('stdout', 'running'),
+        host_string=dhcpd_node.host_string,
+        private_key_filename=dhcpd_node.private_key
+    ):
+        print(" running on %s" % dhcpd_node.host_string)
+
+        cmd = sudo('ls -l /etc/init/isc-dhcp-server.conf')
+        assert 'dhcp' in cmd.stdout
