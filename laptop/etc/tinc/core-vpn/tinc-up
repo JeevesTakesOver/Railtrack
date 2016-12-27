@@ -1,3 +1,4 @@
 #!/bin/sh
+ps -ef | grep dhclient | grep $INTERFACE | awk '{ print $2 }' | xargs -i kill {}
 /sbin/dhclient -nw -v  $INTERFACE
 
