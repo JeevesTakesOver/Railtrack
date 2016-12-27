@@ -1,0 +1,48 @@
+authoritative;                                       # server is authoritative
+option domain-name "{{ domain_name }}";              # the domain name issued
+option domain-name-servers {{ nameservers }};        # name servers issued
+ddns-update-style interim;                           # setup dynamic DNS updates
+ddns-updates on;
+ddns-domainname "{{ domain_name }}";                 # domain name for DDNS updates
+key rndckey {
+        algorithm       hmac-md5;
+        secret          "{{ secret }}";                # get from the /etc/rndc.key file
+}
+
+zone {{ domain_name }}                               # forward zone to update
+{
+        primary {{ primary_ip }};                   # update on the local machine
+        key rndckey;                                # key to use for the update
+}
+
+zone {{ reverse_zone }}                             # reverse zone to update
+{
+        primary {{ primary_ip }};                   # update on the local machine
+        key rndckey;                                # key for update
+}
+
+failover peer "{{ failover_peer }}" {               # fail over configuration
+         {{ dhcpd_role }};                                   # This is the primary
+         address {{ listen_ip }};                   # primarys ip address
+         port 647;
+         peer address {{ peer_address }};           # peer's ip address
+         peer port 647;
+         max-response-delay 60;
+         max-unacked-updates 10;
+         mclt 3600;
+{% if dhcpd_role == 'primary' %}
+         split 128;
+{% endif %}
+         load balance max seconds 3;
+}
+
+subnet {{ subnet }} netmask {{ netmask }}            # zone to issue addresses from
+{
+        pool {
+                failover peer "{{ failover_peer }}";           # pool for dhcp leases with failover bootp not allowed 
+                deny dynamic bootp clients;         
+                range {{ pool_range }};
+        }
+        allow unknown-clients;
+        ignore client-updates;
+}
