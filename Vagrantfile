@@ -163,7 +163,7 @@ Vagrant.configure("2") do |config|
       else
         echo 'swapfile found. No changes made.'
       fi
-      sleep 300 # wait for first apt-get update to finish
+      sleep 500 # wait for first apt-get update to finish
       sudo apt-get update
       sudo apt-get install -y tinc rsync avahi-autoipd
       sudo rsync -a /vagrant/laptop/etc/tinc/ /etc/tinc/
