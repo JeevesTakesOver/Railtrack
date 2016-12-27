@@ -1,2 +1,3 @@
 #!/bin/sh
-avahi-autoipd -D $INTERFACE
+/sbin/dhclient -nw -v  $INTERFACE
+
