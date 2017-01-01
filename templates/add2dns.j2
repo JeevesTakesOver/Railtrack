@@ -1,0 +1,18 @@
+#!/bin/bash
+
+ip=$1
+hostname=$2
+
+if [ "$hostname" == "none" ]
+then
+  hostname="$( echo $ip | tr -s '.' '-' )"
+fi
+
+command_file=/tmp/$RANDOM
+echo "server {{ primary_ip }}" > $command_file
+echo "key rndc-key {{secret}}" >> $command_file
+echo "update delete $hostname.{{ zone_name}}  A" >> $command_file
+echo "update add $hostname.{{ zone_name}} 60 A $ip" >> $command_file
+echo "send" >> $command_file
+nsupdate $command_file
+rm -f $command_file
