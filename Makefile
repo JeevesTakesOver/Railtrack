@@ -49,6 +49,10 @@ step07: ## Deploys the DHCPd service
 	echo "running make step07 ..."
 	venv/bin/fab -f tasks/fabfile.py step_07_deploy_dhcpd
 
+step08: ## Deploys the DNS service
+	echo "running make step08 ..."
+	venv/bin/fab -f tasks/fabfile.py step_08_deploy_dnsserver
+
 acceptance_tests: ## runs acceptance tests against the core nodes
 	echo "running make acceptance_tests ..."
 	venv/bin/fab -f tasks/fabfile.py acceptance_tests
