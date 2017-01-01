@@ -54,6 +54,10 @@ from tests.acceptance import (
     test_that_dhcpd_binaries_were_installed_on,
     test_that_dhcpd_server_config_exists_on,
     test_that_dhcpd_server_init_exists_on,
+    test_that_dnsserver_server_is_running_on,
+    test_that_dnsserver_binaries_were_installed_on,
+    test_that_dnsserver_server_config_exists_on,
+    test_that_dnsserver_server_init_exists_on,
 )
 
 from fabric.api import task, env, execute
@@ -72,6 +76,7 @@ def it():
     execute(step_05_deploy_git2consul)
     execute(step_06_deploy_fsconsul)
     execute(step_07_deploy_dhcpd)
+    execute(step_08_deploy_dnsserver)
 
 
 @task
@@ -268,7 +273,15 @@ def step_07_deploy_dhcpd():
         dhcpd_node.deploy_dhcpd_binary()
         dhcpd_node.deploy_conf_dhcpd()
         dhcpd_node.restart_dhcpd()
-        #dhcpd_node.deploy_init_dhcpd()
+
+
+@task
+def step_08_deploy_dnsserver():
+    dnsserver_cluster = lib.clusters.DNSSERVERCluster()
+    for dnsserver_node in dnsserver_cluster.dnsserver_nodes:
+        dnsserver_node.deploy_dnsserver_binary()
+        dnsserver_node.deploy_conf_dnsserver()
+        dnsserver_node.restart_dnsserver()
 
 @task
 def acceptance_tests():
@@ -277,6 +290,7 @@ def acceptance_tests():
     git2consul = lib.git2consul.Git2ConsulService(consul_cluster)
     fsconsul_cluster = lib.clusters.FSconsulCluster()
     dhcpd_cluster = lib.clusters.DHCPdCluster()
+    dnsserver_cluster = lib.clusters.DNSSERVERCluster()
 
     nodes = []
     nodes.extend(tinc_cluster.tinc_nodes)
@@ -339,6 +353,16 @@ def acceptance_tests():
         test_that_dhcpd_server_init_exists_on(node)
         test_that_dhcpd_server_is_running_on(node)
         test_that_fail2ban_is_running_on(node)
+
+    nodes = dnsserver_cluster.dnsserver_nodes
+
+    for node in nodes:
+        test_that_dnsserver_binaries_were_installed_on(node)
+        test_that_dnsserver_server_config_exists_on(node)
+        test_that_dnsserver_server_init_exists_on(node)
+        test_that_dnsserver_server_is_running_on(node)
+        test_that_fail2ban_is_running_on(node)
+
 
 def get_consul_encryption_key():
     return cfg['consul']['encrypt']
