@@ -1,4 +1,4 @@
 #!/bin/sh
-ps -ef | grep dhclient | grep $INTERFACE | awk '{ print $2 }' | xargs -i kill {}
-/sbin/dhclient -nw -v  $INTERFACE
-
+# https://bugs.launchpad.net/ubuntu/+source/isc-dhcp/+bug/1006937
+/sbin/dhclient -cf /etc/tinc/core-vpn/dhclient.conf -nw -v  $INTERFACE -r
+/sbin/dhclient -cf /etc/tinc/core-vpn/dhclient.conf -nw -v  $INTERFACE
