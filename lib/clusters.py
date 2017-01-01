@@ -21,6 +21,7 @@ import lib.tinc
 import lib.consul
 import lib.fsconsul
 import lib.dhcpd
+import lib.dnsserver
 
 from lib.mycookbooks import (
     parse_config,
@@ -233,6 +234,44 @@ class DHCPdCluster(object):
                     failover_peer=v_node['failover_peer'],
                     primary_ip=v_node['primary_ip'],
                     listen_interface=v_node['listen_interface'],
+                    ssh_credentials=lib.host.SshCredentials(
+                        public_dns_name=v_node['public_dns_name'],
+                        username=v_node['username'],
+                        private_key=v_node['key_filename']
+                    )
+                )
+            )
+
+class DNSSERVERCluster(object):
+    """ A 'Cluster' object composed of primary and secondaries DNSSERVER servers,
+    """
+
+    def __init__(self):
+        """ consumes the config.yaml parameters files generating a set of
+        attributes that map to the different dhcpd objects.
+
+        dhcpd_nodes: List of DNSSERVER servers objects
+        """
+
+        self.cfg = parse_config(
+            os.getenv('CONFIG_YAML', 'config/config.yaml')
+        )
+        self.dnsserver_nodes = []
+
+        # some background on the DNSSERVER archictecture:
+        # each HA setup will have a primary one secondary
+        for k_node, v_node in self.cfg['dnsserver_servers']['servers'].items():
+            self.dnsserver_nodes.append(
+                lib.dnsserver.DNSSERVERServer(
+                    zone_name=v_node['zone_name'],
+                    reverse_zone=v_node['reverse_zone'],
+                    allow_transfer=v_node['allow_transfer'],
+	                dnsserver_role=v_node['dnsserver_role'],
+	                ns1=v_node['ns1'],
+	                ns2=v_node['ns2'],
+	                secret=v_node['secret'],
+                    listen_ip=v_node['listen_ip'],
+                    primary_ip=v_node['primary_ip'],
                     ssh_credentials=lib.host.SshCredentials(
                         public_dns_name=v_node['public_dns_name'],
                         username=v_node['username'],
