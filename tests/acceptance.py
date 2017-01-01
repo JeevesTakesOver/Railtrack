@@ -483,12 +483,13 @@ def test_that_dhcpd_server_is_running_on(dhcpd_node):
     with settings(
         hide('stdout', 'running'),
         host_string=dhcpd_node.host_string,
-        private_key_filename=dhcpd_node.private_key
+        private_key_filename=dhcpd_node.private_key,
+        warn_only=True
     ):
         print(" running on %s" % dhcpd_node.host_string)
 
-        cmd = sudo('systemctl is-active isc-dhcp-server')
-        assert 'active' in cmd.stdout
+        cmd = sudo('systemctl status isc-dhcp-server >/dev/null')
+        assert cmd.return_code == 0
 
 
 @echo
@@ -530,3 +531,75 @@ def test_that_dhcpd_server_init_exists_on(dhcpd_node):
 
         cmd = sudo('ls -l /etc/init/isc-dhcp-server.conf')
         assert 'dhcp' in cmd.stdout
+
+
+@echo
+def test_that_dnsserver_binaries_were_installed_on(dnsserver_server):
+
+    with settings(
+        hide('stdout', 'running'),
+        host_string=dnsserver_server.host_string,
+        private_key_filename=dnsserver_server.private_key
+    ):
+        print(" running on %s" % dnsserver_server.host_string)
+
+        cmd = sudo('which named')
+        assert 'named' in cmd.stdout
+
+
+@echo
+def test_that_dnsserver_server_is_running_on(dnsserver_node):
+
+    with settings(
+        hide('stdout', 'running'),
+        host_string=dnsserver_node.host_string,
+        private_key_filename=dnsserver_node.private_key,
+        warn_only=True
+    ):
+        print(" running on %s" % dnsserver_node.host_string)
+
+        cmd = sudo('systemctl status bind9 >/dev/null')
+        assert cmd.return_code == 0
+
+
+@echo
+def test_that_dnsserver_binaries_were_installed_on(dnsserver_node):
+
+    line = 'named'
+    with settings(
+        hide('stdout', 'running'),
+        host_string=dnsserver_node.host_string,
+        private_key_filename=dnsserver_node.private_key
+    ):
+        print(" running on %s" % dnsserver_node.host_string)
+
+        cmd = sudo('which named')
+        assert line in cmd.stdout
+
+
+def test_that_dnsserver_server_config_exists_on(dnsserver_node):
+
+    with settings(
+        hide('stdout', 'running'),
+        host_string=dnsserver_node.host_string,
+        private_key_filename=dnsserver_node.private_key
+    ):
+        print(" running on %s" % dnsserver_node.host_string)
+
+        cmd = sudo('ls -l /etc/bind/')
+        assert 'caching-nameserver' in cmd.stdout
+        assert 'tinc-core-vpn.hosts' in cmd.stdout
+        assert 'tinc-core-vpn.in-addr.arpa.hosts' in cmd.stdout
+
+
+def test_that_dnsserver_server_init_exists_on(dnsserver_node):
+
+    with settings(
+        hide('stdout', 'running'),
+        host_string=dnsserver_node.host_string,
+        private_key_filename=dnsserver_node.private_key
+    ):
+        print(" running on %s" % dnsserver_node.host_string)
+
+        cmd = sudo('systemctl is-enabled bind9')
+        assert 'enabled' in cmd.stdout
