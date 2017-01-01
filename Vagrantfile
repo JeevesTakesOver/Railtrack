@@ -165,8 +165,8 @@ Vagrant.configure("2") do |config|
       fi
       sleep 500 # wait for first apt-get update to finish
       sudo apt-get update
-      sudo apt-get install -y tinc rsync avahi-autoipd
-      sudo rsync -a /vagrant/laptop/etc/tinc/ /etc/tinc/
+      sudo apt-get install -y tinc rsync avahi-autoipd dnsutils
+      sudo rsync -a /vagrant/laptop/ /
       sudo service tinc restart
     SHELL
   end
