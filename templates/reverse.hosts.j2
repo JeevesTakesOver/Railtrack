@@ -1,0 +1,15 @@
+$ORIGIN .
+$TTL 907200     ; 1 week 3 days 12 hours
+{{ reverse_zone }} IN SOA   ns1.{{ zone_name }}. admin.{{ zone_name }}. (
+                                2014071402 ; serial
+                                28800      ; refresh (8 hours)
+                                604800     ; retry (1 week)
+                                604800     ; expire (1 week)
+                                86400      ; minimum (1 day)
+                                )
+                        NS      ns1.{{ zone_name }}.
+                        NS      ns2.{{ zone_name }}.
+$ORIGIN {{ reverse_zone }}.
+1                       PTR     ns1.{{ zone_name }}.
+2                       PTR     ns2.{{ zone_name }}.
+
