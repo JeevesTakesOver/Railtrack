@@ -1,0 +1,15 @@
+$ORIGIN .
+$TTL 907200     ; 1 week 3 days 12 hours
+{{ zone_name }}           IN SOA  ns1.{{ zone_name }}. admin.{{ zone_name }}. (
+                                2014071403 ; serial
+                                28800      ; refresh (8 hours)
+                                3600       ; retry (1 hour)
+                                604800     ; expire (1 week)
+                                38400      ; minimum (10 hours 40 minutes)
+                                )
+                        NS      ns1.{{ zone_name }}.
+                        NS      ns2.{{ zone_name }}.
+$ORIGIN {{ zone_name }}.
+ns1                     A       169.254.0.1 
+ns2                     A       169.254.0.2
+
