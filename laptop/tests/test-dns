@@ -1,0 +1,5 @@
+#!/bin/bash
+set -e
+ADDRESS=`ifconfig core-vpn | grep 'inet addr' | cut -f2 -d ":" | cut -f 1 -d " " | tr -s "." "-" `
+host ${ADDRESS}.tinc-core-vpn 169.254.0.1
+
