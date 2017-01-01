@@ -1,0 +1,39 @@
+//
+// Do any local configuration here
+//
+
+// Consider adding the 1918 zones here, if they are not used in your
+// organization
+//include "/etc/bind/zones.rfc1918";
+
+include "/etc/bind/rndc.key";
+
+zone "{{ zone_name }}" {
+  type {{ dnsserver_role }};
+  file "/var/cache/bind/{{ zone_name }}.hosts"; 
+{% if dnsserver_role == 'master' %}
+  allow-update { key rndc-key; };
+{% endif %}
+{% if dnsserver_role == 'slave' %}
+   masters { 
+     {{ ns1 }}; 
+};
+{% endif %}
+  allow-transfer { {{ allow_transfer }}; };
+  allow-query { any; };
+};
+
+zone "{{ reverse_zone }}" {
+   type {{ dnsserver_role }};
+   file "/var/cache/bind/{{reverse_zone}}.hosts";
+{% if dnsserver_role == 'master' %}
+  allow-update { key rndc-key; };
+{% endif %}
+{% if dnsserver_role == 'slave' %}
+   masters { 
+     {{ ns1 }}; 
+};
+{% endif %}
+  allow-transfer { {{ allow_transfer }}; };
+  allow-query { any; };
+};
