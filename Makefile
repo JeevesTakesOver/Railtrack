@@ -70,6 +70,7 @@ vagrant_acceptance_tests: ## runs acceptance tests on the 'laptop' box
 	vagrant ssh laptop -- ping -c 1 -w 20 169.254.0.2
 	vagrant ssh laptop -- ping -c 1 -w 20 169.254.0.3
 	vagrant ssh laptop -- ping -c 1 -w 20 169.254.0.10
+	vagrant ssh laptop -- /tests/test-dns
 	vagrant ssh core01 -- sudo systemctl status tinc
 	vagrant ssh core01 -- sudo systemctl status consul-server
 	vagrant ssh core01 -- sudo systemctl status fsconsul
