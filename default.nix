@@ -20,7 +20,7 @@ buildPythonPackage {
   shellHook = ''
   unset http_proxy
   export GIT_SSL_CAINFO=/etc/ssl/certs/ca-bundle.crt
-  virtualenv venv
+  virtualenv --no-wheel --no-setuptools venv 
   wget -c https://bootstrap.pypa.io/get-pip.py
   venv/bin/python get-pip.py
   venv/bin/pip install -r requirements.txt --no-use-wheel
