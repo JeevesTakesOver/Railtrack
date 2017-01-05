@@ -62,6 +62,10 @@ up_laptop: ## vagrant up the 'laptop' VM
 	vagrant up laptop --no-provision
 	sleep 300
 	vagrant provision laptop
+	# vagrant provision will remove resolvconf and dnsmasq
+	# which require a reboot of the VM
+	vagrant halt laptop
+	vagrant up laptop --no-provision
 
 vagrant_acceptance_tests: ## runs acceptance tests on the 'laptop' box
 	echo "running make vagrant_acceptance_tests ..."

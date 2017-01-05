@@ -164,10 +164,11 @@ Vagrant.configure("2") do |config|
         echo 'swapfile found. No changes made.'
       fi
       sleep 500 # wait for first apt-get update to finish
+      export DEBIAN_FRONTEND=noninteractive
       sudo apt-get update
       sudo apt-get install -y tinc rsync avahi-autoipd dnsutils
       sudo rsync -a /vagrant/laptop/ /
-      sudo service tinc restart
+      sudo apt-get -y remove resolvconf dnsmasq
     SHELL
   end
 
