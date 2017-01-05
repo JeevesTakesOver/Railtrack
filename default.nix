@@ -12,6 +12,7 @@ buildPythonPackage {
     libzip
     python27Full
     python27Packages.virtualenv
+    python27Packages.pip
     stdenv
     zlib ];
   src = null;
@@ -19,7 +20,9 @@ buildPythonPackage {
   shellHook = ''
   unset http_proxy
   export GIT_SSL_CAINFO=/etc/ssl/certs/ca-bundle.crt
-  virtualenv venv
+  virtualenv virtualenv
+  wget -c https://bootstrap.pypa.io/get-pip.py
+  venv/bin/python get-pip.py
   venv/bin/pip install -r requirements.txt --no-use-wheel
   export PATH=$PWD/venv/bin:$PATH
   '';
