@@ -244,7 +244,7 @@ dhcpd_servers:
       dhcpd_role: 'primary'
       listen_ip: *core_network_01_tinc_ip
       domain_name: *zone_name
-      nameservers: '8.8.8.8,8.8.4.4'
+      nameservers: '169.254.0.1,169.254.0.2'
       pool_range: '169.254.20.0 169.254.254.254'
       secret: *bind_secret
       reverse_zone: *reverse_zone
@@ -262,7 +262,7 @@ dhcpd_servers:
       dhcpd_role: 'secondary' 
       listen_ip: *core_network_02_tinc_ip
       domain_name: *zone_name
-      nameservers: '8.8.8.8,8.8.4.4'
+      nameservers: '169.254.0.1,169.254.0.2'
       pool_range: '169.254.20.0 169.254.254.254' 
       secret: *bind_secret
       reverse_zone: *reverse_zone
