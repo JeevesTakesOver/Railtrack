@@ -56,7 +56,7 @@ class DHCPdHost(lib.host.Host):
             host_string=self.host_string,
             private_key_filename=self.private_key
         ):
-            apt_install(packages=['isc-dhcp-server'])
+            apt_install(packages=['isc-dhcp-server', 'dnsutils'])
 
 class DHCPdServer(DHCPdHost):
     """ An object representing the DHCPd Server service """
