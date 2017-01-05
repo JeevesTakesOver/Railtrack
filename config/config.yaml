@@ -210,14 +210,14 @@ git2consul: &git2consul
 
 dnsserver_servers:
   bind_secret: &bind_secret '7d5PudjS/DJ5N4KovSnmST4/Fy2hzTYYM0KuanjjFwdcF3phlBDI5jrLVDTDuIgHcDy1c8h4WCnPWyPxfXMK3g=='
-  domain_name: &domain_name 'tinc-core-vpn'
+  zone_name: &zone_name 'tinc-core-vpn'
   reverse_zone: &reverse_zone '0.254.169.in-addr.arpa' 
   servers: 
     node1: &dnsserver01
       <<: *core_network_01
       secret: *bind_secret
       allow_transfer: *core_network_02_tinc_ip
-      zone_name: *domain_name
+      zone_name: *zone_name
       reverse_zone: *reverse_zone
       dnsserver_role: 'master'
       ns1: *core_network_01_tinc_ip
@@ -229,7 +229,7 @@ dnsserver_servers:
       <<: *core_network_02
       secret: *bind_secret
       allow_transfer: *core_network_01_tinc_ip
-      zone_name: *domain_name
+      zone_name: *zone_name
       reverse_zone: *reverse_zone
       dnsserver_role: 'slave'
       ns1: *core_network_01_tinc_ip
@@ -243,7 +243,7 @@ dhcpd_servers:
       <<: *dnsserver01
       dhcpd_role: 'primary'
       listen_ip: *core_network_01_tinc_ip
-      domain_name: *domain_name
+      domain_name: *zone_name
       nameservers: '8.8.8.8,8.8.4.4'
       pool_range: '169.254.20.0 169.254.254.254'
       secret: *bind_secret
@@ -261,7 +261,7 @@ dhcpd_servers:
       <<: *dnsserver01
       dhcpd_role: 'secondary' 
       listen_ip: *core_network_02_tinc_ip
-      domain_name: *domain_name
+      domain_name: *zone_name
       nameservers: '8.8.8.8,8.8.4.4'
       pool_range: '169.254.20.0 169.254.254.254' 
       secret: *bind_secret
