@@ -155,6 +155,59 @@ class DHCPdServer(DHCPdHost):
                 }
             )
 
+            DNSSERVER_add2dns_file = '/etc/dhcp/add2dns'
+
+            upload_template(
+                filename='add2dns.j2',
+                template_dir='templates',
+                destination=DNSSERVER_add2dns_file,
+                use_sudo=True,
+                use_jinja=True,
+                context={
+                    'secret': self.secret,
+                    'domain_name': self.domain_name,
+                    'reverse_zone': self.reverse_zone,
+                    'primary_ip': self.primary_ip
+                }
+            )
+
+            sudo('chown root:dhcpd /etc/dhcp/add2dns')
+            sudo('chmod 750 /etc/dhcp/add2dns')
+
+            DNSSERVER_removefromdns_file = '/etc/dhcp/removefromdns'
+
+            upload_template(
+                filename='removefromdns.j2',
+                template_dir='templates',
+                destination=DNSSERVER_removefromdns_file,
+                use_sudo=True,
+                use_jinja=True,
+                context={
+                    'secret': self.secret,
+                    'domain_name': self.domain_name,
+                    'reverse_zone': self.reverse_zone,
+                    'primary_ip': self.primary_ip
+                }
+            )
+
+            sudo('chown root:dhcpd /etc/dhcp/removefromdns')
+            sudo('chmod 750 /etc/dhcp/removefromdns')
+
+
+            DNSSERVER_apparmor_file = '/etc/apparmor.d/usr.sbin.dhcpd'
+
+            upload_template(
+                filename='apparmor.usr.sbin.dhcpd.j2',
+                template_dir='templates',
+                destination=DNSSERVER_apparmor_file,
+                use_sudo=True,
+                use_jinja=True,
+                context={}
+            )
+
+            sudo('chown root:root /etc/apparmor.d/usr.sbin.dhcpd')
+            sudo('service apparmor reload')
+
     def restart_dhcpd(self):
         """ restarts the dhcpd service """
         log_green('restarting dhcpd...')
