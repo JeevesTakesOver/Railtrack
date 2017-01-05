@@ -184,6 +184,15 @@ The laptop vagrant VM is an example for configuring a client to obtain an IP
 address from the VPN which is automatically registered in DNS.
 
 
+NIXOS
+==============================
+
+My local development laptop is NIXOS, there's is a local default.nix file to
+help with consuming the python code in a more standard virtualenv way.
+
+just run:
+   .. nix-shell
+
 
 License
 ========
