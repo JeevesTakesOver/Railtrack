@@ -12,3 +12,4 @@ tags
 *.un~
 *.sw*
 *.tgz
+git-pip.py
