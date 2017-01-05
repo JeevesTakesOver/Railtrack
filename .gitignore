@@ -13,3 +13,4 @@ tags
 *.sw*
 *.tgz
 git-pip.py
+get-pip.py
