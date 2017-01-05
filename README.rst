@@ -174,6 +174,17 @@ On AWS:
 
       make it
 
+
+Laptop Configuration
+=============================
+
+To consume a DHCP IP address from the VPN, see the Vagrant provision block for
+the laptop, and the up_laptop task in the Makefile.
+The laptop vagrant VM is an example for configuring a client to obtain an IP
+address from the VPN which is automatically registered in DNS.
+
+
+
 License
 ========
 
