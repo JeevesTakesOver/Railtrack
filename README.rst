@@ -8,14 +8,21 @@ Railtrack
 * Self-serviceable.
 * Access control provided by GitHub/GitLab/Bitbucket.
 * Manages Pets
+* Static or DHCP IP allocation of Pets on the VPN.
 * Python based, built on Fabric
 
 
 The code in this repository provisions a fully meshed, geographically
-distributed, resilient, encrypted virtual network.
+distributed, resilient, Layer 2 encrypted virtual network.
+
+This allows for deploying any networked service across the internet, including 
+multi-cloud setups with a single network namespace. As it is a layer 2 VPN, it
+also supports multicast,unicast services or floating virtual-ips.
 
 Services can be added to the virtual network simply by binding the listening
-ports of those services to the local virtual network ip addresses.
+ports of those services to the local virtual network ip addresses. This allows
+for increased security as access to services is only available to hosts
+connected in the VPN.
 
 Management of the hosts allowed to access the virtual network is performed
 through git and pull requests.
@@ -37,6 +44,9 @@ services to the virtual network by commiting the tinc public keys of the tinc
 clients to the github repository and submit a pull request.
 This PR is peer reviewed and once approved, brings the new service online on
 the virtual network.
+This workflow allows for teams to self-service themselves, adding new hosts or 
+team members or removing their access when they leave the project.
+
 
 Usage cases
 ===========
@@ -46,6 +56,16 @@ Usage cases
 * Allow teams to be self-sufficient in adding/removing services to the virtual network.
 
 * Full audits and history through git repository history.
+
+* Single Network segment across multi-cloud vendors
+
+* Highly available VPN services
+
+* Cross-Region/Global network
+
+* Deployment of secure services only available through the VPN.
+
+* Mobile workers
 
 
 Requirements
@@ -192,6 +212,12 @@ help with consuming the python code in a more standard virtualenv way.
 
 just run:
    .. nix-shell
+
+
+Future Work
+===========
+
+Provide a REST api service for management of the access key git repository.
 
 
 License
