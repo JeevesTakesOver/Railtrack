@@ -9,10 +9,31 @@ venv: ## Creates a python virtualenv and installs python modules
 
 up: ## vagrant up for the core vagrant boxes
 	echo "running make up ..."
-	vagrant up core01
-	vagrant up core02
-	vagrant up core03
-	vagrant up git2consul
+	vagrant up core01 --no-provision
+	vagrant ssh core01 -- sudo systemctl disable apt-daily.service
+	vagrant ssh core01 -- sudo systemctl disable apt-daily.timer
+	vagrant halt core01 
+	vagrant up core01 --no-provision
+	vagrant provision core01
+	vagrant up core02 --no-provision
+	vagrant ssh core02 -- sudo systemctl disable apt-daily.service
+	vagrant ssh core02 -- sudo systemctl disable apt-daily.timer
+	vagrant halt core02 
+	vagrant up core02 --no-provision
+	vagrant provision core02 
+	vagrant up core03 --no-provision
+	vagrant ssh core03 -- sudo systemctl disable apt-daily.service
+	vagrant ssh core03 -- sudo systemctl disable apt-daily.timer
+	vagrant halt core03 
+	vagrant up core03 --no-provision
+	vagrant provision core03 
+	vagrant up git2consul --no-provision
+	vagrant ssh git2consul -- sudo systemctl disable apt-daily.service
+	vagrant ssh git2consul -- sudo systemctl disable apt-daily.timer
+	vagrant halt git2consul
+	vagrant up git2consul --no-provision
+	vagrant provision git2consul
+	echo "waiting for first-boot apt-get update to finish ..."
 
 list: ## list available fabric tasks
 	echo "running make list ..."
@@ -61,7 +82,10 @@ acceptance_tests: ## runs acceptance tests against the core nodes
 up_laptop: ## vagrant up the 'laptop' VM
 	echo "running make up_laptop ..."
 	vagrant up laptop --no-provision
-	sleep 300
+	vagrant ssh laptop -- sudo systemctl disable apt-daily.service
+	vagrant ssh laptop -- sudo systemctl disable apt-daily.timer
+	vagrant halt laptop
+	vagrant up laptop --no-provision
 	vagrant provision laptop
 	# vagrant provision will remove resolvconf and dnsmasq
 	# which require a reboot of the VM
