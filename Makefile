@@ -1,6 +1,7 @@
 clean: ## cleanup VMs and virtualenv
 	echo "running make clean..."
-	vagrant destroy -f ; rm -rf venv
+	vagrant destroy -f 
+	rm -rf venv
 
 venv: ## Creates a python virtualenv and installs python modules
 	echo "running make venv ..."
