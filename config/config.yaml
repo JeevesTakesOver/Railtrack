@@ -225,7 +225,7 @@ dnsserver_servers:
       primary_ip: *core_network_01_tinc_ip
       listen_ip: *core_network_01_tinc_ip
 
-    node2:
+    node2: &dnsserver02
       <<: *core_network_02
       secret: *bind_secret
       allow_transfer: *core_network_01_tinc_ip
@@ -258,7 +258,7 @@ dhcpd_servers:
       ns2: *core_network_02_tinc_ip
 
     node2: &dhcpdserver02
-      <<: *dnsserver01
+      <<: *dnsserver02
       dhcpd_role: 'secondary' 
       listen_ip: *core_network_02_tinc_ip
       domain_name: *zone_name
