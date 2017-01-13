@@ -1,7 +1,8 @@
 clean: ## cleanup VMs and virtualenv
 	echo "running make clean..."
 	vagrant destroy -f 
-	rm -rf venv
+	# don't clean the virtualenv on nixos, we use nix-shell
+	grep -i nixos /etc/os-release >/dev/null 2>&1 || rm -rf venv
 
 venv: ## Creates a python virtualenv and installs python modules
 	echo "running make venv ..."
@@ -133,7 +134,8 @@ vagrant_reload: ## reloads all vagrant VMs
 vagrant_test_cycle: ## runs a full acceptance test cycle using Vagrant
 	echo "running make vagrant_test_cycle ..."
 	make clean
-	make venv
+	# don't run make venv on nixos, we use nix-shell for that
+	grep -i nixos /etc/os-release >/dev/null 2>&1 || make venv
 	make up
 	make it
 	make up_laptop
