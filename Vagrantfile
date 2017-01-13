@@ -27,6 +27,7 @@ Vagrant.configure("2") do |config|
 
     core01.vm.provision "shell", inline: <<-SHELL
       #!/bin/sh
+
       grep -q "swapfile" /etc/fstab
       if [ $? -ne 0 ]; then
         echo 'swapfile not found. Adding swapfile.'
@@ -38,6 +39,16 @@ Vagrant.configure("2") do |config|
       else
         echo 'swapfile found. No changes made.'
       fi
+
+      # wait for apt-get actions to finished
+      ps -ef | grep -v grep | grep apt >/dev/null 2>&1
+      while [ $? == 0 ]
+      do
+        echo "apt-... running"
+        sleep 1
+        ps -ef | grep -v grep | grep apt >/dev/null 2>&1
+      done
+
     SHELL
   end
 
@@ -58,6 +69,7 @@ Vagrant.configure("2") do |config|
     end
     core02.vm.provision "shell", inline: <<-SHELL
       #!/bin/sh
+
       grep -q "swapfile" /etc/fstab
       if [ $? -ne 0 ]; then
         echo 'swapfile not found. Adding swapfile.'
@@ -69,6 +81,14 @@ Vagrant.configure("2") do |config|
       else
         echo 'swapfile found. No changes made.'
       fi
+
+      # wait for apt-get actions to finished
+      ps -ef | grep -v grep | grep apt >/dev/null 2>&1
+      while [ $? == 0 ]
+      do
+        sleep 1
+        ps -ef | grep -v grep | grep apt >/dev/null 2>&1
+      done
     SHELL
   end
 
@@ -89,6 +109,7 @@ Vagrant.configure("2") do |config|
     end
     core03.vm.provision "shell", inline: <<-SHELL
       #!/bin/sh
+
       grep -q "swapfile" /etc/fstab
       if [ $? -ne 0 ]; then
         echo 'swapfile not found. Adding swapfile.'
@@ -100,6 +121,14 @@ Vagrant.configure("2") do |config|
       else
         echo 'swapfile found. No changes made.'
       fi
+
+      # wait for apt-get actions to finished
+      ps -ef | grep -v grep | grep apt >/dev/null 2>&1
+      while [ $? == 0 ]
+      do
+        sleep 1
+        ps -ef | grep -v grep | grep apt >/dev/null 2>&1
+      done
     SHELL
   end
 
@@ -120,6 +149,7 @@ Vagrant.configure("2") do |config|
     end
     git2consul.vm.provision "shell", inline: <<-SHELL
       #!/bin/sh
+
       grep -q "swapfile" /etc/fstab
       if [ $? -ne 0 ]; then
         echo 'swapfile not found. Adding swapfile.'
@@ -131,6 +161,14 @@ Vagrant.configure("2") do |config|
       else
         echo 'swapfile found. No changes made.'
       fi
+
+      # wait for apt-get actions to finished
+      ps -ef | grep -v grep | grep apt >/dev/null 2>&1
+      while [ $? == 0 ]
+      do
+        sleep 1
+        ps -ef | grep -v grep | grep apt >/dev/null 2>&1
+      done
     SHELL
   end
 
@@ -152,6 +190,7 @@ Vagrant.configure("2") do |config|
 
     laptop.vm.provision "shell", inline: <<-SHELL
       #!/bin/sh
+
       grep -q "swapfile" /etc/fstab
       if [ $? -ne 0 ]; then
         echo 'swapfile not found. Adding swapfile.'
@@ -163,13 +202,19 @@ Vagrant.configure("2") do |config|
       else
         echo 'swapfile found. No changes made.'
       fi
-      sleep 500 # wait for first apt-get update to finish
-      export DEBIAN_FRONTEND=noninteractive
+
+      # wait for apt-get actions to finished
+      ps -ef | grep -v grep | grep apt >/dev/null 2>&1
+      while [ $? == 0 ]
+      do
+        sleep 1
+        ps -ef | grep -v grep | grep apt >/dev/null 2>&1
+      done
+
       sudo apt-get update
       sudo apt-get install -y tinc rsync avahi-autoipd dnsutils
       sudo rsync -a /vagrant/laptop/ /
       sudo apt-get -y remove resolvconf dnsmasq
     SHELL
   end
-
 end
