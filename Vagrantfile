@@ -212,9 +212,11 @@ Vagrant.configure("2") do |config|
       done
 
       sudo apt-get update
-      sudo apt-get install -y tinc rsync avahi-autoipd dnsutils
+      sudo apt-get install -y tinc rsync dnsutils
       sudo rsync -a /vagrant/laptop/ /
-      sudo apt-get -y remove resolvconf dnsmasq
+      # use additional flags, as ubuntu adds resolvconf and dnsmasq to
+      # 'essential' pkgs.
+      sudo DEBIAN_FRONTEND=noninteractive apt-get -y --allow-remove-essential remove resolvconf dnsmasq
     SHELL
   end
 end
