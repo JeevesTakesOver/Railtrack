@@ -495,7 +495,6 @@ def test_that_dhcpd_server_is_running_on(dhcpd_node):
 @echo
 def test_that_dhcpd_binaries_were_installed_on(dhcpd_node):
 
-    line = 'dhcpd'
     with settings(
         hide('stdout', 'running'),
         host_string=dhcpd_node.host_string,
@@ -504,7 +503,10 @@ def test_that_dhcpd_binaries_were_installed_on(dhcpd_node):
         print(" running on %s" % dhcpd_node.host_string)
 
         cmd = sudo('which dhcpd')
-        assert line in cmd.stdout
+        assert 'dhcpd' in cmd.stdout
+
+        cmd = sudo('which nsupdate')
+        assert 'nsupdate' in cmd.stdout
 
 
 def test_that_dhcpd_server_config_exists_on(dhcpd_node):
@@ -586,10 +588,9 @@ def test_that_dnsserver_server_config_exists_on(dnsserver_node):
     ):
         print(" running on %s" % dnsserver_node.host_string)
 
-        cmd = sudo('ls -l /etc/bind/')
-        assert 'caching-nameserver' in cmd.stdout
+        cmd = sudo('ls -l /var/cache/bind/')
         assert 'tinc-core-vpn.hosts' in cmd.stdout
-        assert 'tinc-core-vpn.in-addr.arpa.hosts' in cmd.stdout
+        assert '0.254.169.in-addr.arpa.hosts' in cmd.stdout
 
 
 def test_that_dnsserver_server_init_exists_on(dnsserver_node):
