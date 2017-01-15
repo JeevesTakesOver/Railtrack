@@ -28,6 +28,8 @@ subnet {{ subnet }} netmask {{ netmask }}            # zone to issue addresses f
                 failover peer "{{ failover_peer }}";           # pool for dhcp leases with failover bootp not allowed 
                 deny dynamic bootp clients;         
                 range {{ pool_range }};
+                max-lease-time 900;
+                default-lease-time 600;
         }
 }
 
