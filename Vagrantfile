@@ -21,8 +21,13 @@ Vagrant.configure("2") do |config|
       v.customize ["modifyvm", :id, "--memory", 256]
       v.customize ["modifyvm", :id, "--name", "core01"]
       Vagrant::Util::Platform.linux? and v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
-
-
+      # https://www.virtualbox.org/manual/ch05.html#iocaching
+      # disable hostio-cache to save memory
+      v.customize [
+        "storagectl", :id, 
+        "--name", "SATA",
+        "--hostiocache", "off"
+      ]
     end
 
     core01.vm.provision "shell", inline: <<-SHELL
@@ -66,6 +71,13 @@ Vagrant.configure("2") do |config|
       v.customize ["modifyvm", :id, "--memory", 256]
       v.customize ["modifyvm", :id, "--name", "core02"]
       Vagrant::Util::Platform.linux? and v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
+      # https://www.virtualbox.org/manual/ch05.html#iocaching
+      # disable hostio-cache to save memory
+      v.customize [
+        "storagectl", :id, 
+        "--name", "SATA",
+        "--hostiocache", "off"
+      ]
     end
     core02.vm.provision "shell", inline: <<-SHELL
       #!/bin/sh
@@ -106,6 +118,13 @@ Vagrant.configure("2") do |config|
       v.customize ["modifyvm", :id, "--memory", 256]
       v.customize ["modifyvm", :id, "--name", "core03"]
       Vagrant::Util::Platform.linux? and v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
+      # https://www.virtualbox.org/manual/ch05.html#iocaching
+      # disable hostio-cache to save memory
+      v.customize [
+        "storagectl", :id, 
+        "--name", "SATA",
+        "--hostiocache", "off"
+      ]
     end
     core03.vm.provision "shell", inline: <<-SHELL
       #!/bin/sh
@@ -146,6 +165,13 @@ Vagrant.configure("2") do |config|
       v.customize ["modifyvm", :id, "--memory", 256]
       v.customize ["modifyvm", :id, "--name", "git2consul"]
       Vagrant::Util::Platform.linux? and v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
+      # https://www.virtualbox.org/manual/ch05.html#iocaching
+      # disable hostio-cache to save memory
+      v.customize [
+        "storagectl", :id, 
+        "--name", "SATA",
+        "--hostiocache", "off"
+      ]
     end
     git2consul.vm.provision "shell", inline: <<-SHELL
       #!/bin/sh
@@ -186,6 +212,13 @@ Vagrant.configure("2") do |config|
       v.customize ["modifyvm", :id, "--memory", 256]
       v.customize ["modifyvm", :id, "--name", "laptop"]
       Vagrant::Util::Platform.linux? and v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
+      # https://www.virtualbox.org/manual/ch05.html#iocaching
+      # disable hostio-cache to save memory
+      v.customize [
+        "storagectl", :id, 
+        "--name", "SATA",
+        "--hostiocache", "off"
+      ]
     end
 
     laptop.vm.provision "shell", inline: <<-SHELL
