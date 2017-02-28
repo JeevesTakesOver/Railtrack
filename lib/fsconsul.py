@@ -53,32 +53,13 @@ class FSconsulHost(lib.host.Host):
             private_key_filename=self.private_key
         ):
             add_usr_local_bin_to_path()
-            apt_install(packages=['git'])
 
-            with cd('/usr/local'):
-                if 'go' not in sudo('ls -l /usr/local/bin'):
-                    sudo('wget -c https://storage.googleapis.com/golang/'
-                         'go1.5.3.linux-amd64.tar.gz')
-                    sudo('tar xzf go1.5.3.linux-amd64.tar.gz')
-
-            if 'fsconsul' not in sudo('ls -l /usr/local/bin'):
-                git_clone('https://github.com/Cimpress-MCP/fsconsul.git',
-                          'fsconsul')
-                run('mkdir -p gopath')
-                run('mkdir -p bin')
-                with shell_env(
-                    PATH='$PATH:/usr/local/go/bin',
-                    GOPATH='/home/%s/gopath' % self.username,
-                    GOBIN='/home/%s/bin' % self.username
-                ):
-                    with cd('fsconsul'):
-                        run('go get -x github.com/mitchellh/gox')
-                        run('go get github.com/Sirupsen/logrus')
-                        run('go get github.com/armed/mkdirp')
-                        run('go get github.com/cimpress-mcp/gosecret/api')
-                        run('go get -x github.com/hashicorp/consul/api')
-                        run('go install .')
-                sudo('cp /home/%s/bin/fsconsul /usr/local/bin' % self.username)
+            with cd('/usr/local/bin'):
+                if 'fsconsul' not in sudo('ls'):
+                    sudo('wget -O fsconsul -c '
+                         'https://bintray.com/cimpress-mcp/Go/download_file?'
+                         'file_path=v0.6.5%2Flinux-amd64%2Ffsconsul')
+                    sudo('chmod 755 fsconsul')
 
     def deploy_init_fsconsul(self):
         """ installs the fsconsul init file """
