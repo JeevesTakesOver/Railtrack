@@ -69,6 +69,7 @@ class DNSSERVERServer(DNSSERVERHost):
 				 secret,
                  listen_ip,
                  primary_ip,
+                 extra_zone_entries,
                  ssh_credentials):
         """ Generates a DNSSERVERServer object
 
@@ -82,6 +83,7 @@ class DNSSERVERServer(DNSSERVERHost):
             string secret: rdnc.key
             string listen_ip: ip where the service is listening
             string primary_ip: ip for the master DNS server
+            string extra_zone_entries: extra host configuration for the zone
             object ssh_credentials: ssh credentials to login to the host
         """
         self.dnsserver_role = dnsserver_role
@@ -93,6 +95,7 @@ class DNSSERVERServer(DNSSERVERHost):
         self.secret = secret
         self.listen_ip = listen_ip
         self.primary_ip = primary_ip
+        self.extra_zone_entries = extra_zone_entries
         self.ssh_credentials = ssh_credentials
         DNSSERVERHost.__init__(self, ssh_credentials=ssh_credentials)
 
@@ -148,6 +151,7 @@ class DNSSERVERServer(DNSSERVERHost):
                     'reverse_zone': self.reverse_zone,
                     'ns1': self.ns1,
                     'ns2': self.ns2,
+                    'extra_zone_entries': self.extra_zone_entries,
                 }
             )
 

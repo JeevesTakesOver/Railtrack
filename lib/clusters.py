@@ -272,6 +272,7 @@ class DNSSERVERCluster(object):
 	                secret=v_node['secret'],
                     listen_ip=v_node['listen_ip'],
                     primary_ip=v_node['primary_ip'],
+                    extra_zone_entries=v_node['extra_zone_entries'],
                     ssh_credentials=lib.host.SshCredentials(
                         public_dns_name=v_node['public_dns_name'],
                         username=v_node['username'],
