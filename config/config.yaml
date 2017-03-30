@@ -212,6 +212,11 @@ dnsserver_servers:
   bind_secret: &bind_secret '7d5PudjS/DJ5N4KovSnmST4/Fy2hzTYYM0KuanjjFwdcF3phlBDI5jrLVDTDuIgHcDy1c8h4WCnPWyPxfXMK3g=='
   zone_name: &zone_name 'tinc-core-vpn'
   reverse_zone: &reverse_zone '0.254.169.in-addr.arpa' 
+  extra_zone_entries: &extra_zone_entries |
+    mesos-masters  IN      A     169.254.100.1 
+                   IN      A     169.254.100.2 
+                   IN      A     169.254.100.3 
+    *.service      IN      CNAME mesos-masters.tinc-core-vpn.
   servers: 
     node1: &dnsserver01
       <<: *core_network_01
@@ -224,6 +229,7 @@ dnsserver_servers:
       ns2: *core_network_02_tinc_ip
       primary_ip: *core_network_01_tinc_ip
       listen_ip: *core_network_01_tinc_ip
+      extra_zone_entries: *extra_zone_entries
 
     node2: &dnsserver02
       <<: *core_network_02
@@ -236,6 +242,8 @@ dnsserver_servers:
       ns2: *core_network_02_tinc_ip
       primary_ip: *core_network_01_tinc_ip
       listen_ip: *core_network_01_tinc_ip
+      extra_zone_entries: *extra_zone_entries
+
 
 dhcpd_servers:
   servers: 
