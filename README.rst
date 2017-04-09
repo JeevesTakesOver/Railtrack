@@ -1,4 +1,6 @@
-[![Stories in Ready](https://badge.waffle.io/Azulinho/Board.png?label=ready&title=Ready)](http://waffle.io/Azulinho/Board)
+.. image:: https://badge.waffle.io/Azulinho/Board.png?label=ready&title=Ready 
+ :target: https://waffle.io/Azulinho/Board 
+ :alt: 'Stories in Ready'
 
 
 =========
