@@ -1,3 +1,6 @@
+[![Stories in Ready](https://badge.waffle.io/Azulinho/Board.png?label=ready&title=Ready)](http://waffle.io/Azulinho/Board)
+
+
 =========
 Railtrack
 =========
