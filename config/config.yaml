@@ -253,7 +253,7 @@ dhcpd_servers:
       listen_ip: *core_network_01_tinc_ip
       domain_name: *zone_name
       nameservers: '169.254.0.1,169.254.0.2'
-      pool_range: '169.254.20.0 169.254.254.254'
+      pool_range: '169.254.100.1 169.254.100.254'
       secret: *bind_secret
       reverse_zone: *reverse_zone
       peer_address: *core_network_02_tinc_ip
@@ -271,7 +271,7 @@ dhcpd_servers:
       listen_ip: *core_network_02_tinc_ip
       domain_name: *zone_name
       nameservers: '169.254.0.1,169.254.0.2'
-      pool_range: '169.254.20.0 169.254.254.254' 
+      pool_range: '169.254.100.1 169.254.100.254' 
       secret: *bind_secret
       reverse_zone: *reverse_zone
       peer_address: *core_network_01_tinc_ip
