@@ -221,17 +221,14 @@ class DHCPdCluster(object):
         for k_node, v_node in self.cfg['dhcpd_servers']['servers'].items():
             self.dhcpd_nodes.append(
                 lib.dhcpd.DHCPdServer(
-                    dhcpd_role=v_node['dhcpd_role'],
                     listen_ip=v_node['listen_ip'],
                     domain_name=v_node['domain_name'],
                     nameservers=v_node['nameservers'],
                     pool_range=v_node['pool_range'],
                     secret=v_node['secret'],
                     reverse_zone=v_node['reverse_zone'],
-                    peer_address=v_node['peer_address'],
                     subnet=v_node['subnet'],
                     netmask=v_node['netmask'],
-                    failover_peer=v_node['failover_peer'],
                     primary_ip=v_node['primary_ip'],
                     listen_interface=v_node['listen_interface'],
                     ssh_credentials=lib.host.SshCredentials(
