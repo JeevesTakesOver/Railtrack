@@ -49,3 +49,4 @@ wheel==0.24.0
 wrapt==1.10.5
 jinja2
 pyBookshelf
+retrying
