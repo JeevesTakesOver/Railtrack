@@ -249,35 +249,14 @@ dhcpd_servers:
   servers: 
     node1: &dhcpdserver01
       <<: *dnsserver01
-      dhcpd_role: 'primary'
       listen_ip: *core_network_01_tinc_ip
       domain_name: *zone_name
       nameservers: '169.254.0.1,169.254.0.2'
       pool_range: '169.254.100.1 169.254.100.254'
       secret: *bind_secret
       reverse_zone: *reverse_zone
-      peer_address: *core_network_02_tinc_ip
       subnet: '169.254.0.0'
       netmask: '255.255.0.0'
-      failover_peer: 'tinc'
-      primary_ip: *core_network_01_tinc_ip
-      listen_interface: 'core-vpn'
-      ns1: *core_network_01_tinc_ip
-      ns2: *core_network_02_tinc_ip
-
-    node2: &dhcpdserver02
-      <<: *dnsserver02
-      dhcpd_role: 'secondary' 
-      listen_ip: *core_network_02_tinc_ip
-      domain_name: *zone_name
-      nameservers: '169.254.0.1,169.254.0.2'
-      pool_range: '169.254.100.1 169.254.100.254' 
-      secret: *bind_secret
-      reverse_zone: *reverse_zone
-      peer_address: *core_network_01_tinc_ip
-      subnet: '169.254.0.0'
-      netmask: '255.255.0.0'
-      failover_peer: 'tinc'
       primary_ip: *core_network_01_tinc_ip
       listen_interface: 'core-vpn'
       ns1: *core_network_01_tinc_ip
