@@ -62,48 +62,40 @@ class DHCPdHost(lib.host.Host):
 class DHCPdServer(DHCPdHost):
     """ An object representing the DHCPd Server service """
     def __init__(self,
-                 dhcpd_role,
                  listen_ip,
                  domain_name,
                  nameservers,
                  pool_range,
                  secret,
                  reverse_zone,
-                 peer_address,
                  subnet,
                  netmask,
-                 failover_peer,
                  primary_ip,
                  listen_interface,
                  ssh_credentials):
         """ Generates a DHCPdServer object
 
         params:
-            string dhcpd_role: either primary or secondary
             string listen_ip: which IP should DHCPd listen on
             string domain_name: domain name for the DHCP pool
             string nameservers: nameservers to provide to the client
             string pool_range: ip range pool
             string secret: shared key between primary and secondary
             string reverse_zone: reverse_zone name
-            string peer_address: IP address of the peer dhcpd server
             string subnet: subnet to offer leases
             string netmask: netmask for offers
             string primary_ip: IP address of the DHCPd master
             string listen_interface: which interface to serve DHCP requests
             object ssh_credentials: ssh credentials to login to the host
         """
-        self.dhcpd_role = dhcpd_role
         self.listen_ip = listen_ip
         self.domain_name = domain_name
         self.nameservers = nameservers
         self.pool_range = pool_range
         self.secret = secret
         self.reverse_zone = reverse_zone
-        self.peer_address = peer_address
         self.subnet = subnet
         self.netmask = netmask
-        self.failover_peer = failover_peer
         self.primary_ip = primary_ip
         self.listen_interface = listen_interface
         self.ssh_credentials = ssh_credentials
@@ -127,17 +119,14 @@ class DHCPdServer(DHCPdHost):
                 use_sudo=True,
                 use_jinja=True,
                 context={
-                    'dhcpd_role': self.dhcpd_role,
                     'listen_ip': self.listen_ip,
                     'domain_name': self.domain_name,
                     'nameservers': self.nameservers,
                     'pool_range': self.pool_range,
                     'secret': self.secret,
                     'reverse_zone': self.reverse_zone,
-                    'peer_address': self.peer_address,
                     'subnet': self.subnet,
                     'netmask': self.netmask,
-                    'failover_peer': self.failover_peer,
                     'primary_ip': self.primary_ip,
                     'listen_interface': self.listen_interface
                 }

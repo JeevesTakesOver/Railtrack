@@ -114,7 +114,8 @@ vagrant_acceptance_tests: ## runs acceptance tests on the 'laptop' box
 	vagrant ssh git2consul -- sudo systemctl status consul-client
 	vagrant ssh git2consul -- sudo systemctl status git2consul
 	vagrant ssh core01 -- sudo systemctl status isc-dhcp-server
-	vagrant ssh core02 -- sudo systemctl status isc-dhcp-server
+	vagrant ssh core01 -- sudo systemctl status bind9
+	vagrant ssh core02 -- sudo systemctl status bind9
 
 vagrant_reload: ## reloads all vagrant VMs
 	echo "running make vagrant_reload ..."
