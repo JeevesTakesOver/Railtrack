@@ -2,20 +2,6 @@ authoritative;                                       # server is authoritative
 use-host-decl-names on;
 one-lease-per-client on;
 
-failover peer "{{ failover_peer }}" {               # fail over configuration
-         {{ dhcpd_role }};                                   # This is the primary
-         address {{ listen_ip }};                   # primarys ip address
-         port 647;
-         peer address {{ peer_address }};           # peer's ip address
-         peer port 647;
-         max-response-delay 60;
-         max-unacked-updates 10;
-         mclt 3600;
-{% if dhcpd_role == 'primary' %}
-         split 128;
-{% endif %}
-         load balance max seconds 3;
-}
 
 subnet {{ subnet }} netmask {{ netmask }}            # zone to issue addresses from
 {
@@ -25,7 +11,6 @@ subnet {{ subnet }} netmask {{ netmask }}            # zone to issue addresses f
         allow unknown-clients;
 
         pool {
-                failover peer "{{ failover_peer }}";           # pool for dhcp leases with failover bootp not allowed 
                 deny dynamic bootp clients;         
                 range {{ pool_range }};
                 max-lease-time 300;
