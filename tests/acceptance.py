@@ -21,7 +21,16 @@ import lib.clusters
 import lib.git2consul
 
 from fabric.context_managers import settings, hide
-from fabric.api import sudo
+from fabric.api import sudo, env
+
+from retrying import retry
+
+env.abort_on_prompts = True
+env.colorize_errors = True
+env.disable_known_hosts = True
+env.parallel = True
+env.pool_size = 16
+env.warn_only = True
 
 
 def echo(func):
@@ -36,6 +45,7 @@ def echo(func):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_patches_were_installed_on(node):
 
     line = '0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded'
@@ -53,6 +63,7 @@ def test_that_patches_were_installed_on(node):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_cron_apt_is_installed_on(node):
 
     line = 'cron-apt'
@@ -70,6 +81,7 @@ def test_that_cron_apt_is_installed_on(node):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_tinc_binaries_were_installed_on(node):
 
     line = '/usr/sbin/tincd'
@@ -86,6 +98,7 @@ def test_that_tinc_binaries_were_installed_on(node):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_tinc_key_pairs_were_deployed_on(tinc_network):
 
     for tinc_node in tinc_network.tinc_nodes:
@@ -104,6 +117,7 @@ def test_that_tinc_key_pairs_were_deployed_on(tinc_network):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_tinc_conf_files_were_deployed_on(tinc_network):
 
     for tinc_node in tinc_network.tinc_nodes:
@@ -121,6 +135,7 @@ def test_that_tinc_conf_files_were_deployed_on(tinc_network):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_tinc_interface_files_were_deployed_on(tinc_network):
 
     for tinc_node in tinc_network.tinc_nodes:
@@ -139,6 +154,7 @@ def test_that_tinc_interface_files_were_deployed_on(tinc_network):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_tinc_nets_boot_files_were_deployed_on(tinc_network):
 
     for tinc_node in tinc_network.tinc_nodes:
@@ -155,6 +171,7 @@ def test_that_tinc_nets_boot_files_were_deployed_on(tinc_network):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_tinc_peers_host_files_were_deployed_on(tinc_network):
 
     for tinc_node in tinc_network.tinc_nodes:
@@ -173,6 +190,7 @@ def test_that_tinc_peers_host_files_were_deployed_on(tinc_network):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_tinc_is_running_on(node):
 
     with settings(
@@ -190,6 +208,7 @@ def test_that_tinc_is_running_on(node):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_fail2ban_is_running_on(node):
 
     with settings(
@@ -207,6 +226,7 @@ def test_that_fail2ban_is_running_on(node):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_tinc_peers_are_pingable_on(tinc_network):
 
     for tinc_node in tinc_network.tinc_nodes:
@@ -223,6 +243,7 @@ def test_that_tinc_peers_are_pingable_on(tinc_network):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_consul_binaries_were_installed_on(consul_node):
 
     line = '/usr/local/bin/consul'
@@ -238,6 +259,7 @@ def test_that_consul_binaries_were_installed_on(consul_node):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_consul_user_exists_on(consul_node):
 
     with settings(
@@ -251,6 +273,7 @@ def test_that_consul_user_exists_on(consul_node):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_consul_directories_exists_on(consul_node):
 
     with settings(
@@ -268,6 +291,7 @@ def test_that_consul_directories_exists_on(consul_node):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_consul_server_config_exists_on(consul_node):
 
     with settings(
@@ -282,6 +306,7 @@ def test_that_consul_server_config_exists_on(consul_node):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_consul_client_config_exists_on(consul_node):
 
     with settings(
@@ -296,6 +321,7 @@ def test_that_consul_client_config_exists_on(consul_node):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_consul_web_ui_files_exists_on(consul_node):
 
     with settings(
@@ -310,6 +336,7 @@ def test_that_consul_web_ui_files_exists_on(consul_node):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_consul_server_init_exists_on(consul_node):
 
     with settings(
@@ -324,6 +351,7 @@ def test_that_consul_server_init_exists_on(consul_node):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_consul_client_init_exists_on(consul_node):
 
     with settings(
@@ -338,6 +366,7 @@ def test_that_consul_client_init_exists_on(consul_node):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_consul_server_is_running_on(consul_node):
 
     with settings(
@@ -356,6 +385,7 @@ def test_that_consul_server_is_running_on(consul_node):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_consul_client_is_running_on(consul_node):
 
     with settings(
@@ -374,6 +404,7 @@ def test_that_consul_client_is_running_on(consul_node):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_consul_peers_are_reachable_on(consul_node):
 
     with settings(
@@ -389,6 +420,7 @@ def test_that_consul_peers_are_reachable_on(consul_node):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_fsconsul_service_is_running_on(consul_node):
 
     with settings(
@@ -407,6 +439,7 @@ def test_that_fsconsul_service_is_running_on(consul_node):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_fsconsul_init_exists_on(consul_node):
 
     with settings(
@@ -421,6 +454,7 @@ def test_that_fsconsul_init_exists_on(consul_node):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_fsconsul_binaries_were_installed_on(consul_node):
 
     line = 'fsconsul'
@@ -436,6 +470,7 @@ def test_that_fsconsul_binaries_were_installed_on(consul_node):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_git2consul_init_exists_on(git2consul):
 
     with settings(
@@ -450,6 +485,7 @@ def test_that_git2consul_init_exists_on(git2consul):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_git2consul_service_is_running_on(git2consul):
 
     with settings(
@@ -464,6 +500,7 @@ def test_that_git2consul_service_is_running_on(git2consul):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_dhcpd_binaries_were_installed_on(dhcpd_server):
 
     with settings(
@@ -478,13 +515,13 @@ def test_that_dhcpd_binaries_were_installed_on(dhcpd_server):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_dhcpd_server_is_running_on(dhcpd_node):
 
     with settings(
         hide('stdout', 'running'),
         host_string=dhcpd_node.host_string,
         private_key_filename=dhcpd_node.private_key,
-        warn_only=True
     ):
         print(" running on %s" % dhcpd_node.host_string)
 
@@ -493,6 +530,7 @@ def test_that_dhcpd_server_is_running_on(dhcpd_node):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_dhcpd_binaries_were_installed_on(dhcpd_node):
 
     with settings(
@@ -509,6 +547,8 @@ def test_that_dhcpd_binaries_were_installed_on(dhcpd_node):
         assert 'nsupdate' in cmd.stdout
 
 
+@echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_dhcpd_server_config_exists_on(dhcpd_node):
 
     with settings(
@@ -522,6 +562,8 @@ def test_that_dhcpd_server_config_exists_on(dhcpd_node):
         assert 'dhcpd.conf' in cmd.stdout
 
 
+@echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_dhcpd_server_init_exists_on(dhcpd_node):
 
     with settings(
@@ -536,6 +578,7 @@ def test_that_dhcpd_server_init_exists_on(dhcpd_node):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_dnsserver_binaries_were_installed_on(dnsserver_server):
 
     with settings(
@@ -550,13 +593,13 @@ def test_that_dnsserver_binaries_were_installed_on(dnsserver_server):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_dnsserver_server_is_running_on(dnsserver_node):
 
     with settings(
         hide('stdout', 'running'),
         host_string=dnsserver_node.host_string,
         private_key_filename=dnsserver_node.private_key,
-        warn_only=True
     ):
         print(" running on %s" % dnsserver_node.host_string)
 
@@ -565,6 +608,7 @@ def test_that_dnsserver_server_is_running_on(dnsserver_node):
 
 
 @echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_dnsserver_binaries_were_installed_on(dnsserver_node):
 
     line = 'named'
@@ -579,6 +623,8 @@ def test_that_dnsserver_binaries_were_installed_on(dnsserver_node):
         assert line in cmd.stdout
 
 
+@echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_dnsserver_server_config_exists_on(dnsserver_node):
 
     with settings(
@@ -593,6 +639,8 @@ def test_that_dnsserver_server_config_exists_on(dnsserver_node):
         assert '0.254.169.in-addr.arpa.hosts' in cmd.stdout
 
 
+@echo
+@retry(stop_max_attempt_number=3, wait_fixed=2000)
 def test_that_dnsserver_server_init_exists_on(dnsserver_node):
 
     with settings(
