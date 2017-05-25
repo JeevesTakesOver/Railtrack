@@ -18,20 +18,14 @@ buildPythonPackage {
   src = null;
   # When used as `nix-shell --pure`
   shellHook = ''
+  PID=$$
   unset http_proxy
   export GIT_SSL_CAINFO=/etc/ssl/certs/ca-bundle.crt
-  virtualenv --no-wheel --no-setuptools venv 
+  virtualenv --no-wheel --no-setuptools /tmp/$PID/venv 
   wget -c https://bootstrap.pypa.io/get-pip.py
-  venv/bin/python get-pip.py
-  venv/bin/pip install -r requirements.txt --no-use-wheel
-  export PATH=$PWD/venv/bin:$PATH
-  '';
-  # used when building environments
-  extraCmds = ''
-  unset http_proxy # otherwise downloads will fail ("nodtd.invalid")
-  export GIT_SSL_CAINFO=/etc/ssl/certs/ca-bundle.clr_white
-  virtualenv venv
-  venv/bin/pip install -r requirements.txt --no-use-wheel
-  export PATH=$PWD/venv/bin:$PATH
+  /tmp/$PID/venv/bin/python get-pip.py
+  /tmp/$PID/venv/bin/pip install -r requirements.txt --no-use-wheel
+  export PATH=/tmp/$PID/venv/bin:$PATH
+  ln -s /tmp/$PID/venv venv
   '';
 }

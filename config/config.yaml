@@ -83,7 +83,7 @@ roles:
         region: 'us-east-1'
         tinc_ip: &core_network_01_tinc_ip '169.254.0.1'
         public_ip_address: &core_network_01_public_ip_address '192.168.56.101'
-        public_dns_name: &core_network_01_public_dns_name 'core01'
+        public_dns_name: &core_network_01_public_dns_name '192.168.56.101' # use ip address on vagrant
         tinc_private_key: <%= ENV['TINC_KEY_FILENAME_CORE_NETWORK_01'] %>
         tinc_public_key: &core_network_01_tinc_public_key |
           -----BEGIN RSA PUBLIC KEY-----
@@ -106,7 +106,7 @@ roles:
         region: 'us-west-2'
         tinc_ip: &core_network_02_tinc_ip '169.254.0.2'
         public_ip_address: &core_network_02_public_ip_address '192.168.56.102'
-        public_dns_name: &core_network_02_public_dns_name 'core02'
+        public_dns_name: &core_network_02_public_dns_name '192.168.56.102' # use ip address on vagrant
         tinc_private_key: <%= ENV['TINC_KEY_FILENAME_CORE_NETWORK_02'] %>
         tinc_public_key: &core_network_02_tinc_public_key |
           -----BEGIN RSA PUBLIC KEY-----
@@ -129,7 +129,7 @@ roles:
         region: 'eu-west-1'
         tinc_ip: &core_network_03_tinc_ip '169.254.0.3'
         public_ip_address: &core_network_03_public_ip_address '192.168.56.103'
-        public_dns_name: &core_network_03_public_dns_name 'core03'
+        public_dns_name: &core_network_03_public_dns_name '192.168.56.103' # use ip address on vagrant
         tinc_private_key: <%= ENV['TINC_KEY_FILENAME_CORE_NETWORK_03'] %>
         tinc_public_key: &core_network_03_tinc_public_key |
           -----BEGIN RSA PUBLIC KEY-----
@@ -191,7 +191,7 @@ git2consul: &git2consul
   encrypt: *consul_encryption_key
   tinc_ip: '169.254.0.10'
   public_ip_address: '192.168.56.110'
-  public_dns_name:  'git2consul'
+  public_dns_name:  '192.168.56.110' # use ip address on vagrant
   tinc_private_key: <%= ENV['TINC_KEY_FILENAME_GIT2CONSUL'] %>
   tinc_public_key: |
     -----BEGIN RSA PUBLIC KEY-----

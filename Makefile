@@ -4,9 +4,14 @@ clean: ## cleanup VMs and virtualenv
 	# don't clean the virtualenv on nixos, we use nix-shell
 	grep -i nixos /etc/os-release >/dev/null 2>&1 || rm -rf venv
 
+.ONESHELL:
 venv: ## Creates a python virtualenv and installs python modules
 	echo "running make venv ..."
-	python -m virtualenv --python python2.7 venv ; . venv/bin/activate && pip install -r requirements.txt
+	PID=$$$$
+	python -m virtualenv --python python2.7 /tmp/$$PID/venv 
+	. /tmp/$$PID/venv/bin/activate 
+	pip install -r requirements.txt
+	ln -s /tmp/$$PID/venv venv
 
 up: ## vagrant up for the core vagrant boxes
 	echo "running make up ..."
