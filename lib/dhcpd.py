@@ -59,6 +59,19 @@ class DHCPdHost(lib.host.Host):
             apt_install(packages=['isc-dhcp-server'])
             apt_install(packages=['dnsutils'])
 
+            dhcpd_service_file = '/etc/systemd/system/isc-dhcp-server.service'
+
+            upload_template(
+                filename='isc-dhcp-server.service.j2',
+                template_dir='templates',
+                destination=dhcpd_service_file,
+                use_sudo=True,
+                use_jinja=True,
+            )
+
+            sudo('systemctl daemon-reload')
+
+
 class DHCPdServer(DHCPdHost):
     """ An object representing the DHCPd Server service """
     def __init__(self,
@@ -206,9 +219,6 @@ class DHCPdServer(DHCPdHost):
             host_string=self.host_string,
             private_key_filename=self.private_key,
         ):
-            systemd(
-                service='isc-dhcp-server',
-                start=True,
-                enabled=True,
-                restart=True
-            )
+            sudo('systemctl daemon-reload')
+            sudo('systemctl enable isc-dhcp-server')
+            sudo('systemctl restart isc-dhcp-server')

@@ -189,12 +189,18 @@ def step_03_deploy_consul_cluster():
 
     consul_cluster.consul_nodes[0].create_consul_bootstrap_config()
     consul_cluster.consul_nodes[0].start_bootstrap_cluster_process()
+    sleep_for_one_minute()
 
     for consul_node in consul_cluster.consul_nodes[1:]:
         consul_node.restart_consul_service()
         sleep_for_one_minute()
 
     consul_cluster.consul_nodes[0].finish_bootstrap_cluster_process()
+    sleep_for_one_minute()
+
+    for consul_node in consul_cluster.consul_nodes:
+        consul_node.restart_consul_service()
+        sleep_for_one_minute()
 
 
 @task

@@ -137,7 +137,9 @@ vagrant_reload: ## reloads all vagrant VMs
 	vagrant up git2consul --no-provision
 	sleep 60
 
+.ONESHELL:
 vagrant_test_cycle: ## runs a full acceptance test cycle using Vagrant
+	set -e
 	echo "running make vagrant_test_cycle ..."
 	make clean
 	# don't run make venv on nixos, we use nix-shell for that

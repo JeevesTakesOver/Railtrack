@@ -240,7 +240,7 @@ class ConsulServer(ConsulHost):
             host_string=self.host_string,
             private_key_filename=self.private_key,
         ):
-            sudo('service consul-server restart')
+            sudo('systemctl restart consul-server')
             sleep(30)
 
     def finish_bootstrap_cluster_process(self):
@@ -255,7 +255,7 @@ class ConsulServer(ConsulHost):
                 sudo("kill $( ps -ef | grep consul | grep -v grep | "
                      "awk '{ print $2 }') || echo")
 
-                sudo('service consul-server restart')
+                sudo('systemctl restart consul-server')
                 sudo('rm /etc/consul.d/bootstrapped.in_progress')
                 sudo('touch /etc/consul.d/bootstrapped.locked')
 
@@ -327,4 +327,4 @@ class ConsulClient(ConsulHost):
             host_string=self.host_string,
             private_key_filename=self.private_key,
         ):
-            sudo('service consul-client restart')
+            sudo('systemctl restart consul-client')
