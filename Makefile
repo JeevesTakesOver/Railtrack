@@ -8,9 +8,9 @@ clean: ## cleanup VMs and virtualenv
 venv: ## Creates a python virtualenv and installs python modules
 	echo "running make venv ..."
 	PID=$$$$
-	python -m virtualenv --python python2.7 /tmp/$$PID/venv 
+	python -m virtualenv --python python2.7 --quiet /tmp/$$PID/venv 
 	. /tmp/$$PID/venv/bin/activate 
-	pip install -r requirements.txt
+	pip install --quiet -r requirements.txt
 	ln -s /tmp/$$PID/venv venv
 
 up: ## vagrant up for the core vagrant boxes
