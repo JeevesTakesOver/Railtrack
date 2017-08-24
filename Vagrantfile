@@ -13,9 +13,9 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "core01" do |core01|
     # consume a local Vagrant image if available
-    if defined? CORE01_VM_BOX_URL 
+    if defined? ENV['CORE01_VM_BOX_URL']
         core01.vm.box = "RAIlTRACK_CORE01_VM"
-        core01.vm.box_url = CORE01_VM_BOX_URL
+        core01.vm.box_url = ENV['CORE01_VM_BOX_URL']
     else
         core01.vm.box = UPSTREAM_VM_BOX
     end
@@ -67,9 +67,9 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "core02" do |core02|
     # consume a local Vagrant image if available
-    if defined? CORE02_VM_BOX_URL 
+    if defined? ENV['CORE02_VM_BOX_URL']
         core02.vm.box = "RAIlTRACK_CORE02_VM"
-        core02.vm.box_url = CORE02_VM_BOX_URL
+        core02.vm.box_url = ENV['CORE02_VM_BOX_URL']
     else
         core02.vm.box = UPSTREAM_VM_BOX
     end
@@ -119,9 +119,9 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "core03" do |core03|
     # consume a local Vagrant image if available
-    if defined? CORE02_VM_BOX_URL 
-        core03.vm.box = "RAIlTRACK_CORE02_VM"
-        core03.vm.box_url = CORE02_VM_BOX_URL
+    if defined? ENV['CORE03_VM_BOX_URL']
+        core03.vm.box = "RAIlTRACK_CORE03_VM"
+        core03.vm.box_url = ENV['CORE03_VM_BOX_URL']
     else
         core03.vm.box = UPSTREAM_VM_BOX
     end
@@ -171,9 +171,9 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "git2consul" do |git2consul|
     # consume a local Vagrant image if available
-    if defined? GIT2CONSUL_VM_BOX_URL 
+    if defined? ENV['GIT2CONSUL_VM_BOX_URL']
         git2consul.vm.box = "RAIlTRACK_GIT2CONSUL_VM"
-        git2consul.vm.box_url = GIT2CONSUL_VM_BOX_URL
+        git2consul.vm.box_url = ENV['GIT2CONSUL_VM_BOX_URL']
     else
         git2consul.vm.box = UPSTREAM_VM_BOX
     end
@@ -223,9 +223,9 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "laptop" do |laptop|
     # consume a local Vagrant image if available
-    if defined? LAPTOP_VM_BOX_URL 
+    if defined? ENV['LAPTOP_VM_BOX_URL']
         laptop.vm.box = "RAIlTRACK_LAPTOP_VM"
-        laptop.vm.box_url = LAPTOP_VM_BOX_URL
+        laptop.vm.box_url = ENV['LAPTOP_VM_BOX_URL']
     else
         laptop.vm.box = UPSTREAM_VM_BOX
     end
