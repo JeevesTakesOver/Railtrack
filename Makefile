@@ -3,6 +3,8 @@ clean: ## cleanup VMs and virtualenv
 	vagrant destroy -f 
 	# don't clean the virtualenv on nixos, we use nix-shell
 	grep -i nixos /etc/os-release >/dev/null 2>&1 || rm -rf venv
+	# clean local VM boxes
+	rm -f *.box
 
 .ONESHELL:
 venv: ## Creates a python virtualenv and installs python modules
@@ -151,6 +153,33 @@ vagrant_test_cycle: ## runs a full acceptance test cycle using Vagrant
 	sleep 300
 	make acceptance_tests
 	make vagrant_acceptance_tests
+
+vagrant_package: ## packages the VMs locally
+	vagrant package core01 core01.box
+	vagrant package core02 core02.box
+	vagrant package core03 core03.box
+	vagrant package git2consul git2consul.box
+	vagrant package laptop laptop.box
+
+vagrant_upload: ## uploads local VMs images to S3
+	# https://github.com/minio/mc
+	wget -c https://dl.minio.io/client/mc/release/linux-amd64/mc
+	chmod +x mc
+	# SET MC_CONFIG_STRING to your S3 compatible endpoint
+	# minio http://192.168.1.51 BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
+	# s3 https://s3.amazonaws.com BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
+	# gcs  https://storage.googleapis.com BKIKJAA5BMMU2RHO6IBB V8f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v2
+	#
+	# SET MC_SERVICE to the name of the S3 endpoint 
+	# (minio/s3/gcs) as the example above
+	#
+	# SET MC_PATH to the S3 bucket folder path
+	./mc config host add $$MC_CONFIG_STRING
+	./mc cp $$MC_SERVICE core01.box $$MC_PATH/core01.box
+	./mc cp $$MC_SERVICE core02.box $$MC_PATH/core02.box
+	./mc cp $$MC_SERVICE core03.box $$MC_PATH/core03.box
+	./mc cp $$MC_SERVICE git2consul.box $$MC_PATH/git2consul.box
+	./mc cp $$MC_SERVICE laptop.box $$MC_PATH/laptop.box
 
 
 .PHONY: help
