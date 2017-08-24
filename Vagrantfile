@@ -13,9 +13,8 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "core01" do |core01|
     # consume a local Vagrant image if available
-    if defined? ENV['CORE01_VM_BOX_URL']
+    if defined? ENV['CORE01_VM_BOX']
         core01.vm.box = "RAIlTRACK_CORE01_VM"
-        core01.vm.box_url = ENV['CORE01_VM_BOX_URL']
     else
         core01.vm.box = UPSTREAM_VM_BOX
     end

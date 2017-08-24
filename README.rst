@@ -262,6 +262,7 @@ export LAPTOP_VM_BOX_URL=http://$MC_USERNAME:$MC_PASSWORD@$MC_FQDN/minio/$MC_PAT
 
 set -e
 
+nix-shell --run "set -e ; make vagrant_import_image"
 nix-shell --run "set -e ; make vagrant_test_cycle"
 nix-shell --run "set -e ; make vagrant_package"
 nix-shell --run "set -e ; make vagrant_upload"
