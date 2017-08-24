@@ -246,17 +246,19 @@ export TINC_KEY_FILENAME_GIT2CONSUL=key-pairs/git2consul.priv
 export CONFIG_YAML=config/config.yaml
 
 # S3 bucket containing baked vagrant images from previous builds
-export MC_URL="http://filestore.service.tinc-core-vpn"
-export MC_CONFIG_STRING="minio $MC_URL XXXXXXXXXXXXXXXXXXXX YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY S3v4"
+export MC_FQDN="filestore.service.tinc-core-vpn"
+export MC_USERNAME="XXXXXXXXXXXXX"
+export MC_PASSWORD="YYYYYYYYYYYYY"
+export MC_CONFIG_STRING="minio http://$MC_FQDN $MC_USERNAME $MC_PASSWORD S3v4"
 export MC_SERVICE="minio"
-export MC_PATH="/vagrant-boxes/"
+export MC_PATH="/vagrant-boxes"
 
 # tell Vagrantfile to consume my baked VMs from Minio
-export CORE01_VM_BOX_URL=$MC_URL/minio/$MC_PATH/core01.box
-export CORE02_VM_BOX_URL=$MC_URL/minio/$MC_PATH/core02.box
-export CORE03_VM_BOX_URL=$MC_URL/minio/$MC_PATH/core03.box
-export GIT2CONSUL_VM_BOX_URL=$MC_URL/minio/$MC_PATH/git2consul.box
-export LAPTOP_VM_BOX_URL=$MC_URL/minio/$MC_PATH/laptop.box
+export CORE01_VM_BOX_URL=http://$MC_USERNAME:$MC_PASSWORD@$MC_FQDN/minio/$MC_PATH/core01.box
+export CORE02_VM_BOX_URL=http://$MC_USERNAME:$MC_PASSWORD@$MC_FQDN/minio/$MC_PATH/core02.box
+export CORE03_VM_BOX_URL=http://$MC_USERNAME:$MC_PASSWORD@$MC_FQDN/minio/$MC_PATH/core03.box
+export GIT2CONSUL_VM_BOX_URL=http://$MC_USERNAME:$MC_PASSWORD@$MC_FQDN/minio/$MC_PATH/git2consul.box
+export LAPTOP_VM_BOX_URL=http://$MC_USERNAME:$MC_PASSWORD@$MC_FQDN/minio/$MC_PATH/laptop.box
 
 set -e
 
