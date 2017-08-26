@@ -155,11 +155,16 @@ vagrant_test_cycle: ## runs a full acceptance test cycle using Vagrant
 	make vagrant_acceptance_tests
 
 vagrant_package: ## packages the VMs locally
-	vagrant package core01 core01.box
-	vagrant package core02 core02.box
-	vagrant package core03 core03.box
-	vagrant package git2consul git2consul.box
-	vagrant package laptop laptop.box
+	vagrant package core01 
+	mv package.box core01.box
+	vagrant package core02 
+	mv package.box core02.box
+	vagrant package core03 
+	mv package.box core03.box
+	vagrant package git2consul 
+	mv package.box git2consul.box
+	vagrant package laptop 
+	mv package.box laptop.box
 
 vagrant_upload: ## uploads local VMs images to S3
 	# https://github.com/minio/mc
