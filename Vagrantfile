@@ -1,6 +1,9 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+# https://github.com/chef/bento/issues/577#issuecomment-215133141
+UPSTREAM_VM_BOX = 'gbarbieru/xenial'
+
 Vagrant.configure("2") do |config|
 
   config.hostmanager.enabled = true
@@ -9,8 +12,12 @@ Vagrant.configure("2") do |config|
   config.hostmanager.include_offline = true
 
   config.vm.define "core01" do |core01|
-    # https://github.com/chef/bento/issues/577#issuecomment-215133141
-    core01.vm.box = "gbarbieru/xenial"
+    # consume a local Vagrant image if available
+    if ENV.has_key?('CORE01_VM_BOX_URL')
+        core01.vm.box = "RAILTRACK_CORE01_VM"
+    else
+        core01.vm.box = UPSTREAM_VM_BOX
+    end
     core01.vm.hostname = 'core01'
     core01.vm.network :private_network, ip: "192.168.56.101"
     core01.ssh.insert_key = false
@@ -58,8 +65,12 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define "core02" do |core02|
-    # https://github.com/chef/bento/issues/577#issuecomment-215133141
-    core02.vm.box = "gbarbieru/xenial"
+    # consume a local Vagrant image if available
+    if ENV.has_key?('CORE02_VM_BOX_URL')
+        core02.vm.box = "RAILTRACK_CORE02_VM"
+    else
+        core02.vm.box = UPSTREAM_VM_BOX
+    end
     core02.vm.hostname = 'core02'
 
     core02.vm.network :private_network, ip: "192.168.56.102"
@@ -105,8 +116,12 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define "core03" do |core03|
-    # https://github.com/chef/bento/issues/577#issuecomment-215133141
-    core03.vm.box = "gbarbieru/xenial"
+    # consume a local Vagrant image if available
+    if ENV.has_key?('CORE03_VM_BOX_URL')
+        core03.vm.box = "RAILTRACK_CORE03_VM"
+    else
+        core03.vm.box = UPSTREAM_VM_BOX
+    end
     core03.vm.hostname = 'core03'
 
     core03.vm.network :private_network, ip: "192.168.56.103"
@@ -152,8 +167,12 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define "git2consul" do |git2consul|
-    # https://github.com/chef/bento/issues/577#issuecomment-215133141
-    git2consul.vm.box = "gbarbieru/xenial"
+    # consume a local Vagrant image if available
+    if ENV.has_key?('GIT2CONSUL_VM_BOX_URL')
+        git2consul.vm.box = "RAILTRACK_GIT2CONSUL_VM"
+    else
+        git2consul.vm.box = UPSTREAM_VM_BOX
+    end
     git2consul.vm.hostname = 'git2consul'
 
     git2consul.vm.network :private_network, ip: "192.168.56.110"
@@ -199,8 +218,12 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define "laptop" do |laptop|
-    # https://github.com/chef/bento/issues/577#issuecomment-215133141
-    laptop.vm.box = "gbarbieru/xenial"
+    # consume a local Vagrant image if available
+    if ENV.has_key?('LAPTOP_VM_BOX_URL')
+        laptop.vm.box = "RAILTRACK_LAPTOP_VM"
+    else
+        laptop.vm.box = UPSTREAM_VM_BOX
+    end
     laptop.vm.hostname = 'laptop'
 
     laptop.vm.network :private_network, ip: "192.168.56.200"

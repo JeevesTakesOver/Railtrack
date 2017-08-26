@@ -3,6 +3,8 @@ clean: ## cleanup VMs and virtualenv
 	vagrant destroy -f 
 	# don't clean the virtualenv on nixos, we use nix-shell
 	grep -i nixos /etc/os-release >/dev/null 2>&1 || rm -rf venv
+	# clean local VM boxes
+	rm -f *.box
 
 .ONESHELL:
 venv: ## Creates a python virtualenv and installs python modules
@@ -151,6 +153,64 @@ vagrant_test_cycle: ## runs a full acceptance test cycle using Vagrant
 	sleep 300
 	make acceptance_tests
 	make vagrant_acceptance_tests
+
+vagrant_package: ## packages the VMs locally
+	vagrant package core01 
+	mv package.box core01.box
+	vagrant package core02 
+	mv package.box core02.box
+	vagrant package core03 
+	mv package.box core03.box
+	vagrant package git2consul 
+	mv package.box git2consul.box
+	vagrant package laptop 
+	mv package.box laptop.box
+
+vagrant_upload: ## uploads local VMs images to S3
+	# https://github.com/minio/mc
+	wget -c https://dl.minio.io/client/mc/release/linux-amd64/mc
+	chmod +x mc
+	# SET MC_CONFIG_STRING to your S3 compatible endpoint
+	# minio http://192.168.1.51 BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
+	# s3 https://s3.amazonaws.com BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
+	# gcs  https://storage.googleapis.com BKIKJAA5BMMU2RHO6IBB V8f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v2
+	#
+	# SET MC_SERVICE to the name of the S3 endpoint 
+	# (minio/s3/gcs) as the example above
+	#
+	# SET MC_PATH to the S3 bucket folder path
+	./mc config host add $$MC_CONFIG_STRING
+	./mc cp core01.box $MC_SERVICE/$$MC_PATH/core01.box
+	./mc cp core02.box $MC_SERVICE/$$MC_PATH/core02.box
+	./mc cp core03.box $MC_SERVICE/$$MC_PATH/core03.box
+	./mc cp git2consul.box $MC_SERVICE/$$MC_PATH/git2consul.box
+	./mc cp laptop.box $MC_SERVICE/$$MC_PATH/laptop.box
+
+vagrant_import_image: ## imports a vagrant box image
+	# https://github.com/minio/mc
+	wget -c https://dl.minio.io/client/mc/release/linux-amd64/mc
+	chmod +x mc
+	# SET MC_CONFIG_STRING to your S3 compatible endpoint
+	# minio http://192.168.1.51 BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
+	# s3 https://s3.amazonaws.com BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
+	# gcs  https://storage.googleapis.com BKIKJAA5BMMU2RHO6IBB V8f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v2
+	#
+	# SET MC_SERVICE to the name of the S3 endpoint 
+	# (minio/s3/gcs) as the example above
+	#
+	# SET MC_PATH to the S3 bucket folder path
+	./mc config host add $$MC_CONFIG_STRING
+	./mc cp $$MC_SERVICE/$$MC_PATH/core01.box core01.box
+	./mc cp $$MC_SERVICE/$$MC_PATH/core02.box core02.box
+	./mc cp $$MC_SERVICE/$$MC_PATH/core03.box core03.box
+	./mc cp $$MC_SERVICE/$$MC_PATH/git2consul.box git2consul.box
+	./mc cp $$MC_SERVICE/$$MC_PATH/laptop.box laptop.box
+	vagrant box add RAILTRACK_CORE01_VM core01.box -f
+	vagrant box add RAILTRACK_CORE02_VM core02.box -f
+	vagrant box add RAILTRACK_CORE03_VM core03.box -f 
+	vagrant box add RAILTRACK_GIT2CONSUL_VM git2consul.box -f
+	vagrant box add RAILTRACK_LAPTOP_VM laptop.box -f
+	rm -f *.box
 
 
 .PHONY: help
