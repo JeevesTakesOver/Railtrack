@@ -24,7 +24,7 @@ stdenv.mkDerivation  {
    # set SOURCE_DATE_EPOCH so that we can use python wheels
    SOURCE_DATE_EPOCH=$(date +%s)
   virtualenv --no-setuptools --clear --quiet /tmp/$PID/venv 
-  wget -c https://bootstrap.pypa.io/get-pip.py
+  wget -q -c https://bootstrap.pypa.io/get-pip.py
   /tmp/$PID/venv/bin/python get-pip.py
   /tmp/$PID/venv/bin/pip install --quiet -r requirements.txt 
   export PATH=/tmp/$PID/venv/bin:$PATH
