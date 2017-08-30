@@ -22,6 +22,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import lib.clusters
 import lib.git2consul
 import lib.mycookbooks
+from time import sleep
 from tests.acceptance import (
     test_that_consul_binaries_were_installed_on,
     test_that_consul_client_config_exists_on,
@@ -60,7 +61,7 @@ from tests.acceptance import (
     test_that_dnsserver_server_init_exists_on,
 )
 
-from fabric.api import task, env, execute
+from fabric.api import task, env, execute, local
 
 from bookshelf.api_v1 import (sleep_for_one_minute)
 
@@ -370,6 +371,139 @@ def acceptance_tests():
         test_that_fail2ban_is_running_on(node)
 
 
+@task
+def clean():
+    log_green('running clean')
+    local('vagrant destroy -f', capture=True)
+    local('rm -f *.box', capture=True)
+
+
+@task
+def vagrant_up():
+    log_green('running vagrant_up')
+    for vm in ['core01', 'core02', 'core03', 'git2consul']:
+        local('vagrant up %s --no-provision' % vm, capture=True)
+        local('vagrant ssh %s -- sudo systemctl disable apt-daily.service' % vm,
+              capture=True)
+        local('vagrant ssh %s -- sudo systemctl disable apt-daily.timer' % vm,
+              capture=True)
+        local('vagrant halt %s' % vm, capture=True)
+        local('vagrant up %s --no-provision' % vm, capture=True)
+        local('vagrant provision %s' % vm, capture=True)
+
+@task
+def vagrant_up_laptop():
+    log_green('running vagrant_up_laptop')
+    local('vagrant up laptop --no-provision', capture=True)
+    local('vagrant ssh laptop -- sudo systemctl disable apt-daily.service',
+            capture=True)
+    local('vagrant ssh laptop -- sudo systemctl disable apt-daily.timer',
+            capture=True)
+    local('vagrant halt laptop', capture=True)
+    local('vagrant up laptop --no-provision', capture=True)
+    local('vagrant provision laptop', capture=True)
+    # vagrant provision will remove resolvconf and dnsmasq
+    # which require a reboot of the VM
+    local('vagrant halt laptop', capture=True)
+    local('vagrant up laptop --no-provision', capture=True)
+
+@task
+def vagrant_acceptance_tests():
+    log_green('running vagrant_acceptance_tests')
+    for ip in ['169.254.0.1', '169.254.0.2', '169.254.0.3', '169.254.0.10']:
+        local('vagrant ssh laptop -- ping -c 1 -w 20 %s' %ip, capture=True)
+
+    local('vagrant ssh laptop -- /vagrant/laptop/tests/test-dns',
+            capture=True)
+
+    for vm in ['core01', 'core02', 'core03']:
+        for svc in ['tinc', 'consul-server', 'fsconsul']:
+            local('vagrant ssh %s -- sudo systemctl status %s' % (vm, svc),
+                capture=True)
+
+    for svc in ['tinc', 'consul-client', 'git2consul']:
+        local('vagrant ssh git2consul -- sudo systemctl status %s' % svc,
+            capture=True)
+
+    local('vagrant ssh core01 -- sudo systemctl status isc-dhcp-server',
+          capture=True)
+    for vm in ['core01', 'core02']:
+        local('vagrant ssh %s -- sudo systemctl status bind9' % vm,
+              capture=True)
+
+@task
+def vagrant_reload():
+    log_green('running vagrant_reload')
+    for vm in ['core01', 'core02', 'core03', 'git2consul']:
+        local('vagrant halt %s' % vm, capture=True)
+        local('vagrant up %s --no-provision' % vm, capture=True)
+        sleep(60)
+
+@task
+def vagrant_test_cycle():
+    log_green('running vagrant_test_cycle')
+    execute(clean)
+    execute(vagrant_up)
+    execute(vagrant_reload)
+    execute(it)
+    sleep(300) # give enough time for DHCP do its business
+    execute(vagrant_up_laptop)
+    execute(acceptance_tests)
+    execute(vagrant_acceptance_tests)
+
+@task
+def vagrant_package():
+    log_green('running vagrant_package')
+    for vm in ['core01', 'core02', 'core03', 'git2consul', 'laptop']:
+        local('vagrant package %s' % vm, capture=True)
+        local('mv package.box %s.box' % vm, capture=True)
+
+@task
+def vagrant_upload():
+    log_green('running vagrant_upload')
+    # https://github.com/minio/mc
+    local('wget -c https://dl.minio.io/client/mc/release/linux-amd64/mc')
+    local('chmod +x mc')
+    # SET MC_CONFIG_STRING to your S3 compatible endpoint
+    # minio http://192.168.1.51 BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
+    # s3 https://s3.amazonaws.com BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
+    # gcs  https://storage.googleapis.com BKIKJAA5BMMU2RHO6IBB V8f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v2
+    #
+    # SET MC_SERVICE to the name of the S3 endpoint
+    # (minio/s3/gcs) as the example above
+    #
+    # SET MC_PATH to the S3 bucket folder path
+    local('./mc config host add %s' % os.environ['MC_CONFIG_STRING'] )
+    for vm in ['core01', 'core02', 'core03', 'git2consul', 'laptop']:
+        local('./mc cp %s.box %s/%s/%s.box' % (
+            vm, os.environ['MC_SERVICE'], os.environ['MC_PATH'], vm
+        ) , capture=True)
+
+@task
+def vagrant_import_image():
+    log_green('running vagrant_import_image')
+    # https://github.com/minio/mc
+    local('wget -c https://dl.minio.io/client/mc/release/linux-amd64/mc')
+    local('chmod +x mc')
+    # SET MC_CONFIG_STRING to your S3 compatible endpoint
+    # minio http://192.168.1.51 BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
+    # s3 https://s3.amazonaws.com BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
+    # gcs  https://storage.googleapis.com BKIKJAA5BMMU2RHO6IBB V8f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v2
+    #
+    # SET MC_SERVICE to the name of the S3 endpoint
+    # (minio/s3/gcs) as the example above
+    #
+    # SET MC_PATH to the S3 bucket folder path
+    local('./mc config host add %s' % os.environ['MC_CONFIG_STRING'] )
+    for vm in ['core01', 'core02', 'core03', 'git2consul', 'laptop']:
+        local('./mc cp %s/%s/%s.box %s.box' % (
+            os.environ['MC_SERVICE'], os.environ['MC_PATH'], vm, vm
+        ) , capture=True)
+        local('vagrant box add RAILTRACK_%s_VM %s.box -f' % (vm.upper(), vm) )
+    local('rm -f *.box')
+
+
+
 def get_consul_encryption_key():
     return cfg['consul']['encrypt']
 
@@ -392,3 +526,4 @@ env.user = cfg['ec2_common']['username']
 env.key_filename = cfg['ec2_common']['key_filename']
 env.connection_attempts = 10
 env.timeout = 30
+env.warn_only = False
