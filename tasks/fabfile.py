@@ -67,6 +67,44 @@ from bookshelf.api_v1 import (sleep_for_one_minute)
 
 from bookshelf.api_v2.ec2 import (connect_to_ec2, create_server_ec2)
 from bookshelf.api_v2.logging_helpers import log_green
+from retrying import retry
+from functools import partial
+import logging
+
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger('retry')
+
+
+# Define Exception class for retry
+class RetryException(Exception):
+    u_str = "Exception ({}) raised after {} tries."
+
+    def __init__(self, exp, max_retry):
+        self.exp = exp
+        self.max_retry = max_retry
+    def __unicode__(self):
+        return self.u_str.format(self.exp, self.max_retry)
+    def __str__(self):
+        return self.__unicode__()
+
+
+# Define retry util function
+def retry_func(func, max_retry=10):
+    """
+    @param func: The function that needs to be retry
+    @param max_retry: Maximum retry of `func` function, default is `10`
+    @return: func
+    @raise: RetryException if retries exceeded than max_retry
+    """
+    for retry in range(1, max_retry + 1):
+        try:
+            return func()
+        except Exception, e:
+            logger.info('Failed to call {}, in retry({}/{})'.format(func.func,
+                                                           retry, max_retry))
+    else:
+        raise RetryException(e, max_retry)
 
 
 @task
