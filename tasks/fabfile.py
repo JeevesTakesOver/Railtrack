@@ -438,7 +438,6 @@ def vagrant_up():
                 )
             except RetryException, e:
                 print(e)
-                sys.exit(1)
 
 
 @task
@@ -465,7 +464,6 @@ def vagrant_up_laptop():
             )
         except RetryException, e:
             print(e)
-            sys.exit(1)
 
 
 @task
@@ -510,7 +508,6 @@ def vagrant_reload():
                 )
             except RetryException, e:
                 print(e)
-                sys.exit(1)
 
         sleep(60)
 
