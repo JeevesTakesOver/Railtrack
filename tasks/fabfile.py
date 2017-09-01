@@ -68,43 +68,6 @@ from bookshelf.api_v1 import (sleep_for_one_minute)
 from bookshelf.api_v2.ec2 import (connect_to_ec2, create_server_ec2)
 from bookshelf.api_v2.logging_helpers import log_green
 from retrying import retry
-from functools import partial
-import logging
-
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('retry')
-
-
-# Define Exception class for retry
-class RetryException(Exception):
-    u_str = "Exception ({}) raised after {} tries."
-
-    def __init__(self, exp, max_retry):
-        self.exp = exp
-        self.max_retry = max_retry
-    def __unicode__(self):
-        return self.u_str.format(self.exp, self.max_retry)
-    def __str__(self):
-        return self.__unicode__()
-
-
-# Define retry util function
-def retry_func(func, max_retry=10):
-    """
-    @param func: The function that needs to be retry
-    @param max_retry: Maximum retry of `func` function, default is `10`
-    @return: func
-    @raise: RetryException if retries exceeded than max_retry
-    """
-    for retry in range(1, max_retry + 1):
-        try:
-            return func()
-        except Exception, e:
-            logger.info('Failed to call {}, in retry({}/{})'.format(func.func,
-                                                           retry, max_retry))
-    else:
-        raise RetryException(e, max_retry)
 
 
 @task
@@ -420,50 +383,29 @@ def clean():
 def vagrant_up():
     log_green('running vagrant_up')
     for vm in ['core01', 'core02', 'core03', 'git2consul']:
-        steps = [
-            'vagrant up %s --no-provision' % vm,
-            'vagrant ssh %s -- sudo systemctl disable apt-daily.service' % vm,
-            'vagrant ssh %s -- sudo systemctl disable apt-daily.timer' % vm,
-            'vagrant halt %s' % vm,
-            'vagrant up %s --no-provision' % vm,
-            'vagrant provision %s' % vm
-        ]
+        vagrant_up_with_retry(vm)
+        vagrant_run_with_retry(vm, 'sudo systemctl disable apt-daily.service')
+        vagrant_run_with_retry(vm, 'sudo systemctl disable apt-daily.timer')
+        vagrant_halt_with_retry(vm)
+        vagrant_up_with_retry(vm)
+        vagrant_provision_with_retry(vm)
 
-        for step in steps:
-            try:
-                retry_func(
-                    partial(
-                        local, step, capture=True
-                    ), max_retry=3
-                )
-            except RetryException, e:
-                print(e)
 
 
 @task
 def vagrant_up_laptop():
     log_green('running vagrant_up_laptop')
-    steps = [
-        'vagrant up laptop --no-provision',
-        'vagrant ssh laptop -- sudo systemctl disable apt-daily.service',
-        'vagrant ssh laptop -- sudo systemctl disable apt-daily.timer',
-        'vagrant halt laptop',
-        'vagrant up laptop --no-provision',
-        'vagrant provision laptop',
-        # vagrant provision will remove resolvconf and dnsmasq
-        # which require a reboot of the VM
-        'vagrant halt laptop',
-        'vagrant up laptop --no-provision',
-    ]
-    for step in steps:
-        try:
-            retry_func(
-                partial(
-                    local, step, capture=True
-                ), max_retry=3
-            )
-        except RetryException, e:
-            print(e)
+    vm = 'laptop'
+    vagrant_up_with_retry(vm)
+    vagrant_run_with_retry(vm, 'sudo systemctl disable apt-daily.service')
+    vagrant_run_with_retry(vm, 'sudo systemctl disable apt-daily.timer')
+    vagrant_halt_with_retry(vm)
+    vagrant_up_with_retry(vm)
+    vagrant_provision_with_retry(vm)
+    # vagrant provision will remove resolvconf and dnsmasq
+    # which require a reboot of the VM
+    vagrant_halt_with_retry(vm)
+    vagrant_up_with_retry(vm)
 
 
 @task
@@ -494,21 +436,8 @@ def vagrant_acceptance_tests():
 def vagrant_reload():
     log_green('running vagrant_reload')
     for vm in ['core01', 'core02', 'core03', 'git2consul']:
-        steps = [
-            'vagrant halt %s' % vm,
-            'vagrant up %s --no-provision' % vm
-        ]
-
-        for step in steps:
-            try:
-                retry_func(
-                    partial(
-                        local, step, capture=True
-                    ), max_retry=3
-                )
-            except RetryException, e:
-                print(e)
-
+        vagrant_halt_with_retry(vm)
+        vagrant_up_with_retry(vm)
         sleep(60)
 
 @task
@@ -577,6 +506,23 @@ def vagrant_import_image():
 
 def get_consul_encryption_key():
     return cfg['consul']['encrypt']
+
+@retry(stop_max_attempt_number=3, wait_fixed=10000)
+def vagrant_up_with_retry(vm):
+    local('vagrant up %s --no_provision' % vm)
+
+@retry(stop_max_attempt_number=3, wait_fixed=10000)
+def vagrant_run_with_retry(vm, command):
+    local('vagrant ssh %s -- %s' % (vm, command))
+
+@retry(stop_max_attempt_number=3, wait_fixed=10000)
+def vagrant_halt_with_retry(vm):
+    local('vagrant halt %s' % vm)
+
+@retry(stop_max_attempt_number=3, wait_fixed=10000)
+def vagrant_provision_with_retry(vm):
+    local('vagrant provision %s' % vm)
+
 
 """
     ___main___
