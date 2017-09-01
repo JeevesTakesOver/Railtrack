@@ -509,7 +509,7 @@ def get_consul_encryption_key():
 
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
 def vagrant_up_with_retry(vm):
-    local('vagrant up %s --no_provision' % vm)
+    local('vagrant up %s --no-provision' % vm)
 
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
 def vagrant_run_with_retry(vm, command):
