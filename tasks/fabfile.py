@@ -420,30 +420,53 @@ def clean():
 def vagrant_up():
     log_green('running vagrant_up')
     for vm in ['core01', 'core02', 'core03', 'git2consul']:
-        local('vagrant up %s --no-provision' % vm, capture=True)
-        local('vagrant ssh %s -- sudo systemctl disable apt-daily.service' % vm,
-              capture=True)
-        local('vagrant ssh %s -- sudo systemctl disable apt-daily.timer' % vm,
-              capture=True)
-        local('vagrant halt %s' % vm, capture=True)
-        local('vagrant up %s --no-provision' % vm, capture=True)
-        local('vagrant provision %s' % vm, capture=True)
+        steps = [
+            'vagrant up %s --no-provision' % vm,
+            'vagrant ssh %s -- sudo systemctl disable apt-daily.service' % vm,
+            'vagrant ssh %s -- sudo systemctl disable apt-daily.timer' % vm,
+            'vagrant halt %s' % vm,
+            'vagrant up %s --no-provision' % vm,
+            'vagrant provision %s' % vm
+        ]
+
+        for step in steps:
+            try:
+                retry_func(
+                    partial(
+                        local, step, capture=True
+                    ), max_retry=3
+                )
+            except RetryException, e:
+                print(e)
+                sys.exit(1)
+
 
 @task
 def vagrant_up_laptop():
     log_green('running vagrant_up_laptop')
-    local('vagrant up laptop --no-provision', capture=True)
-    local('vagrant ssh laptop -- sudo systemctl disable apt-daily.service',
-            capture=True)
-    local('vagrant ssh laptop -- sudo systemctl disable apt-daily.timer',
-            capture=True)
-    local('vagrant halt laptop', capture=True)
-    local('vagrant up laptop --no-provision', capture=True)
-    local('vagrant provision laptop', capture=True)
-    # vagrant provision will remove resolvconf and dnsmasq
-    # which require a reboot of the VM
-    local('vagrant halt laptop', capture=True)
-    local('vagrant up laptop --no-provision', capture=True)
+    steps = [
+        'vagrant up laptop --no-provision',
+        'vagrant ssh laptop -- sudo systemctl disable apt-daily.service',
+        'vagrant ssh laptop -- sudo systemctl disable apt-daily.timer',
+        'vagrant halt laptop',
+        'vagrant up laptop --no-provision',
+        'vagrant provision laptop',
+        # vagrant provision will remove resolvconf and dnsmasq
+        # which require a reboot of the VM
+        'vagrant halt laptop',
+        'vagrant up laptop --no-provision',
+    ]
+    for step in steps:
+        try:
+            retry_func(
+                partial(
+                    local, step, capture=True
+                ), max_retry=3
+            )
+        except RetryException, e:
+            print(e)
+            sys.exit(1)
+
 
 @task
 def vagrant_acceptance_tests():
@@ -473,8 +496,22 @@ def vagrant_acceptance_tests():
 def vagrant_reload():
     log_green('running vagrant_reload')
     for vm in ['core01', 'core02', 'core03', 'git2consul']:
-        local('vagrant halt %s' % vm, capture=True)
-        local('vagrant up %s --no-provision' % vm, capture=True)
+        steps = [
+            'vagrant halt %s' % vm,
+            'vagrant up %s --no-provision' % vm
+        ]
+
+        for step in steps:
+            try:
+                retry_func(
+                    partial(
+                        local, step, capture=True
+                    ), max_retry=3
+                )
+            except RetryException, e:
+                print(e)
+                sys.exit(1)
+
         sleep(60)
 
 @task
@@ -539,7 +576,6 @@ def vagrant_import_image():
         ) , capture=True)
         local('vagrant box add RAILTRACK_%s_VM %s.box -f' % (vm.upper(), vm) )
     local('rm -f *.box')
-
 
 
 def get_consul_encryption_key():
