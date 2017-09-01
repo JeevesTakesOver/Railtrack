@@ -558,7 +558,7 @@ def vagrant_upload():
 def vagrant_import_image():
     log_green('running vagrant_import_image')
     # https://github.com/minio/mc
-    local('wget -c https://dl.minio.io/client/mc/release/linux-amd64/mc')
+    local('wget -q -c https://dl.minio.io/client/mc/release/linux-amd64/mc')
     local('chmod +x mc')
     # SET MC_CONFIG_STRING to your S3 compatible endpoint
     # minio http://192.168.1.51 BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
