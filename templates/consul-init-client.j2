@@ -1,16 +1,19 @@
 [Unit]
 Description=Consul Client
 After=network.target tinc.service
+Requires=tinc.service
 
 [Service]
 User=consul
 Group=consul
-ExecStart=/usr/local/bin/consul agent -config-dir /etc/consul.d/client -bind {{ node_ip }}
+# allow 30 seconds for tinc to acquire an ip address
+ExecStart=/bin/sh -ec "sleep 30 ; /usr/local/bin/consul agent -config-dir /etc/consul.d/client -bind {{ node_ip }}"
 ExecReload=/bin/kill -HUP $MAINPID
 ExecStop=/bin/kill $MAINPID
 KillMode=process
 Restart=always
 RestartSec=5
+TimeoutStartSec=60
 
 
 [Install]
