@@ -1,2 +1,4 @@
 #!/bin/sh
-ifconfig $INTERFACE down
+PATH=/run/current-system/sw/bin:/run/current-system/sw/sbin:$PATH
+
+dhclient -4 -nw -v $INTERFACE -cf /etc/tinc/core-vpn/dhclient.conf -r
