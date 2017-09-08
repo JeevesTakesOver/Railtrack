@@ -114,6 +114,7 @@ class DNSSERVERServer(DNSSERVERHost):
                 destination=DNSSERVER_named_conf_options_file,
                 use_sudo=True,
                 use_jinja=True,
+                backup=False,
                 context={
                     'listen_ip': self.listen_ip
                 }
@@ -126,6 +127,7 @@ class DNSSERVERServer(DNSSERVERHost):
                 destination=DNSSERVER_named_conf_file,
                 use_sudo=True,
                 use_jinja=True,
+                backup=False,
                 context={
                     'dnsserver_role': self.dnsserver_role,
                     'allow_transfer': self.allow_transfer,
@@ -144,6 +146,7 @@ class DNSSERVERServer(DNSSERVERHost):
                 destination=DNSSERVER_hosts_file,
                 use_sudo=True,
                 use_jinja=True,
+                backup=False,
                 context={
                     'dnsserver_role': self.dnsserver_role,
                     'zone_name': self.zone_name,
@@ -163,6 +166,7 @@ class DNSSERVERServer(DNSSERVERHost):
                 destination=DNSSERVER_reverse_file,
                 use_sudo=True,
                 use_jinja=True,
+                backup=False,
                 context={
                     'dnsserver_role': self.dnsserver_role,
                     'zone_name': self.zone_name,
@@ -181,6 +185,7 @@ class DNSSERVERServer(DNSSERVERHost):
                 destination=DNSSERVER_key_file,
                 use_sudo=True,
                 use_jinja=True,
+                backup=False,
                 context={
                     'secret': self.secret
                 }

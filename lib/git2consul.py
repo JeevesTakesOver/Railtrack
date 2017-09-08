@@ -133,6 +133,7 @@ class Git2ConsulService(Git2ConsulHost,
                 destination=git2consul_bootstrap_file,
                 use_sudo=True,
                 use_jinja=True,
+                backup=False,
                 context={
                     'service_name': self.service_name,
                     'git_url': self.git_url,

@@ -78,6 +78,7 @@ class FSconsulHost(lib.host.Host):
                 destination=fsconsul_init_file,
                 use_sudo=True,
                 use_jinja=True,
+                backup=False,
                 context={},
             )
 
@@ -128,6 +129,7 @@ class FSconsulServer(FSconsulHost):
                 destination=fsconsul_conf_file,
                 use_sudo=True,
                 use_jinja=True,
+                backup=False,
                 context={'prefix': self.fsconsul_prefix,
                          'path': self.fsconsul_path,
                          'dc': self.datacenter},

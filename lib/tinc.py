@@ -197,6 +197,7 @@ class TincEndpoint(TincHost):
                             destination=tinc_config_file,
                             use_sudo=True,
                             use_jinja=True,
+                            backup=False,
                             context={'tinc_node': self.tinc_name,
                                      'tinc_nodes': list_of_peers}
                             )
@@ -222,6 +223,7 @@ class TincEndpoint(TincHost):
                                 destination=tinc_interface_file,
                                 use_sudo=True,
                                 use_jinja=True,
+                                backup=False,
                                 context={'tinc_ip': self.tinc_ip,
                                          'tinc_netmask': tinc_netmask,
                                          'tinc_network': tinc_network})
@@ -252,6 +254,7 @@ class TincEndpoint(TincHost):
                 destination=tinc_client_host_file,
                 use_sudo=True,
                 use_jinja=True,
+                backup=False,
                 context={
                     'tinc_node': tinc_client.tinc_name,
                     'public_ip_address': tinc_client.public_dns_name,
@@ -285,6 +288,7 @@ class TincEndpoint(TincHost):
                     destination=tinc_host_file,
                     use_sudo=True,
                     use_jinja=True,
+                    backup=False,
                     context={
                         'tinc_node': peer.tinc_name,
                         'public_ip_address': peer.public_dns_name,
@@ -310,6 +314,7 @@ class TincEndpoint(TincHost):
                 destination=tinc_nets_file,
                 use_sudo=True,
                 use_jinja=True,
+                backup=False,
                 context={'tinc_network_name': tinc_network_name}
             )
 
