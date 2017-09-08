@@ -411,7 +411,7 @@ def vagrant_up_laptop():
 @task
 def vagrant_acceptance_tests():
     log_green('running vagrant_acceptance_tests')
-    for ip in ['169.254.0.1', '169.254.0.2', '169.254.0.3', '169.254.0.10']:
+    for ip in ['10.254.0.1', '10.254.0.2', '10.254.0.3', '10.254.0.10']:
         local('vagrant ssh laptop -- ping -c 1 -w 20 %s' %ip, capture=True)
 
     local('vagrant ssh laptop -- /vagrant/laptop/tests/test-dns',
