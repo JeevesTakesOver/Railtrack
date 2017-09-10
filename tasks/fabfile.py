@@ -443,7 +443,6 @@ def vagrant_reload():
 @task
 def vagrant_test_cycle():
     log_green('running vagrant_test_cycle')
-    execute(clean)
     execute(vagrant_up)
     execute(vagrant_reload)
     execute(it)
