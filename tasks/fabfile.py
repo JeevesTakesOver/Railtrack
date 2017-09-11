@@ -531,6 +531,36 @@ def vagrant_provision_with_retry(vm):
     local('vagrant provision %s' % vm)
 
 
+@task
+def jenkins_build(branch,
+                  run_reset_consul=False,
+                  run_import_vms=False,
+                  run_upload_vms=False):
+
+    build_tasks = []
+    if run_import_vms:
+        build_tasks.extend([vagrant_import_image])
+
+    if run_reset_consul:
+        build_tasks.extend([vagrant_up, reset_consul])
+
+
+    if branch == 'master':
+        build_tasks.extend([vagrant_test_cycle, vagrant_package, vagrant_upload])
+    else:
+        build_tasks.extend([vagrant_up, reset_consul, vagrant_test_cycle])
+
+    if run_upload_vms:
+        build_tasks.extend([vagrant_package, vagrant_upload])
+
+    build_tasks.extend([clean])
+
+    for t in build_tasks:
+        execute(t)
+
+
+
+
 """
     ___main___
 """
