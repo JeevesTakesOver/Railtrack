@@ -444,6 +444,7 @@ def vagrant_reload():
 def vagrant_test_cycle():
     log_green('running vagrant_test_cycle')
     execute(vagrant_up)
+    execute(reset_consul)
     execute(vagrant_reload)
     execute(it)
     execute(vagrant_reload)
