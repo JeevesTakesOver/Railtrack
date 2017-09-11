@@ -446,6 +446,7 @@ def vagrant_test_cycle():
     execute(vagrant_up)
     execute(vagrant_reload)
     execute(it)
+    execute(vagrant_reload)
     sleep(300) # give enough time for DHCP do its business
     execute(vagrant_up_laptop)
     execute(acceptance_tests)
