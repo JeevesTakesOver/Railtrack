@@ -406,6 +406,7 @@ def vagrant_up_laptop():
     # which require a reboot of the VM
     vagrant_halt_with_retry(vm)
     vagrant_up_with_retry(vm)
+    sleep(60)
 
 
 @task
