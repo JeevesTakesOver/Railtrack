@@ -452,6 +452,7 @@ def vagrant_test_cycle():
     sleep(300) # give enough time for DHCP do its business
     execute(vagrant_up_laptop)
     execute(acceptance_tests)
+    sleep(300) # give enough time for the laptop to do its business
     execute(vagrant_acceptance_tests)
 
 @task
