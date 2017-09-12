@@ -225,5 +225,4 @@ class DHCPdServer(DHCPdHost):
             private_key_filename=self.private_key,
         ):
             sudo('systemctl daemon-reload')
-            sudo('systemctl enable isc-dhcp-server')
-            sudo('systemctl restart isc-dhcp-server')
+            systemd(['isc-dhcp-server'], start=True, enabled=True, restart=True)
