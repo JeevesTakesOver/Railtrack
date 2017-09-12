@@ -378,6 +378,19 @@ def clean():
     local('vagrant destroy -f', capture=True)
     local('rm -f *.box', capture=True)
 
+
+@task
+def vagrant_up():
+    log_green('running vagrant_up')
+    for vm in ['core01', 'core02', 'core03', 'git2consul']:
+        vagrant_up_with_retry(vm)
+        vagrant_run_with_retry(vm, 'sudo systemctl disable apt-daily.service')
+        vagrant_run_with_retry(vm, 'sudo systemctl disable apt-daily.timer')
+        vagrant_halt_with_retry(vm)
+        vagrant_up_with_retry(vm)
+        vagrant_provision_with_retry(vm)
+
+
 def get_consul_encryption_key():
     return cfg['consul']['encrypt']
 
