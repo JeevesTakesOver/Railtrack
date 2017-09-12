@@ -433,6 +433,14 @@ def vagrant_acceptance_tests():
         local('vagrant ssh %s -- sudo systemctl status bind9' % vm,
               capture=True)
 
+@task
+def vagrant_reload():
+    log_green('running vagrant_reload')
+    for vm in ['core01', 'core02', 'core03', 'git2consul']:
+        vagrant_halt_with_retry(vm)
+        vagrant_up_with_retry(vm)
+        sleep(60)
+
 def get_consul_encryption_key():
     return cfg['consul']['encrypt']
 
