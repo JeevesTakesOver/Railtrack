@@ -137,6 +137,14 @@ Run the following to login in to the laptop:
 Configuration and Deployment
 =============================
 
+#. Prepare a python virtualenv
+   .. code-block:: bash
+
+      virtualenv venv
+      . venv/bin/activate
+      pip install -r requirements.txt
+
+
 On AWS:
 
 #. Generate private and public keys for the different hosts:
@@ -185,7 +193,7 @@ On AWS:
 
    .. code-block:: bash
 
-      make venv step_01
+      fabric -f tasks/fabfile.py step_01
 
 #. Edit the ``config/config.yaml`` file or set CONFIG_YAML to your config.yaml file:
 
@@ -197,7 +205,7 @@ On AWS:
 
    .. code-block:: bash
 
-      make it
+      fabric -f tasks/fabfile.py it
 
 
 Laptop Configuration
