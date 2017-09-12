@@ -455,6 +455,13 @@ def vagrant_test_cycle():
     sleep(300) # give enough time for the laptop to do its business
     execute(vagrant_acceptance_tests)
 
+@task
+def vagrant_package():
+    log_green('running vagrant_package')
+    for vm in ['core01', 'core02', 'core03', 'git2consul', 'laptop']:
+        local('vagrant package %s' % vm, capture=True)
+        local('mv package.box %s.box' % vm, capture=True)
+
 def get_consul_encryption_key():
     return cfg['consul']['encrypt']
 
