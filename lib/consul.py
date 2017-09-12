@@ -165,6 +165,7 @@ class ConsulServer(ConsulHost):
                 destination=consul_server_file,
                 use_sudo=True,
                 use_jinja=True,
+                backup=False,
                 context={
                     'bootstrap': 'false',
                     'server': 'true',
@@ -189,6 +190,7 @@ class ConsulServer(ConsulHost):
                             destination=consul_init_file,
                             use_sudo=True,
                             use_jinja=True,
+                            backup=False,
                             context={'consul_interface': self.consul_interface,
                                      'node_ip': self.consul_ip})
             sudo('systemctl daemon-reload')
@@ -209,6 +211,7 @@ class ConsulServer(ConsulHost):
                             destination=consul_bootstrap_file,
                             use_sudo=True,
                             use_jinja=True,
+                            backup=False,
                             context={'bootstrap': 'true',
                                      'server': 'true',
                                      'datacenter': self.datacenter,
@@ -291,6 +294,7 @@ class ConsulClient(ConsulHost):
                 destination=consul_client_file,
                 use_sudo=True,
                 use_jinja=True,
+                backup=False,
                 context={
                     'server': 'false',
                     'datacenter': self.datacenter,
@@ -314,6 +318,7 @@ class ConsulClient(ConsulHost):
                             destination=consul_init_file,
                             use_sudo=True,
                             use_jinja=True,
+                            backup=False,
                             context={'tinc_network_name': tinc_network_name,
                                      'node_ip': self.tinc_ip})
             sudo('systemctl daemon-reload')
