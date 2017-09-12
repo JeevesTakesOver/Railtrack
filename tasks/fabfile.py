@@ -391,6 +391,23 @@ def vagrant_up():
         vagrant_provision_with_retry(vm)
 
 
+
+@task
+def vagrant_up_laptop():
+    log_green('running vagrant_up_laptop')
+    vm = 'laptop'
+    vagrant_up_with_retry(vm)
+    vagrant_run_with_retry(vm, 'sudo systemctl disable apt-daily.service')
+    vagrant_run_with_retry(vm, 'sudo systemctl disable apt-daily.timer')
+    vagrant_halt_with_retry(vm)
+    vagrant_up_with_retry(vm)
+    vagrant_provision_with_retry(vm)
+    # vagrant provision will remove resolvconf and dnsmasq
+    # which require a reboot of the VM
+    vagrant_halt_with_retry(vm)
+    vagrant_up_with_retry(vm)
+    sleep(60)
+
 def get_consul_encryption_key():
     return cfg['consul']['encrypt']
 
