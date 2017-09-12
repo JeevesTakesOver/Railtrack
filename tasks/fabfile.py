@@ -22,6 +22,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import lib.clusters
 import lib.git2consul
 import lib.mycookbooks
+from time import sleep
 from tests.acceptance import (
     test_that_consul_binaries_were_installed_on,
     test_that_consul_client_config_exists_on,
@@ -60,12 +61,13 @@ from tests.acceptance import (
     test_that_dnsserver_server_init_exists_on,
 )
 
-from fabric.api import task, env, execute
+from fabric.api import task, env, execute, local
 
 from bookshelf.api_v1 import (sleep_for_one_minute)
 
 from bookshelf.api_v2.ec2 import (connect_to_ec2, create_server_ec2)
 from bookshelf.api_v2.logging_helpers import log_green
+from retrying import retry
 
 
 @task
