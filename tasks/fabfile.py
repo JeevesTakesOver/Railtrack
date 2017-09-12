@@ -462,6 +462,27 @@ def vagrant_package():
         local('vagrant package %s' % vm, capture=True)
         local('mv package.box %s.box' % vm, capture=True)
 
+@task
+def vagrant_upload():
+    log_green('running vagrant_upload')
+    # https://github.com/minio/mc
+    local('wget -q -c https://dl.minio.io/client/mc/release/linux-amd64/mc')
+    local('chmod +x mc')
+    # SET MC_CONFIG_STRING to your S3 compatible endpoint
+    # minio http://192.168.1.51 BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
+    # s3 https://s3.amazonaws.com BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
+    # gcs  https://storage.googleapis.com BKIKJAA5BMMU2RHO6IBB V8f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v2
+    #
+    # SET MC_SERVICE to the name of the S3 endpoint
+    # (minio/s3/gcs) as the example above
+    #
+    # SET MC_PATH to the S3 bucket folder path
+    local('./mc config host add %s' % os.environ['MC_CONFIG_STRING'] )
+    for vm in ['core01', 'core02', 'core03', 'git2consul', 'laptop']:
+        local('./mc cp %s.box %s/%s/%s.box' % (
+            vm, os.environ['MC_SERVICE'], os.environ['MC_PATH'], vm
+        ) , capture=True)
+
 def get_consul_encryption_key():
     return cfg['consul']['encrypt']
 
