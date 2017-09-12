@@ -505,6 +505,13 @@ def vagrant_import_image():
         ) , capture=True)
         local('vagrant box add RAILTRACK_%s_VM %s.box -f' % (vm.upper(), vm) )
     local('rm -f *.box')
+
+@task
+def reset_consul():
+    log_green('running reset_consul')
+    for vm in ['core01', 'core02', 'core03']:
+        local('vagrant ssh %s -- sudo rm -rf /etc/consul.d' % vm, capture=True)
+
 def get_consul_encryption_key():
     return cfg['consul']['encrypt']
 
