@@ -372,6 +372,12 @@ def acceptance_tests():
         test_that_fail2ban_is_running_on(node)
 
 
+@task
+def clean():
+    log_green('running clean')
+    local('vagrant destroy -f', capture=True)
+    local('rm -f *.box', capture=True)
+
 def get_consul_encryption_key():
     return cfg['consul']['encrypt']
 
