@@ -408,6 +408,31 @@ def vagrant_up_laptop():
     vagrant_up_with_retry(vm)
     sleep(60)
 
+
+@task
+def vagrant_acceptance_tests():
+    log_green('running vagrant_acceptance_tests')
+    for ip in ['10.254.0.1', '10.254.0.2', '10.254.0.3', '10.254.0.10']:
+        local('vagrant ssh laptop -- ping -c 1 -w 20 %s' %ip, capture=True)
+
+    local('vagrant ssh laptop -- /vagrant/laptop/tests/test-dns',
+            capture=True)
+
+    for vm in ['core01', 'core02', 'core03']:
+        for svc in ['tinc', 'consul-server', 'fsconsul']:
+            local('vagrant ssh %s -- sudo systemctl status %s' % (vm, svc),
+                capture=True)
+
+    for svc in ['tinc', 'consul-client', 'git2consul']:
+        local('vagrant ssh git2consul -- sudo systemctl status %s' % svc,
+            capture=True)
+
+    local('vagrant ssh core01 -- sudo systemctl status isc-dhcp-server',
+          capture=True)
+    for vm in ['core01', 'core02']:
+        local('vagrant ssh %s -- sudo systemctl status bind9' % vm,
+              capture=True)
+
 def get_consul_encryption_key():
     return cfg['consul']['encrypt']
 
