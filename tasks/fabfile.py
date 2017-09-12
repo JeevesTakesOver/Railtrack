@@ -392,3 +392,4 @@ env.user = cfg['ec2_common']['username']
 env.key_filename = cfg['ec2_common']['key_filename']
 env.connection_attempts = 10
 env.timeout = 30
+env.warn_only = False
