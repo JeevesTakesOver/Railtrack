@@ -228,53 +228,87 @@ just run:
 
 
 
+Jenkins Builds on NixOS using Mesos
+=====================================
+
+This is my Jenkins build job for RailTrack CI
+
+
 
 ```
 #!/usr/bin/env bash
 
+# Jenkins job parameters:
+# IMPORT_VMS
+# UPLOAD_VMS
+# RESET_CONSUL
+# BRANCH_TO_BUILD
+
 source /etc/profile
 
-export HOME=$WORKSPACE
+export HOME=/var/lib/mesos
 export PYTHONUNBUFFERED=no
 
+rm -rf "/var/lib/mesos/VirtualBox VMs/core01"
+rm -rf "/var/lib/mesos/VirtualBox VMs/core02"
+rm -rf "/var/lib/mesos/VirtualBox VMs/core03"
+rm -rf "/var/lib/mesos/VirtualBox VMs/git2consul"
+rm -rf "/var/lib/mesos/VirtualBox VMs/laptop"
+
+set -e	
 
 vagrant plugin install vagrant-hostmanager
 vagrant plugin install hostupdater
 
 export AWS_ACCESS_KEY_ID=VAGRANT
 export AWS_SECRET_ACCESS_KEY=VAGRANT
-
 export KEY_PAIR_NAME=vagrant-tinc-vpn
 export KEY_FILENAME=$HOME/.vagrant.d/insecure_private_key
-
+  
 export TINC_KEY_FILENAME_CORE_NETWORK_01=key-pairs/core01.priv
 export TINC_KEY_FILENAME_CORE_NETWORK_02=key-pairs/core02.priv
 export TINC_KEY_FILENAME_CORE_NETWORK_03=key-pairs/core03.priv
 export TINC_KEY_FILENAME_GIT2CONSUL=key-pairs/git2consul.priv
 export CONFIG_YAML=config/config.yaml
 
-# S3 bucket containing baked vagrant images from previous builds
-export MC_FQDN="filestore.service.tinc-core-vpn"
-export MC_USERNAME="XXXXXXXXXXXXX"
-export MC_PASSWORD="YYYYYYYYYYYYY"
-export MC_CONFIG_STRING="minio http://$MC_FQDN $MC_USERNAME $MC_PASSWORD S3v4"
-export MC_SERVICE="minio"
-export MC_PATH="/vagrant-boxes"
 
-# tell Vagrantfile to consume my baked VMs from Minio
-export CORE01_VM_BOX_URL=http://$MC_USERNAME:$MC_PASSWORD@$MC_FQDN/minio/$MC_PATH/core01.box
-export CORE02_VM_BOX_URL=http://$MC_USERNAME:$MC_PASSWORD@$MC_FQDN/minio/$MC_PATH/core02.box
-export CORE03_VM_BOX_URL=http://$MC_USERNAME:$MC_PASSWORD@$MC_FQDN/minio/$MC_PATH/core03.box
-export GIT2CONSUL_VM_BOX_URL=http://$MC_USERNAME:$MC_PASSWORD@$MC_FQDN/minio/$MC_PATH/git2consul.box
-export LAPTOP_VM_BOX_URL=http://$MC_USERNAME:$MC_PASSWORD@$MC_FQDN/minio/$MC_PATH/laptop.box
+# do we need to import VMs
+if [ "$IMPORT_VMS" == "YES" ]; then
 
-set -e
+   	# S3 bucket containing baked vagrant images from previous builds
+    export MC_USERNAME=XXXXXXXXXXXXXXXXXXX
+	export MC_PASSWORD=YYYYYYYYYYYYYYYYYYY
 
-nix-shell --run "set -e ; make vagrant_import_image"
-nix-shell --run "set -e ; make vagrant_test_cycle"
-nix-shell --run "set -e ; make vagrant_package"
-nix-shell --run "set -e ; make vagrant_upload"
-nix-shell --run "set -e ; make clean"
+	export MC_FQDN="filestore.service.tinc-core-vpn"
+	export MC_CONFIG_STRING="minio http://$MC_FQDN $MC_USERNAME $MC_PASSWORD S3v4"
+	export MC_SERVICE="minio"
+	export MC_PATH="vagrant-boxes"
+
+
+	# tell Vagrantfile to consume my baked VMs from Minio
+	export CORE01_VM_BOX_URL=http://$MC_USERNAME:$MC_PASSWORD@$MC_FQDN/minio/$MC_PATH/core01.box
+	export CORE02_VM_BOX_URL=http://$MC_USERNAME:$MC_PASSWORD@$MC_FQDN/minio/$MC_PATH/core02.box
+	export CORE03_VM_BOX_URL=http://$MC_USERNAME:$MC_PASSWORD@$MC_FQDN/minio/$MC_PATH/core03.box
+	export GIT2CONSUL_VM_BOX_URL=http://$MC_USERNAME:$MC_PASSWORD@$MC_FQDN/minio/$MC_PATH/git2consul.box
+	export LAPTOP_VM_BOX_URL=http://$MC_USERNAME:$MC_PASSWORD@$MC_FQDN/minio/$MC_PATH/laptop.box
+    
+    BUILD_PARAMS=",run_import_vms=True"
+fi
+
+# do we need to upload_vms ?
+if [ "$UPLOAD_VMS" == "YES" ]; then
+
+   EXTRA_FABRIC_TASK_PARAMS="$EXTRA_FABRIC_TASK_PARAMS,run_upload_vms=True"
+fi
+
+# do we want to reset consul ?
+if [ "$RESET_CONSUL" == "YES" ]; then
+
+   EXTRA_FABRIC_TASK_PARAMS="$EXTRA_FABRIC_TASK_PARAMS,run_reset_consul=True"
+fi
+
+
+nix-shell --run "fab -f tasks/fabfile.py jenkins_build:branch=${BRANCH_TO_BUILD}${EXTRA_FABRIC_TASK_PARAMS}"
 ```
 
 
