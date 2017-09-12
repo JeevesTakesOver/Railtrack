@@ -441,6 +441,20 @@ def vagrant_reload():
         vagrant_up_with_retry(vm)
         sleep(60)
 
+@task
+def vagrant_test_cycle():
+    log_green('running vagrant_test_cycle')
+    execute(vagrant_up)
+    execute(reset_consul)
+    execute(vagrant_reload)
+    execute(it)
+    execute(vagrant_reload)
+    sleep(300) # give enough time for DHCP do its business
+    execute(vagrant_up_laptop)
+    execute(acceptance_tests)
+    sleep(300) # give enough time for the laptop to do its business
+    execute(vagrant_acceptance_tests)
+
 def get_consul_encryption_key():
     return cfg['consul']['encrypt']
 
