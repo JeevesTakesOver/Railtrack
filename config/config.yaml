@@ -22,7 +22,7 @@ tinc_common: &tinc_common
   env: 'development'
   tinc_netmask: '255.255.0.0'
   tinc_network_name: 'core-vpn'
-  tinc_network: '169.254.0.0'
+  tinc_network: '10.254.0.0'
 
 regions:
   us-east-1: &us_east_1
@@ -81,7 +81,7 @@ roles:
         <<: *us_east_1
         tinc_node: 'core_network_01'
         region: 'us-east-1'
-        tinc_ip: &core_network_01_tinc_ip '169.254.0.1'
+        tinc_ip: &core_network_01_tinc_ip '10.254.0.1'
         public_ip_address: &core_network_01_public_ip_address '192.168.56.101'
         public_dns_name: &core_network_01_public_dns_name '192.168.56.101' # use ip address on vagrant
         tinc_private_key: <%= ENV['TINC_KEY_FILENAME_CORE_NETWORK_01'] %>
@@ -104,7 +104,7 @@ roles:
         <<: *us_west_2
         tinc_node: 'core_network_02'
         region: 'us-west-2'
-        tinc_ip: &core_network_02_tinc_ip '169.254.0.2'
+        tinc_ip: &core_network_02_tinc_ip '10.254.0.2'
         public_ip_address: &core_network_02_public_ip_address '192.168.56.102'
         public_dns_name: &core_network_02_public_dns_name '192.168.56.102' # use ip address on vagrant
         tinc_private_key: <%= ENV['TINC_KEY_FILENAME_CORE_NETWORK_02'] %>
@@ -127,7 +127,7 @@ roles:
         <<: *eu_west_1
         tinc_node: 'core_network_03'
         region: 'eu-west-1'
-        tinc_ip: &core_network_03_tinc_ip '169.254.0.3'
+        tinc_ip: &core_network_03_tinc_ip '10.254.0.3'
         public_ip_address: &core_network_03_public_ip_address '192.168.56.103'
         public_dns_name: &core_network_03_public_dns_name '192.168.56.103' # use ip address on vagrant
         tinc_private_key: <%= ENV['TINC_KEY_FILENAME_CORE_NETWORK_03'] %>
@@ -151,7 +151,7 @@ tinc_networks:
   core-vpn:
     tinc_network_name: &tinc_network_name 'core-vpn'
     tinc_netmask: '255.255.0.0'
-    tinc_network: '169.254.0.0'
+    tinc_network: '10.254.0.0'
     servers:
       core_network_01: *core_network_01
       core_network_02: *core_network_02
@@ -189,7 +189,7 @@ git2consul: &git2consul
   datacenter: 'tinc'
   version: '0.6.3'
   encrypt: *consul_encryption_key
-  tinc_ip: '169.254.0.10'
+  tinc_ip: '10.254.0.10'
   public_ip_address: '192.168.56.110'
   public_dns_name:  '192.168.56.110' # use ip address on vagrant
   tinc_private_key: <%= ENV['TINC_KEY_FILENAME_GIT2CONSUL'] %>
@@ -211,11 +211,11 @@ git2consul: &git2consul
 dnsserver_servers:
   bind_secret: &bind_secret '7d5PudjS/DJ5N4KovSnmST4/Fy2hzTYYM0KuanjjFwdcF3phlBDI5jrLVDTDuIgHcDy1c8h4WCnPWyPxfXMK3g=='
   zone_name: &zone_name 'tinc-core-vpn'
-  reverse_zone: &reverse_zone '0.254.169.in-addr.arpa' 
+  reverse_zone: &reverse_zone '0.254.10.in-addr.arpa' 
   extra_zone_entries: &extra_zone_entries |
-    mesos-masters  IN      A     169.254.100.1 
-                   IN      A     169.254.100.2 
-                   IN      A     169.254.100.3 
+    mesos-masters  IN      A     10.254.100.1 
+                   IN      A     10.254.100.2 
+                   IN      A     10.254.100.3 
     *.service      IN      CNAME mesos-masters.tinc-core-vpn.
   servers: 
     node1: &dnsserver01
@@ -251,11 +251,11 @@ dhcpd_servers:
       <<: *dnsserver01
       listen_ip: *core_network_01_tinc_ip
       domain_name: *zone_name
-      nameservers: '169.254.0.1,169.254.0.2'
-      pool_range: '169.254.100.1 169.254.100.254'
+      nameservers: '10.254.0.1,10.254.0.2'
+      pool_range: '10.254.100.1 10.254.100.254'
       secret: *bind_secret
       reverse_zone: *reverse_zone
-      subnet: '169.254.0.0'
+      subnet: '10.254.0.0'
       netmask: '255.255.0.0'
       primary_ip: *core_network_01_tinc_ip
       listen_interface: 'core-vpn'
