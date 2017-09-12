@@ -515,6 +515,22 @@ def reset_consul():
 def get_consul_encryption_key():
     return cfg['consul']['encrypt']
 
+@retry(stop_max_attempt_number=3, wait_fixed=10000)
+def vagrant_up_with_retry(vm):
+    local('vagrant up %s --no-provision' % vm)
+
+@retry(stop_max_attempt_number=3, wait_fixed=10000)
+def vagrant_run_with_retry(vm, command):
+    local('vagrant ssh %s -- %s' % (vm, command))
+
+@retry(stop_max_attempt_number=3, wait_fixed=10000)
+def vagrant_halt_with_retry(vm):
+    local('vagrant halt %s' % vm)
+
+@retry(stop_max_attempt_number=3, wait_fixed=10000)
+def vagrant_provision_with_retry(vm):
+    local('vagrant provision %s' % vm)
+
 """
     ___main___
 """
