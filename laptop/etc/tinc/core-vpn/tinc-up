@@ -1,4 +1,20 @@
 #!/bin/sh
+PATH=/run/current-system/sw/bin:/run/current-system/sw/sbin:$PATH
+
+# see: https://www.tinc-vpn.org/pipermail/tinc/2017-January/004729.html
+macfile=/etc/tinc/$NETNAME/address
+if [ -f $macfile ]; then
+    ip link set $INTERFACE address `cat $macfile`
+else
+    cat /sys/class/net/$INTERFACE/address >$macfile
+fi
+
+#avahi-autoipd -D $INTERFACE -t /etc/tinc/core-vpn/tinc-avahi-autoipd -w
 # https://bugs.launchpad.net/ubuntu/+source/isc-dhcp/+bug/1006937
-/sbin/dhclient -cf /etc/tinc/core-vpn/dhclient.conf -nw -v  $INTERFACE -r
-/sbin/dhclient -cf /etc/tinc/core-vpn/dhclient.conf -nw -v  $INTERFACE
+dhclient -4 -nw -v $INTERFACE -cf /etc/tinc/core-vpn/dhclient.conf -r
+dhclient -4 -nw -v $INTERFACE -cf /etc/tinc/core-vpn/dhclient.conf
+
+# TODO: we're assuming a 10.254.0.0 block here, fix it
+# reset VPN route to only send 10.254.0.0 traffic
+nohup /etc/tinc/core-vpn/fix-route >/dev/null 2>&1 &
+

@@ -131,6 +131,7 @@ class DHCPdServer(DHCPdHost):
                 destination=dhcpd_server_file,
                 use_sudo=True,
                 use_jinja=True,
+                backup=False,
                 context={
                     'listen_ip': self.listen_ip,
                     'domain_name': self.domain_name,
@@ -153,6 +154,7 @@ class DHCPdServer(DHCPdHost):
                 destination=dhcpd_defaults_file,
                 use_sudo=True,
                 use_jinja=True,
+                backup=False,
                 context={
                     'listen_interface': self.listen_interface
                 }
@@ -166,6 +168,7 @@ class DHCPdServer(DHCPdHost):
                 destination=DNSSERVER_add2dns_file,
                 use_sudo=True,
                 use_jinja=True,
+                backup=False,
                 context={
                     'secret': self.secret,
                     'domain_name': self.domain_name,
@@ -185,6 +188,7 @@ class DHCPdServer(DHCPdHost):
                 destination=DNSSERVER_removefromdns_file,
                 use_sudo=True,
                 use_jinja=True,
+                backup=False,
                 context={
                     'secret': self.secret,
                     'domain_name': self.domain_name,
@@ -205,6 +209,7 @@ class DHCPdServer(DHCPdHost):
                 destination=DNSSERVER_apparmor_file,
                 use_sudo=True,
                 use_jinja=True,
+                backup=False,
                 context={}
             )
 
@@ -220,5 +225,4 @@ class DHCPdServer(DHCPdHost):
             private_key_filename=self.private_key,
         ):
             sudo('systemctl daemon-reload')
-            sudo('systemctl enable isc-dhcp-server')
-            sudo('systemctl restart isc-dhcp-server')
+            systemd(['isc-dhcp-server'], start=True, enabled=True, restart=True)
