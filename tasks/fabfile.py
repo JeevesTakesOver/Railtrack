@@ -523,7 +523,11 @@ def get_consul_encryption_key():
 
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
 def vagrant_up_with_retry(vm):
-    local('vagrant up %s --no-provision' % vm)
+    cmd = 'vagrant up %s --no-provision' % vm
+    process = Popen(shlex.split(cmd), stdout=PIPE)
+    process.communicate()
+    exit_code = process.wait()
+    return exit_code
 
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
 def vagrant_run_with_retry(vm, command):
@@ -531,11 +535,19 @@ def vagrant_run_with_retry(vm, command):
 
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
 def vagrant_halt_with_retry(vm):
-    local('vagrant halt %s' % vm)
+    cmd = 'vagrant halt %s' % vm
+    process = Popen(shlex.split(cmd), stdout=PIPE)
+    process.communicate()
+    exit_code = process.wait()
+    return exit_code
 
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
 def vagrant_provision_with_retry(vm):
-    local('vagrant provision %s' % vm)
+    cmd = 'vagrant provision %s' % vm
+    process = Popen(shlex.split(cmd), stdout=PIPE)
+    process.communicate()
+    exit_code = process.wait()
+    return exit_code
 
 
 @task
