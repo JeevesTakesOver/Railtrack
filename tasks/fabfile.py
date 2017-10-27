@@ -18,11 +18,14 @@
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from fabric.context_managers import settings
 
 import lib.clusters
 import lib.git2consul
 import lib.mycookbooks
+import shlex
 from time import sleep
+from subprocess import Popen, PIPE
 from tests.acceptance import (
     test_that_consul_binaries_were_installed_on,
     test_that_consul_client_config_exists_on,
@@ -143,7 +146,10 @@ def step_02_deploy_tinc_cluster():
 
     tinc_cluster = lib.clusters.TincCluster()
     for tinc_node in tinc_cluster.tinc_nodes:
-        tinc_node.install_patches()
+        # we reboot the host which ocasionally gives back an ssh error message
+        with settings(warn_only=True):
+            tinc_node.install_patches()
+        sleep(30)
         tinc_node.install_cron_apt()
         tinc_node.install_fail2ban()
         tinc_node.install_tinc_software()
