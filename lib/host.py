@@ -31,6 +31,7 @@ from bookshelf.api_v2.logging_helpers import log_green
 from lib.mycookbooks import (
     upgrade_kernel_and_grub,
 )
+from retrying import retry
 
 
 class SshCredentials(object):
@@ -71,6 +72,7 @@ class Host(object):
         self.host_string = "%s@%s" % (self.username,
                                       self.public_dns_name)
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def install_patches(self):
         """ installs the latest updates, updates the kernel and reboots,
             the instance/host/vm.
@@ -86,6 +88,7 @@ class Host(object):
             upgrade_kernel_and_grub(do_reboot=True)
             wait_for_ssh(self.public_dns_name)
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def install_cron_apt(self):
         """ installs apt-cron which provides automatic security updates """
         with settings(
@@ -96,6 +99,7 @@ class Host(object):
             log_green(self.host_string)
             apt_install(packages=['cron-apt'])
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def install_fail2ban(self):
         """ installs fail2ban to block ssh brute-force attacks"""
         with settings(

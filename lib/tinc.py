@@ -38,6 +38,7 @@ from lib.mycookbooks import (
     install_tinc,
     ubuntu14_required_packages
 )
+from retrying import retry
 
 
 class TincNetwork(object):
@@ -75,6 +76,7 @@ class TincHost(Host):
         """
         Host.__init__(self, ssh_credentials=ssh_credentials)
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def install_tinc_software(self):
         """ Install the tinc software """
         with settings(
@@ -93,6 +95,7 @@ class TincHost(Host):
             add_usr_local_bin_to_path()
             install_tinc()
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def restart_tinc(self):
         """ restarts the tinc service """
         with settings(
@@ -151,6 +154,7 @@ class TincEndpoint(TincHost):
 
         TincHost.__init__(self, ssh_credentials=ssh_credentials)
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def deploy_tinc_key_pair(self, tinc_network_name):
         """ deploys the tinc private key for the network """
         log_green('deploying tinc key pair ...')
@@ -176,6 +180,7 @@ class TincEndpoint(TincHost):
 
             sudo('chown root:root -R /etc/tinc/')
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def deploy_tinc_conf_file(self, tinc_network_name):
         """ deploys the tinc configuration file for the network  """
         log_green('deploying tinc config file ...')
@@ -202,6 +207,7 @@ class TincEndpoint(TincHost):
                                      'tinc_nodes': list_of_peers}
                             )
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def deploy_tinc_interface_files(self,
                                     tinc_network_name,
                                     tinc_network,
@@ -231,6 +237,7 @@ class TincEndpoint(TincHost):
                 sudo('chmod 755 %s' % tinc_interface_file)
                 sudo('chown root:root %s' % tinc_interface_file)
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def deploy_tinc_client_host_file(self, tinc_client):
         """ deploys the tinc client public key for the network  """
 
@@ -263,6 +270,7 @@ class TincEndpoint(TincHost):
                 },
             )
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def deploy_tinc_peers_host_file(self, tinc_network_name):
         """ deploys the tinc peer public key for the network  """
         log_green('deploying tinc peer host file ...')
@@ -297,6 +305,7 @@ class TincEndpoint(TincHost):
                     },
                 )
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def deploy_tinc_nets_boot_files(self, tinc_network_name):
         """ deploys the tinc nets boot file  """
         log_green('deploying tinc nets boot file ...')

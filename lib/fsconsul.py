@@ -30,6 +30,7 @@ from bookshelf.api_v2.pkg import apt_install
 
 import lib.host
 import lib.tinc
+from retrying import retry
 
 
 class FSconsulHost(lib.host.Host):
@@ -44,6 +45,7 @@ class FSconsulHost(lib.host.Host):
         """
         lib.host.Host.__init__(self, ssh_credentials=ssh_credentials)
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def install_fsconsul(self):
         """ installs fsconsul """
         log_green('installing fsconsul ...')
@@ -61,6 +63,7 @@ class FSconsulHost(lib.host.Host):
                          'file_path=v0.6.5%2Flinux-amd64%2Ffsconsul')
                     sudo('chmod 755 fsconsul')
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def deploy_init_fsconsul(self):
         """ installs the fsconsul init file """
         log_green('installing fsconsul ...')
@@ -112,6 +115,7 @@ class FSconsulServer(FSconsulHost):
             self, ssh_credentials=ssh_credentials
         )
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def deploy_conf_fsconsul(self):
         """ installs the fsconsul configuration file """
         log_green('deploying config file for fsconsul ...')

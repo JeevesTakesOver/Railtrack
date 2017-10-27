@@ -15,6 +15,7 @@ from lib.mycookbooks import (
 
 import lib.consul
 import lib.clusters
+from retrying import retry
 
 
 class Git2ConsulHost(lib.consul.ConsulClient):
@@ -31,6 +32,7 @@ class Git2ConsulHost(lib.consul.ConsulClient):
                                          ssh_credentials=ssh_credentials,
                                          consul_cluster=consul_cluster)
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def install_git2consul(self):
         """ installs the git2consul software """
         log_green('installing git2consul ...')
@@ -44,6 +46,7 @@ class Git2ConsulHost(lib.consul.ConsulClient):
                 sudo('apt-get install -y npm nodejs nodejs-legacy git')
                 sudo('npm install git2consul@0.11.0')
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def deploy_init_git2consul(self):
         """ installs the git2consul init script """
         log_green('deploying git2consul init script ...')
@@ -117,6 +120,7 @@ class Git2ConsulService(Git2ConsulHost,
             consul_cluster=consul_cluster
         )
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def create_git2consul_config(self):
         """ creates the git2consul config file """
         log_green('deploying git2consul config file ...')
@@ -143,6 +147,7 @@ class Git2ConsulService(Git2ConsulHost,
                 },
             )
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def bootstrap_git2consul(self):
         """ bootstraps git2consul """
         log_green('bootstrapping git2consul ...')

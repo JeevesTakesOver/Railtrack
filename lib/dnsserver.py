@@ -33,6 +33,7 @@ from bookshelf.api_v2.os_helpers import (
     systemd
 )
 import lib.host
+from retrying import retry
 
 class DNSSERVERHost(lib.host.Host):
     """ A virtual DNSSERVER Host object providing methods for installing and
@@ -46,6 +47,7 @@ class DNSSERVERHost(lib.host.Host):
         """
         lib.host.Host.__init__(self, ssh_credentials=ssh_credentials)
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def deploy_dnsserver_binary(self):
         """ Install the DNSSERVER software """
         log_green('deploying DNSSERVER binary...')
@@ -99,6 +101,7 @@ class DNSSERVERServer(DNSSERVERHost):
         self.ssh_credentials = ssh_credentials
         DNSSERVERHost.__init__(self, ssh_credentials=ssh_credentials)
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def deploy_conf_dnsserver(self):
         """ creates the DNSSERVER server config file """
         log_green('create DNSSERVER server config...')
@@ -198,6 +201,7 @@ class DNSSERVERServer(DNSSERVERHost):
             sudo('chmod 660 /etc/bind/rndc.key')
 
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def restart_dnsserver(self):
         """ restarts the DNSSERVER service """
         log_green('restarting DNSSERVER...')

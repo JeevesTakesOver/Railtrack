@@ -30,6 +30,7 @@ from bookshelf.api_v2.pkg import (
 )
 from bookshelf.api_v2.os_helpers import add_usr_local_bin_to_path
 import lib.host
+from retrying import retry
 
 
 class ConsulHost(lib.host.Host):
@@ -44,6 +45,7 @@ class ConsulHost(lib.host.Host):
         """
         lib.host.Host.__init__(self, ssh_credentials=ssh_credentials)
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def deploy_consul_binary(self):
         """ Install the consul software """
         log_green('deploying consul binary...')
@@ -92,6 +94,7 @@ class ConsulHost(lib.host.Host):
             sudo('mkdir -p /var/consul')
             sudo('chown consul:consul /var/consul')
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def download_consul_web_ui_files(self):
         """ installs the consul web ui files """
         log_green('install web ui for consul...')
@@ -144,6 +147,7 @@ class ConsulServer(ConsulHost):
         self.consul_encryption_key = consul_encryption_key
         ConsulHost.__init__(self, ssh_credentials=ssh_credentials)
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def create_consul_server_config(self):
         """ creates the consul server config file """
         log_green('create consul server config...')
@@ -175,6 +179,7 @@ class ConsulServer(ConsulHost):
                 }
             )
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def create_consul_server_init_script(self):
         """ creates the consul server init file """
         log_green('create consul server init script...')
@@ -196,6 +201,7 @@ class ConsulServer(ConsulHost):
             sudo('systemctl daemon-reload')
             sudo('systemctl enable consul-server')
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def create_consul_bootstrap_config(self):
         """ creates the consul server bootstrap config """
         log_green('create consul server bootstrap config...')
@@ -217,6 +223,7 @@ class ConsulServer(ConsulHost):
                                      'datacenter': self.datacenter,
                                      'encrypt': self.consul_encryption_key})
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def start_bootstrap_cluster_process(self):
         """ starts the bootstrap cluster process  """
         log_green('start bootstrap cluster process...')
@@ -235,6 +242,7 @@ class ConsulServer(ConsulHost):
 
                 sudo('touch /etc/consul.d/bootstrapped.in_progress')
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def restart_consul_service(self):
         """ restarts the consul server service """
         log_green('restarting consul server service ...')
@@ -246,6 +254,7 @@ class ConsulServer(ConsulHost):
             sudo('systemctl restart consul-server')
             sleep(30)
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def finish_bootstrap_cluster_process(self):
         """ finishes the consul bottstrapping process """
         log_green('finish bootstrap cluster process ...')
@@ -274,6 +283,7 @@ class ConsulClient(ConsulHost):
         ConsulHost.__init__(self, ssh_credentials=ssh_credentials)
         self.consul_peers = consul_cluster.consul_nodes
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def create_consul_client_config(self):
         """ creates the consul client config file """
         log_green('create consul client config ...')
@@ -303,6 +313,7 @@ class ConsulClient(ConsulHost):
                 }
             )
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def create_consul_client_init_script(self, tinc_network_name):
         """ creates the consul client init file """
         log_green('create consul client init script ...')
@@ -324,6 +335,7 @@ class ConsulClient(ConsulHost):
             sudo('systemctl daemon-reload')
             sudo('systemctl enable consul-client')
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def restart_consul_client_service(self):
         """ restarts the consul client service """
         log_green('restart consul client service ...')

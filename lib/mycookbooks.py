@@ -37,8 +37,10 @@ from bookshelf.api_v1 import (
     reboot,
     apt_install
 )
+from retrying import retry
 
 
+@retry(stop_max_attempt_number=3, wait_fixed=10000)
 def ubuntu14_required_packages():
     return ["apt-transport-https",
             "software-properties-common",
@@ -68,6 +70,7 @@ def ubuntu14_required_packages():
             "ruby-dev"]
 
 
+@retry(stop_max_attempt_number=3, wait_fixed=10000)
 def upgrade_kernel_and_grub(do_reboot=False, log=True):
     """ updates the kernel and the grub config """
 
@@ -109,6 +112,7 @@ def parse_config(filename):
         )
 
 
+@retry(stop_max_attempt_number=3, wait_fixed=10000)
 def install_tinc():
     """ installs tinc """
     apt_install(packages=['tinc'])

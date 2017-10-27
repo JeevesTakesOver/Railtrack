@@ -33,6 +33,7 @@ from bookshelf.api_v2.os_helpers import (
     systemd
 )
 import lib.host
+from retrying import retry
 
 
 class DHCPdHost(lib.host.Host):
@@ -47,6 +48,7 @@ class DHCPdHost(lib.host.Host):
         """
         lib.host.Host.__init__(self, ssh_credentials=ssh_credentials)
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def deploy_dhcpd_binary(self):
         """ Install the dhcpd software """
         log_green('deploying dhcpd binary...')
@@ -114,6 +116,7 @@ class DHCPdServer(DHCPdHost):
         self.ssh_credentials = ssh_credentials
         DHCPdHost.__init__(self, ssh_credentials=ssh_credentials)
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def deploy_conf_dhcpd(self):
         """ creates the DHCPd server config file """
         log_green('create dhcpd server config...')
@@ -216,6 +219,7 @@ class DHCPdServer(DHCPdHost):
             sudo('chown root:root /etc/apparmor.d/usr.sbin.dhcpd')
             sudo('service apparmor reload')
 
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def restart_dhcpd(self):
         """ restarts the dhcpd service """
         log_green('restarting dhcpd...')
