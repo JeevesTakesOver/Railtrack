@@ -71,9 +71,11 @@ from bookshelf.api_v1 import (sleep_for_one_minute)
 from bookshelf.api_v2.ec2 import (connect_to_ec2, create_server_ec2)
 from bookshelf.api_v2.logging_helpers import log_green
 from retrying import retry
+from profilehooks import timecall
 
 
 @task
+@timecall(immediate=True)
 def it():
     execute(step_02_deploy_tinc_cluster)
     execute(step_03_deploy_consul_cluster)
@@ -85,6 +87,7 @@ def it():
 
 
 @task
+@timecall(immediate=True)
 def step_01_create_hosts():
 
     for k_node, v_node in cfg['consul_servers']['servers'].items():
@@ -142,6 +145,7 @@ def step_01_create_hosts():
 
 
 @task
+@timecall(immediate=True)
 def step_02_deploy_tinc_cluster():
 
     tinc_cluster = lib.clusters.TincCluster()
@@ -183,6 +187,7 @@ def step_02_deploy_tinc_cluster():
 
 
 @task
+@timecall(immediate=True)
 def step_03_deploy_consul_cluster():
 
     consul_cluster = lib.clusters.ConsulCluster()
@@ -212,6 +217,7 @@ def step_03_deploy_consul_cluster():
 
 
 @task
+@timecall(immediate=True)
 def step_04_deploy_git2consul_tinc_client():
 
     consul_cluster = lib.clusters.ConsulCluster()
@@ -261,6 +267,7 @@ def step_04_deploy_git2consul_tinc_client():
 
 
 @task
+@timecall(immediate=True)
 def step_05_deploy_git2consul():
     consul_cluster = lib.clusters.ConsulCluster()
     git2consul = lib.git2consul.Git2ConsulService(consul_cluster)
@@ -272,6 +279,7 @@ def step_05_deploy_git2consul():
 
 
 @task
+@timecall(immediate=True)
 def step_06_deploy_fsconsul():
     fsconsul_cluster = lib.clusters.FSconsulCluster()
 
@@ -281,6 +289,7 @@ def step_06_deploy_fsconsul():
         fsconsul_node.deploy_init_fsconsul()
 
 @task
+@timecall(immediate=True)
 def step_07_deploy_dhcpd():
     dhcpd_cluster = lib.clusters.DHCPdCluster()
     for dhcpd_node in dhcpd_cluster.dhcpd_nodes:
@@ -290,6 +299,7 @@ def step_07_deploy_dhcpd():
 
 
 @task
+@timecall(immediate=True)
 def step_08_deploy_dnsserver():
     dnsserver_cluster = lib.clusters.DNSSERVERCluster()
     for dnsserver_node in dnsserver_cluster.dnsserver_nodes:
@@ -298,6 +308,7 @@ def step_08_deploy_dnsserver():
         dnsserver_node.restart_dnsserver()
 
 @task
+@timecall(immediate=True)
 def acceptance_tests():
     tinc_cluster = lib.clusters.TincCluster()
     consul_cluster = lib.clusters.ConsulCluster()
@@ -379,6 +390,7 @@ def acceptance_tests():
 
 
 @task
+@timecall(immediate=True)
 def clean():
     log_green('running clean')
     local('vagrant destroy -f', capture=True)
@@ -386,6 +398,7 @@ def clean():
 
 
 @task
+@timecall(immediate=True)
 def vagrant_up():
     log_green('running vagrant_up')
     for vm in ['core01', 'core02', 'core03', 'git2consul']:
@@ -399,6 +412,7 @@ def vagrant_up():
 
 
 @task
+@timecall(immediate=True)
 def vagrant_up_laptop():
     log_green('running vagrant_up_laptop')
     vm = 'laptop'
@@ -416,6 +430,7 @@ def vagrant_up_laptop():
 
 
 @task
+@timecall(immediate=True)
 def vagrant_acceptance_tests():
     log_green('running vagrant_acceptance_tests')
     for ip in ['10.254.0.1', '10.254.0.2', '10.254.0.3', '10.254.0.10']:
@@ -440,6 +455,7 @@ def vagrant_acceptance_tests():
               capture=True)
 
 @task
+@timecall(immediate=True)
 def vagrant_reload():
     log_green('running vagrant_reload')
     for vm in ['core01', 'core02', 'core03', 'git2consul']:
@@ -448,6 +464,7 @@ def vagrant_reload():
         sleep(60)
 
 @task
+@timecall(immediate=True)
 def vagrant_test_cycle():
     log_green('running vagrant_test_cycle')
     execute(vagrant_up)
@@ -462,6 +479,7 @@ def vagrant_test_cycle():
     execute(vagrant_acceptance_tests)
 
 @task
+@timecall(immediate=True)
 def vagrant_package():
     log_green('running vagrant_package')
     for vm in ['core01', 'core02', 'core03', 'git2consul', 'laptop']:
@@ -469,6 +487,7 @@ def vagrant_package():
         local('mv package.box %s.box' % vm, capture=True)
 
 @task
+@timecall(immediate=True)
 def vagrant_upload():
     log_green('running vagrant_upload')
     # https://github.com/minio/mc
@@ -490,6 +509,7 @@ def vagrant_upload():
         ) , capture=True)
 
 @task
+@timecall(immediate=True)
 def vagrant_import_image():
     log_green('running vagrant_import_image')
     # https://github.com/minio/mc
@@ -513,6 +533,7 @@ def vagrant_import_image():
     local('rm -f *.box')
 
 @task
+@timecall(immediate=True)
 def reset_consul():
     log_green('running reset_consul')
     for vm in ['core01', 'core02', 'core03']:
@@ -522,6 +543,7 @@ def get_consul_encryption_key():
     return cfg['consul']['encrypt']
 
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
+@timecall(immediate=True)
 def vagrant_up_with_retry(vm):
     cmd = 'vagrant up %s --no-provision' % vm
     process = Popen(shlex.split(cmd), stdout=PIPE)
@@ -530,10 +552,12 @@ def vagrant_up_with_retry(vm):
     return exit_code
 
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
+@timecall(immediate=True)
 def vagrant_run_with_retry(vm, command):
     local('vagrant ssh %s -- %s' % (vm, command))
 
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
+@timecall(immediate=True)
 def vagrant_halt_with_retry(vm):
     cmd = 'vagrant halt %s' % vm
     process = Popen(shlex.split(cmd), stdout=PIPE)
@@ -542,6 +566,7 @@ def vagrant_halt_with_retry(vm):
     return exit_code
 
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
+@timecall(immediate=True)
 def vagrant_provision_with_retry(vm):
     cmd = 'vagrant provision %s' % vm
     process = Popen(shlex.split(cmd), stdout=PIPE)
@@ -551,33 +576,13 @@ def vagrant_provision_with_retry(vm):
 
 
 @task
-def jenkins_build(branch,
-                  run_reset_consul=False,
-                  run_import_vms=False,
-                  run_upload_vms=False):
-
-    build_tasks = []
-    if run_import_vms:
-        build_tasks.extend([vagrant_import_image])
-
-    if run_reset_consul:
-        build_tasks.extend([vagrant_up, reset_consul])
-
-
-    if branch == 'master':
-        build_tasks.extend([vagrant_test_cycle, vagrant_package, vagrant_upload])
-    else:
-        build_tasks.extend([vagrant_up, reset_consul, vagrant_test_cycle])
-
-    if run_upload_vms:
-        build_tasks.extend([vagrant_package, vagrant_upload])
-
-    build_tasks.extend([clean])
-
-    for t in build_tasks:
-        execute(t)
-
-
+@timecall(immediate=True)
+def jenkins_build():
+    try:
+        execute(vagrant_test_cycle)
+        execute(clean)
+    except:
+        execute(clean)
 
 
 """

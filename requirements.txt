@@ -50,3 +50,4 @@ wrapt==1.10.5
 jinja2
 pyBookshelf
 retrying
+profilehooks
