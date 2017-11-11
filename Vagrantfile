@@ -19,33 +19,23 @@ Vagrant.configure("2") do |config|
 
     core01.vm.provider :virtualbox do |v|
       v.linked_clone = true
-      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-      v.customize ["modifyvm", :id, "--memory", 256]
+      v.customize ["modifyvm", :id, "--memory", 1024]
       v.customize ["modifyvm", :id, "--name", "core01"]
+      v.customize ["modifyvm", :id, "--natdnsproxy1", "off"]
+      v.customize ["modifyvm", :id, "--natdnshostresolver1", "off"]
       Vagrant::Util::Platform.linux? and v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
-      # https://www.virtualbox.org/manual/ch05.html#iocaching
-      # disable hostio-cache to save memory
       v.customize [
         "storagectl", :id, 
         "--name", "SATA",
-        "--hostiocache", "off"
+        "--hostiocache", "on"
       ]
     end
 
     core01.vm.provision "shell", inline: <<-SHELL
       #!/bin/sh
 
-      grep -q "swapfile" /etc/fstab
-      if [ $? -ne 0 ]; then
-        echo 'swapfile not found. Adding swapfile.'
-        fallocate -l 1024M /swapfile
-        chmod 600 /swapfile
-        mkswap /swapfile
-        swapon /swapfile
-        echo '/swapfile none swap defaults 0 0' >> /etc/fstab
-      else
-        echo 'swapfile found. No changes made.'
-      fi
+      systemctl disable apt-daily.service
+      systemctl disable apt-daily.timer
 
       # wait for apt-get actions to finished
       ps -ef | grep -v grep | grep apt >/dev/null 2>&1
@@ -68,32 +58,22 @@ Vagrant.configure("2") do |config|
 
     core02.vm.provider :virtualbox do |v|
       v.linked_clone = true
-      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-      v.customize ["modifyvm", :id, "--memory", 256]
+      v.customize ["modifyvm", :id, "--memory", 1024]
       v.customize ["modifyvm", :id, "--name", "core02"]
+      v.customize ["modifyvm", :id, "--natdnsproxy1", "off"]
+      v.customize ["modifyvm", :id, "--natdnshostresolver1", "off"]
       Vagrant::Util::Platform.linux? and v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
-      # https://www.virtualbox.org/manual/ch05.html#iocaching
-      # disable hostio-cache to save memory
       v.customize [
         "storagectl", :id, 
         "--name", "SATA",
-        "--hostiocache", "off"
+        "--hostiocache", "on"
       ]
     end
     core02.vm.provision "shell", inline: <<-SHELL
       #!/bin/sh
 
-      grep -q "swapfile" /etc/fstab
-      if [ $? -ne 0 ]; then
-        echo 'swapfile not found. Adding swapfile.'
-        fallocate -l 1024M /swapfile
-        chmod 600 /swapfile
-        mkswap /swapfile
-        swapon /swapfile
-        echo '/swapfile none swap defaults 0 0' >> /etc/fstab
-      else
-        echo 'swapfile found. No changes made.'
-      fi
+      systemctl disable apt-daily.service
+      systemctl disable apt-daily.timer
 
       # wait for apt-get actions to finished
       ps -ef | grep -v grep | grep apt >/dev/null 2>&1
@@ -114,32 +94,22 @@ Vagrant.configure("2") do |config|
 
     core03.vm.provider :virtualbox do |v|
       v.linked_clone = true
-      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-      v.customize ["modifyvm", :id, "--memory", 256]
+      v.customize ["modifyvm", :id, "--memory", 1024]
       v.customize ["modifyvm", :id, "--name", "core03"]
+      v.customize ["modifyvm", :id, "--natdnsproxy1", "off"]
+      v.customize ["modifyvm", :id, "--natdnshostresolver1", "off"]
       Vagrant::Util::Platform.linux? and v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
-      # https://www.virtualbox.org/manual/ch05.html#iocaching
-      # disable hostio-cache to save memory
       v.customize [
         "storagectl", :id, 
         "--name", "SATA",
-        "--hostiocache", "off"
+        "--hostiocache", "on"
       ]
     end
     core03.vm.provision "shell", inline: <<-SHELL
       #!/bin/sh
 
-      grep -q "swapfile" /etc/fstab
-      if [ $? -ne 0 ]; then
-        echo 'swapfile not found. Adding swapfile.'
-        fallocate -l 1024M /swapfile
-        chmod 600 /swapfile
-        mkswap /swapfile
-        swapon /swapfile
-        echo '/swapfile none swap defaults 0 0' >> /etc/fstab
-      else
-        echo 'swapfile found. No changes made.'
-      fi
+      systemctl disable apt-daily.service
+      systemctl disable apt-daily.timer
 
       # wait for apt-get actions to finished
       ps -ef | grep -v grep | grep apt >/dev/null 2>&1
@@ -160,32 +130,24 @@ Vagrant.configure("2") do |config|
 
     git2consul.vm.provider :virtualbox do |v|
       v.linked_clone = true
-      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-      v.customize ["modifyvm", :id, "--memory", 256]
+      v.customize ["modifyvm", :id, "--natdnsproxy1", "off"]
+      v.customize ["modifyvm", :id, "--natdnshostresolver1", "off"]
+      v.customize ["modifyvm", :id, "--memory", 768]
       v.customize ["modifyvm", :id, "--name", "git2consul"]
+      v.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
       Vagrant::Util::Platform.linux? and v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
-      # https://www.virtualbox.org/manual/ch05.html#iocaching
-      # disable hostio-cache to save memory
       v.customize [
         "storagectl", :id, 
         "--name", "SATA",
-        "--hostiocache", "off"
+        "--hostiocache", "on"
       ]
     end
     git2consul.vm.provision "shell", inline: <<-SHELL
       #!/bin/sh
+      #
 
-      grep -q "swapfile" /etc/fstab
-      if [ $? -ne 0 ]; then
-        echo 'swapfile not found. Adding swapfile.'
-        fallocate -l 1024M /swapfile
-        chmod 600 /swapfile
-        mkswap /swapfile
-        swapon /swapfile
-        echo '/swapfile none swap defaults 0 0' >> /etc/fstab
-      else
-        echo 'swapfile found. No changes made.'
-      fi
+      systemctl disable apt-daily.service
+      systemctl disable apt-daily.timer
 
       # wait for apt-get actions to finished
       ps -ef | grep -v grep | grep apt >/dev/null 2>&1
@@ -206,33 +168,23 @@ Vagrant.configure("2") do |config|
 
     laptop.vm.provider :virtualbox do |v|
       v.linked_clone = true
-      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-      v.customize ["modifyvm", :id, "--memory", 256]
+      v.customize ["modifyvm", :id, "--memory", 512]
       v.customize ["modifyvm", :id, "--name", "laptop"]
+      v.customize ["modifyvm", :id, "--natdnsproxy1", "off"]
+      v.customize ["modifyvm", :id, "--natdnshostresolver1", "off"]
       Vagrant::Util::Platform.linux? and v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
-      # https://www.virtualbox.org/manual/ch05.html#iocaching
-      # disable hostio-cache to save memory
       v.customize [
         "storagectl", :id, 
         "--name", "SATA",
-        "--hostiocache", "off"
+        "--hostiocache", "on"
       ]
     end
 
     laptop.vm.provision "shell", inline: <<-SHELL
       #!/bin/sh
 
-      grep -q "swapfile" /etc/fstab
-      if [ $? -ne 0 ]; then
-        echo 'swapfile not found. Adding swapfile.'
-        fallocate -l 1024M /swapfile
-        chmod 600 /swapfile
-        mkswap /swapfile
-        swapon /swapfile
-        echo '/swapfile none swap defaults 0 0' >> /etc/fstab
-      else
-        echo 'swapfile found. No changes made.'
-      fi
+      systemctl disable apt-daily.service
+      systemctl disable apt-daily.timer
 
       # wait for apt-get actions to finished
       ps -ef | grep -v grep | grep apt >/dev/null 2>&1

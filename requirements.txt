@@ -51,3 +51,5 @@ jinja2
 pyBookshelf
 retrying
 profilehooks
+pathos
+dill
