@@ -272,44 +272,7 @@ This is my Jenkins build job for RailTrack CI
       export TINC_KEY_FILENAME_GIT2CONSUL=key-pairs/git2consul.priv
       export CONFIG_YAML=config/config.yaml
 
-
-      # do we need to import VMs
-      if [ "$IMPORT_VMS" == "YES" ]; then
-
-          # S3 bucket containing baked vagrant images from previous builds
-          export MC_USERNAME=XXXXXXXXXXXXXXXXXXX
-          export MC_PASSWORD=YYYYYYYYYYYYYYYYYYY
-
-          export MC_FQDN="filestore.service.tinc-core-vpn"
-          export MC_CONFIG_STRING="minio http://$MC_FQDN $MC_USERNAME $MC_PASSWORD S3v4"
-          export MC_SERVICE="minio"
-          export MC_PATH="vagrant-boxes"
-
-
-          # tell Vagrantfile to consume my baked VMs from Minio
-          export CORE01_VM_BOX_URL=http://$MC_USERNAME:$MC_PASSWORD@$MC_FQDN/minio/$MC_PATH/core01.box
-          export CORE02_VM_BOX_URL=http://$MC_USERNAME:$MC_PASSWORD@$MC_FQDN/minio/$MC_PATH/core02.box
-          export CORE03_VM_BOX_URL=http://$MC_USERNAME:$MC_PASSWORD@$MC_FQDN/minio/$MC_PATH/core03.box
-          export GIT2CONSUL_VM_BOX_URL=http://$MC_USERNAME:$MC_PASSWORD@$MC_FQDN/minio/$MC_PATH/git2consul.box
-          export LAPTOP_VM_BOX_URL=http://$MC_USERNAME:$MC_PASSWORD@$MC_FQDN/minio/$MC_PATH/laptop.box
-
-          BUILD_PARAMS=",run_import_vms=True"
-      fi
-
-      # do we need to upload_vms ?
-      if [ "$UPLOAD_VMS" == "YES" ]; then
-
-         EXTRA_FABRIC_TASK_PARAMS="$EXTRA_FABRIC_TASK_PARAMS,run_upload_vms=True"
-      fi
-
-      # do we want to reset consul ?
-      if [ "$RESET_CONSUL" == "YES" ]; then
-
-         EXTRA_FABRIC_TASK_PARAMS="$EXTRA_FABRIC_TASK_PARAMS,run_reset_consul=True"
-      fi
-
-
-      nix-shell --run "fab -f tasks/fabfile.py jenkins_build:branch=${BRANCH_TO_BUILD}${EXTRA_FABRIC_TASK_PARAMS}"
+      nix-shell --run "fab -f tasks/fabfile.py jenkins_build"
 
 
 Future Work
