@@ -32,6 +32,7 @@ from lib.mycookbooks import (
     upgrade_kernel_and_grub,
 )
 from retrying import retry
+from fabric.api import sudo
 
 
 class SshCredentials(object):
@@ -85,7 +86,20 @@ class Host(object):
         ):
             log_green(self.host_string)
             install_os_updates(distribution='ubuntu14.04')
-            upgrade_kernel_and_grub(do_reboot=True)
+            upgrade_kernel_and_grub(do_reboot=False)
+
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
+    def reboot(self):
+        """ reboots the VM 
+            This function blocks until ssh is available after reboot
+        """
+        with settings(
+            hide('running', 'stdout'),
+            host_string=self.host_string,
+            private_key_filename=self.private_key
+        ):
+            log_green(self.host_string)
+            sudo('reboot')
             wait_for_ssh(self.public_dns_name)
 
     @retry(stop_max_attempt_number=3, wait_fixed=10000)

@@ -64,7 +64,7 @@ from tests.acceptance import (
     test_that_dnsserver_server_init_exists_on,
 )
 
-from fabric.api import task, env, execute, local
+from fabric.api import task, env, execute, local, sudo
 
 from bookshelf.api_v1 import (sleep_for_one_minute)
 
@@ -72,6 +72,7 @@ from bookshelf.api_v2.ec2 import (connect_to_ec2, create_server_ec2)
 from bookshelf.api_v2.logging_helpers import log_green
 from retrying import retry
 from profilehooks import timecall
+
 
 
 @task
@@ -149,41 +150,72 @@ def step_01_create_hosts():
 def step_02_deploy_tinc_cluster():
 
     tinc_cluster = lib.clusters.TincCluster()
+
+    pool = Pool(processes=3)
+    results = []
+    for tinc_node in tinc_cluster.tinc_nodes:
+        results.append(pool.apipe(tinc_node.install_patches))
+
+    for stream in results:
+        stream.get()
+
+
     for tinc_node in tinc_cluster.tinc_nodes:
         # we reboot the host which ocasionally gives back an ssh error message
         with settings(warn_only=True):
-            tinc_node.install_patches()
+            tinc_node.reboot()
         sleep(30)
+
+
+    def flow(tinc_node):
         tinc_node.install_cron_apt()
         tinc_node.install_fail2ban()
         tinc_node.install_tinc_software()
 
+    pool = Pool(processes=3)
+    results = []
+    for tinc_node in tinc_cluster.tinc_nodes:
+        results.append(pool.apipe(flow, tinc_node))
+    for stream in results:
+        stream.get()
+
+
+    def flow(tinc_node, tinc_network):
+        tinc_node.deploy_tinc_key_pair(
+            tinc_network_name=tinc_network.tinc_network_name
+        )
+
+        tinc_node.deploy_tinc_conf_file(
+            tinc_network_name=tinc_network.tinc_network_name
+        )
+
+        tinc_node.deploy_tinc_interface_files(
+            tinc_network_name=tinc_network.tinc_network_name,
+            tinc_network=tinc_network.tinc_network,
+            tinc_netmask=tinc_network.tinc_netmask
+        )
+
+        tinc_node.deploy_tinc_peers_host_file(
+            tinc_network_name=tinc_network.tinc_network_name
+        )
+
+        tinc_node.deploy_tinc_nets_boot_files(
+            tinc_network_name=tinc_network.tinc_network_name
+        )
+
+
     for tinc_network in tinc_cluster.tinc_networks:
+        pool = Pool(processes=3)
+        results = []
         for tinc_node in tinc_network.tinc_nodes:
+            results.append(pool.apipe(flow, tinc_node, tinc_network))
+        for stream in results:
+            stream.get()
 
-            tinc_node.deploy_tinc_key_pair(
-                tinc_network_name=tinc_network.tinc_network_name
-            )
-
-            tinc_node.deploy_tinc_conf_file(
-                tinc_network_name=tinc_network.tinc_network_name
-            )
-
-            tinc_node.deploy_tinc_interface_files(
-                tinc_network_name=tinc_network.tinc_network_name,
-                tinc_network=tinc_network.tinc_network,
-                tinc_netmask=tinc_network.tinc_netmask
-            )
-
-            tinc_node.deploy_tinc_peers_host_file(
-                tinc_network_name=tinc_network.tinc_network_name
-            )
-
-            tinc_node.deploy_tinc_nets_boot_files(
-                tinc_network_name=tinc_network.tinc_network_name
-            )
-
+        for tinc_node in tinc_network.tinc_nodes:
+            log_green('restarting tinc...')
             tinc_node.restart_tinc()
+            sleep(15)
 
 
 @task
@@ -192,13 +224,22 @@ def step_03_deploy_consul_cluster():
 
     consul_cluster = lib.clusters.ConsulCluster()
 
-    for consul_node in consul_cluster.consul_nodes:
+    def flow(consul_node):
         consul_node.deploy_consul_binary()
         consul_node.create_user_consul()
         consul_node.create_consul_directories()
         consul_node.create_consul_server_config()
         consul_node.download_consul_web_ui_files()
         consul_node.create_consul_server_init_script()
+
+
+    pool = Pool(processes=3)
+    results = []
+    for consul_node in consul_cluster.consul_nodes:
+        results.append(pool.apipe(flow, consul_node))
+    for stream in results:
+        stream.get()
+
 
     consul_cluster.consul_nodes[0].create_consul_bootstrap_config()
     consul_cluster.consul_nodes[0].start_bootstrap_cluster_process()
@@ -225,6 +266,8 @@ def step_04_deploy_git2consul_tinc_client():
     tinc_cluster = lib.clusters.TincCluster()
 
     git2consul.install_patches()
+    with settings(warn_only=True):
+        git2consul.reboot()
     git2consul.install_cron_apt()
     git2consul.install_fail2ban()
 
@@ -283,29 +326,52 @@ def step_05_deploy_git2consul():
 def step_06_deploy_fsconsul():
     fsconsul_cluster = lib.clusters.FSconsulCluster()
 
-    for fsconsul_node in fsconsul_cluster.fsconsul_nodes:
+    def flow(fsconsul_node):
         fsconsul_node.install_fsconsul()
         fsconsul_node.deploy_conf_fsconsul()
         fsconsul_node.deploy_init_fsconsul()
+
+    pool = Pool(processes=3)
+    results = []
+    for fsconsul_node in fsconsul_cluster.fsconsul_nodes:
+        results.append(pool.apipe(flow, fsconsul_node))
+    for stream in results:
+        stream.get()
 
 @task
 @timecall(immediate=True)
 def step_07_deploy_dhcpd():
     dhcpd_cluster = lib.clusters.DHCPdCluster()
-    for dhcpd_node in dhcpd_cluster.dhcpd_nodes:
+
+    def flow(dhcpd_node):
         dhcpd_node.deploy_dhcpd_binary()
         dhcpd_node.deploy_conf_dhcpd()
         dhcpd_node.restart_dhcpd()
+
+    pool = Pool(processes=3)
+    results = []
+    for dhcpd_node in dhcpd_cluster.dhcpd_nodes:
+        results.append(pool.apipe(flow, dhcpd_node))
+    for stream in results:
+        stream.get()
 
 
 @task
 @timecall(immediate=True)
 def step_08_deploy_dnsserver():
     dnsserver_cluster = lib.clusters.DNSSERVERCluster()
-    for dnsserver_node in dnsserver_cluster.dnsserver_nodes:
+
+    def flow(dnsserver_node):
         dnsserver_node.deploy_dnsserver_binary()
         dnsserver_node.deploy_conf_dnsserver()
         dnsserver_node.restart_dnsserver()
+
+    pool = Pool(processes=3)
+    results = []
+    for dnsserver_node in dnsserver_cluster.dnsserver_nodes:
+        results.append(pool.apipe(flow, dnsserver_node))
+    for stream in results:
+        stream.get()
 
 @task
 @timecall(immediate=True)
@@ -387,6 +453,8 @@ def acceptance_tests():
         test_that_dnsserver_server_init_exists_on(node)
         test_that_dnsserver_server_is_running_on(node)
         test_that_fail2ban_is_running_on(node)
+from functools import partial
+from pathos.multiprocessing import ProcessingPool as Pool
 
 
 @task
@@ -403,12 +471,9 @@ def vagrant_up():
     log_green('running vagrant_up')
     for vm in ['core01', 'core02', 'core03', 'git2consul']:
         vagrant_up_with_retry(vm)
-        vagrant_run_with_retry(vm, 'sudo systemctl disable apt-daily.service')
-        vagrant_run_with_retry(vm, 'sudo systemctl disable apt-daily.timer')
         vagrant_halt_with_retry(vm)
         vagrant_up_with_retry(vm)
         vagrant_provision_with_retry(vm)
-
 
 
 @task
@@ -417,8 +482,6 @@ def vagrant_up_laptop():
     log_green('running vagrant_up_laptop')
     vm = 'laptop'
     vagrant_up_with_retry(vm)
-    vagrant_run_with_retry(vm, 'sudo systemctl disable apt-daily.service')
-    vagrant_run_with_retry(vm, 'sudo systemctl disable apt-daily.timer')
     vagrant_halt_with_retry(vm)
     vagrant_up_with_retry(vm)
     vagrant_provision_with_retry(vm)
@@ -468,8 +531,6 @@ def vagrant_reload():
 def vagrant_test_cycle():
     log_green('running vagrant_test_cycle')
     execute(vagrant_up)
-    execute(reset_consul)
-    execute(vagrant_reload)
     execute(it)
     execute(vagrant_reload)
     sleep(300) # give enough time for DHCP do its business
@@ -583,6 +644,7 @@ def jenkins_build():
         execute(clean)
     except:
         execute(clean)
+        sys.exit(1)
 
 
 """
