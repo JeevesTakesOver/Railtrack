@@ -640,6 +640,7 @@ def vagrant_provision_with_retry(vm):
 @timecall(immediate=True)
 def jenkins_build():
     try:
+        local('vagrant box update')
         execute(vagrant_test_cycle)
         execute(clean)
     except:
