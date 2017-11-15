@@ -10,6 +10,7 @@ Vagrant.configure("2") do |config|
   config.hostmanager.manage_host = false
   config.hostmanager.manage_guest = true
   config.hostmanager.include_offline = true
+  config.cache.scope = :box
 
   config.vm.define "core01" do |core01|
     core01.vm.box = UPSTREAM_VM_BOX

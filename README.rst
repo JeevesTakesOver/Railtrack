@@ -89,6 +89,7 @@ set the following environment variables:
 
    vagrant plugin install vagrant-hostmanager
    vagrant plugin install hostupdater
+   vagrant plugin install vagrant-cachier
 
    export AWS_ACCESS_KEY_ID=VAGRANT
    export AWS_SECRET_ACCESS_KEY=VAGRANT

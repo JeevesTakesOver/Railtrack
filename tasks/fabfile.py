@@ -471,9 +471,9 @@ def vagrant_up():
     log_green('running vagrant_up')
     for vm in ['core01', 'core02', 'core03', 'git2consul']:
         vagrant_up_with_retry(vm)
+        vagrant_provision_with_retry(vm)
         vagrant_halt_with_retry(vm)
         vagrant_up_with_retry(vm)
-        vagrant_provision_with_retry(vm)
 
 
 @task
