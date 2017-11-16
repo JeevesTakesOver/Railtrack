@@ -243,18 +243,18 @@ def step_03_deploy_consul_cluster():
 
     consul_cluster.consul_nodes[0].create_consul_bootstrap_config()
     consul_cluster.consul_nodes[0].start_bootstrap_cluster_process()
-    sleep_for_one_minute()
+    sleep(30)
 
     for consul_node in consul_cluster.consul_nodes[1:]:
         consul_node.restart_consul_service()
-        sleep_for_one_minute()
+        sleep(30)
 
     consul_cluster.consul_nodes[0].finish_bootstrap_cluster_process()
-    sleep_for_one_minute()
+    sleep(30)
 
     for consul_node in consul_cluster.consul_nodes:
         consul_node.restart_consul_service()
-        sleep_for_one_minute()
+        sleep(30)
 
 
 @task
@@ -298,7 +298,7 @@ def step_04_deploy_git2consul_tinc_client():
     for tinc_node in tinc_cluster.tinc_nodes:
         tinc_node.deploy_tinc_client_host_file(git2consul)
         tinc_node.restart_tinc()
-        sleep_for_one_minute
+        sleep(30)
 
     git2consul.deploy_consul_binary()
     git2consul.create_user_consul()
@@ -489,7 +489,7 @@ def vagrant_up_laptop():
     # which require a reboot of the VM
     vagrant_halt_with_retry(vm)
     vagrant_up_with_retry(vm)
-    sleep(60)
+    sleep(30)
 
 
 @task
@@ -524,7 +524,7 @@ def vagrant_reload():
     for vm in ['core01', 'core02', 'core03', 'git2consul']:
         vagrant_halt_with_retry(vm)
         vagrant_up_with_retry(vm)
-        sleep(60)
+        sleep(30)
 
 @task
 @timecall(immediate=True)
@@ -533,7 +533,7 @@ def vagrant_test_cycle():
     execute(vagrant_up)
     execute(it)
     execute(vagrant_reload)
-    sleep(300) # give enough time for DHCP do its business
+    sleep(180) # give enough time for DHCP do its business
     execute(vagrant_up_laptop)
     execute(acceptance_tests)
     sleep(300) # give enough time for the laptop to do its business
