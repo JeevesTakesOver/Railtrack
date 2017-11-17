@@ -2,7 +2,7 @@
 # vi: set ft=ruby :
 
 # https://github.com/chef/bento/issues/577#issuecomment-215133141
-UPSTREAM_VM_BOX = 'gbarbieru/xenial'
+UPSTREAM_VM_BOX = 'bento/ubuntu-16.04'
 
 Vagrant.configure("2") do |config|
 
