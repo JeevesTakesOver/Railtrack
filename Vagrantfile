@@ -15,6 +15,8 @@ Vagrant.configure("2") do |config|
     config.cache.scope = :box
     config.cache.synced_folder_opts = {
        owner: "_apt",
+       group: "_apt",
+       mount_options: ["dmode=777", "fmode=666"]
     }
   end
 
