@@ -20,7 +20,7 @@ ec2_common: &ec2_common
 
 tinc_common: &tinc_common
   env: 'development'
-  tinc_netmask: '255.255.0.0'
+  tinc_netmask: '255.255.255.0'
   tinc_network_name: 'core-vpn'
   tinc_network: '10.254.0.0'
 
@@ -150,7 +150,7 @@ roles:
 tinc_networks:
   core-vpn:
     tinc_network_name: &tinc_network_name 'core-vpn'
-    tinc_netmask: '255.255.0.0'
+    tinc_netmask: '255.255.255.0'
     tinc_network: '10.254.0.0'
     servers:
       core_network_01: *core_network_01
@@ -256,7 +256,7 @@ dhcpd_servers:
       secret: *bind_secret
       reverse_zone: *reverse_zone
       subnet: '10.254.0.0'
-      netmask: '255.255.0.0'
+      netmask: '255.255.255.0'
       primary_ip: *core_network_01_tinc_ip
       listen_interface: 'core-vpn'
       ns1: *core_network_01_tinc_ip
