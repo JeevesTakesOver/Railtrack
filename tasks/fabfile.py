@@ -489,6 +489,7 @@ def vagrant_up_laptop():
 
 @task
 @timecall(immediate=True)
+@retry(stop_max_attempt_number=3, wait_fixed=30000)
 def vagrant_acceptance_tests():
     log_green('running vagrant_acceptance_tests')
     for ip in ['10.254.0.1', '10.254.0.2', '10.254.0.3', '10.254.0.10']:
