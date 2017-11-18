@@ -72,6 +72,8 @@ from bookshelf.api_v2.ec2 import (connect_to_ec2, create_server_ec2)
 from bookshelf.api_v2.logging_helpers import log_green
 from retrying import retry
 from profilehooks import timecall
+from functools import partial
+from pathos.multiprocessing import ProcessingPool as Pool
 
 
 
@@ -453,8 +455,6 @@ def acceptance_tests():
         test_that_dnsserver_server_init_exists_on(node)
         test_that_dnsserver_server_is_running_on(node)
         test_that_fail2ban_is_running_on(node)
-from functools import partial
-from pathos.multiprocessing import ProcessingPool as Pool
 
 
 @task
