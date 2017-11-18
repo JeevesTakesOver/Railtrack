@@ -1,8 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# https://github.com/chef/bento/issues/577#issuecomment-215133141
-UPSTREAM_VM_BOX = 'gbarbieru/xenial'
+UPSTREAM_VM_BOX = 'bento/ubuntu-16.04'
 
 Vagrant.configure("2") do |config|
 
@@ -26,27 +25,10 @@ Vagrant.configure("2") do |config|
       Vagrant::Util::Platform.linux? and v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
       v.customize [
         "storagectl", :id, 
-        "--name", "SATA",
+        "--name", "SATA Controller",
         "--hostiocache", "on"
       ]
     end
-
-    core01.vm.provision "shell", inline: <<-SHELL
-      #!/bin/sh
-
-      systemctl disable apt-daily.service
-      systemctl disable apt-daily.timer
-
-      # wait for apt-get actions to finished
-      ps -ef | grep -v grep | grep apt >/dev/null 2>&1
-      while [ $? == 0 ]
-      do
-        echo "apt-... running"
-        sleep 1
-        ps -ef | grep -v grep | grep apt >/dev/null 2>&1
-      done
-
-    SHELL
   end
 
   config.vm.define "core02" do |core02|
@@ -65,24 +47,10 @@ Vagrant.configure("2") do |config|
       Vagrant::Util::Platform.linux? and v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
       v.customize [
         "storagectl", :id, 
-        "--name", "SATA",
+        "--name", "SATA Controller",
         "--hostiocache", "on"
       ]
     end
-    core02.vm.provision "shell", inline: <<-SHELL
-      #!/bin/sh
-
-      systemctl disable apt-daily.service
-      systemctl disable apt-daily.timer
-
-      # wait for apt-get actions to finished
-      ps -ef | grep -v grep | grep apt >/dev/null 2>&1
-      while [ $? == 0 ]
-      do
-        sleep 1
-        ps -ef | grep -v grep | grep apt >/dev/null 2>&1
-      done
-    SHELL
   end
 
   config.vm.define "core03" do |core03|
@@ -101,24 +69,10 @@ Vagrant.configure("2") do |config|
       Vagrant::Util::Platform.linux? and v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
       v.customize [
         "storagectl", :id, 
-        "--name", "SATA",
+        "--name", "SATA Controller",
         "--hostiocache", "on"
       ]
     end
-    core03.vm.provision "shell", inline: <<-SHELL
-      #!/bin/sh
-
-      systemctl disable apt-daily.service
-      systemctl disable apt-daily.timer
-
-      # wait for apt-get actions to finished
-      ps -ef | grep -v grep | grep apt >/dev/null 2>&1
-      while [ $? == 0 ]
-      do
-        sleep 1
-        ps -ef | grep -v grep | grep apt >/dev/null 2>&1
-      done
-    SHELL
   end
 
   config.vm.define "git2consul" do |git2consul|
@@ -138,25 +92,10 @@ Vagrant.configure("2") do |config|
       Vagrant::Util::Platform.linux? and v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
       v.customize [
         "storagectl", :id, 
-        "--name", "SATA",
+        "--name", "SATA Controller",
         "--hostiocache", "on"
       ]
     end
-    git2consul.vm.provision "shell", inline: <<-SHELL
-      #!/bin/sh
-      #
-
-      systemctl disable apt-daily.service
-      systemctl disable apt-daily.timer
-
-      # wait for apt-get actions to finished
-      ps -ef | grep -v grep | grep apt >/dev/null 2>&1
-      while [ $? == 0 ]
-      do
-        sleep 1
-        ps -ef | grep -v grep | grep apt >/dev/null 2>&1
-      done
-    SHELL
   end
 
   config.vm.define "laptop" do |laptop|
@@ -175,24 +114,13 @@ Vagrant.configure("2") do |config|
       Vagrant::Util::Platform.linux? and v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
       v.customize [
         "storagectl", :id, 
-        "--name", "SATA",
+        "--name", "SATA Controller",
         "--hostiocache", "on"
       ]
     end
 
     laptop.vm.provision "shell", inline: <<-SHELL
       #!/bin/sh
-
-      systemctl disable apt-daily.service
-      systemctl disable apt-daily.timer
-
-      # wait for apt-get actions to finished
-      ps -ef | grep -v grep | grep apt >/dev/null 2>&1
-      while [ $? == 0 ]
-      do
-        sleep 1
-        ps -ef | grep -v grep | grep apt >/dev/null 2>&1
-      done
 
       sudo apt-get update
       sudo apt-get install -y tinc rsync dnsutils

@@ -72,6 +72,8 @@ from bookshelf.api_v2.ec2 import (connect_to_ec2, create_server_ec2)
 from bookshelf.api_v2.logging_helpers import log_green
 from retrying import retry
 from profilehooks import timecall
+from functools import partial
+from pathos.multiprocessing import ProcessingPool as Pool
 
 
 
@@ -453,8 +455,6 @@ def acceptance_tests():
         test_that_dnsserver_server_init_exists_on(node)
         test_that_dnsserver_server_is_running_on(node)
         test_that_fail2ban_is_running_on(node)
-from functools import partial
-from pathos.multiprocessing import ProcessingPool as Pool
 
 
 @task
@@ -471,9 +471,6 @@ def vagrant_up():
     log_green('running vagrant_up')
     for vm in ['core01', 'core02', 'core03', 'git2consul']:
         vagrant_up_with_retry(vm)
-        vagrant_halt_with_retry(vm)
-        vagrant_up_with_retry(vm)
-        vagrant_provision_with_retry(vm)
 
 
 @task
@@ -481,8 +478,6 @@ def vagrant_up():
 def vagrant_up_laptop():
     log_green('running vagrant_up_laptop')
     vm = 'laptop'
-    vagrant_up_with_retry(vm)
-    vagrant_halt_with_retry(vm)
     vagrant_up_with_retry(vm)
     vagrant_provision_with_retry(vm)
     # vagrant provision will remove resolvconf and dnsmasq
@@ -494,6 +489,7 @@ def vagrant_up_laptop():
 
 @task
 @timecall(immediate=True)
+@retry(stop_max_attempt_number=3, wait_fixed=30000)
 def vagrant_acceptance_tests():
     log_green('running vagrant_acceptance_tests')
     for ip in ['10.254.0.1', '10.254.0.2', '10.254.0.3', '10.254.0.10']:
@@ -636,10 +632,17 @@ def vagrant_provision_with_retry(vm):
     return exit_code
 
 
+@retry(stop_max_attempt_number=3, wait_fixed=10000)
+@timecall(immediate=True)
+def vagrant_box_update_with_retry():
+    local('vagrant box update')
+
+
 @task
 @timecall(immediate=True)
 def jenkins_build():
     try:
+        vagrant_box_update_with_retry()
         execute(vagrant_test_cycle)
         execute(clean)
     except:
