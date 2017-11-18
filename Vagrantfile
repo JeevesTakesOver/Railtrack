@@ -1,7 +1,6 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# https://github.com/chef/bento/issues/577#issuecomment-215133141
 UPSTREAM_VM_BOX = 'bento/ubuntu-16.04'
 
 Vagrant.configure("2") do |config|
@@ -35,7 +34,7 @@ Vagrant.configure("2") do |config|
       Vagrant::Util::Platform.linux? and v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
       v.customize [
         "storagectl", :id, 
-        "--name", "SATA",
+        "--name", "SATA Controller",
         "--hostiocache", "on"
       ]
     end
@@ -74,7 +73,7 @@ Vagrant.configure("2") do |config|
       Vagrant::Util::Platform.linux? and v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
       v.customize [
         "storagectl", :id, 
-        "--name", "SATA",
+        "--name", "SATA Controller",
         "--hostiocache", "on"
       ]
     end
@@ -110,7 +109,7 @@ Vagrant.configure("2") do |config|
       Vagrant::Util::Platform.linux? and v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
       v.customize [
         "storagectl", :id, 
-        "--name", "SATA",
+        "--name", "SATA Controller",
         "--hostiocache", "on"
       ]
     end
@@ -147,7 +146,7 @@ Vagrant.configure("2") do |config|
       Vagrant::Util::Platform.linux? and v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
       v.customize [
         "storagectl", :id, 
-        "--name", "SATA",
+        "--name", "SATA Controller",
         "--hostiocache", "on"
       ]
     end
@@ -184,7 +183,7 @@ Vagrant.configure("2") do |config|
       Vagrant::Util::Platform.linux? and v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
       v.customize [
         "storagectl", :id, 
-        "--name", "SATA",
+        "--name", "SATA Controller",
         "--hostiocache", "on"
       ]
     end
