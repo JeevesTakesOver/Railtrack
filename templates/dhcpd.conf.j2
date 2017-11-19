@@ -7,7 +7,7 @@ subnet {{ subnet }} netmask {{ netmask }}            # zone to issue addresses f
 {
         option domain-name "{{ domain_name }}.";              # the domain name issued
         option domain-name-servers {{ nameservers }};        # name servers issued
-        option subnet-mask 255.255.0.0;
+        option subnet-mask 255.255.255.0;
         allow unknown-clients;
 
         pool {

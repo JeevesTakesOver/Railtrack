@@ -20,7 +20,7 @@ ec2_common: &ec2_common
 
 tinc_common: &tinc_common
   env: 'development'
-  tinc_netmask: '255.255.0.0'
+  tinc_netmask: '255.255.255.0'
   tinc_network_name: 'core-vpn'
   tinc_network: '10.254.0.0'
 
@@ -150,7 +150,7 @@ roles:
 tinc_networks:
   core-vpn:
     tinc_network_name: &tinc_network_name 'core-vpn'
-    tinc_netmask: '255.255.0.0'
+    tinc_netmask: '255.255.255.0'
     tinc_network: '10.254.0.0'
     servers:
       core_network_01: *core_network_01
@@ -189,7 +189,7 @@ git2consul: &git2consul
   datacenter: 'tinc'
   version: '0.6.3'
   encrypt: *consul_encryption_key
-  tinc_ip: '10.254.0.10'
+  tinc_ip: '10.254.0.4'
   public_ip_address: '192.168.56.110'
   public_dns_name:  '192.168.56.110' # use ip address on vagrant
   tinc_private_key: <%= ENV['TINC_KEY_FILENAME_GIT2CONSUL'] %>
@@ -213,9 +213,9 @@ dnsserver_servers:
   zone_name: &zone_name 'tinc-core-vpn'
   reverse_zone: &reverse_zone '0.254.10.in-addr.arpa' 
   extra_zone_entries: &extra_zone_entries |
-    mesos-masters  IN      A     10.254.100.1 
-                   IN      A     10.254.100.2 
-                   IN      A     10.254.100.3 
+    mesos-masters  IN      A     10.254.0.11 
+                   IN      A     10.254.0.12 
+                   IN      A     10.254.0.13 
     *.service      IN      CNAME mesos-masters.tinc-core-vpn.
   servers: 
     node1: &dnsserver01
@@ -252,11 +252,11 @@ dhcpd_servers:
       listen_ip: *core_network_01_tinc_ip
       domain_name: *zone_name
       nameservers: '10.254.0.1,10.254.0.2'
-      pool_range: '10.254.100.1 10.254.100.254'
+      pool_range: '10.254.0.10 10.254.0.254'
       secret: *bind_secret
       reverse_zone: *reverse_zone
       subnet: '10.254.0.0'
-      netmask: '255.255.0.0'
+      netmask: '255.255.255.0'
       primary_ip: *core_network_01_tinc_ip
       listen_interface: 'core-vpn'
       ns1: *core_network_01_tinc_ip

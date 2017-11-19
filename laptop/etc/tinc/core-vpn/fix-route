@@ -6,6 +6,6 @@ netstat -rnv | grep 10.254.0.0 | grep 0.0.0.0 >/dev/null 2>&1
 
 if [ $? = 0 ]; then
   # TODO: we're assuming a 10.254.0.0 block here, fix it
-  route del -net 10.254.0.0 netmask 255.255.0.0 gateway 0.0.0.0
-  route add -net 10.254.0.0 netmask 255.255.0.0 gateway `ifconfig tinc.core-vpn| grep inet | awk '{ print $2 }' `
+  route del -net 10.254.0.0 netmask 255.255.255.0 gateway 0.0.0.0
+  route add -net 10.254.0.0 netmask 255.255.255.0 gateway `ifconfig core-vpn| grep inet | awk '{ print $2 }' | cut -f 2 -d ':' `
 fi
