@@ -493,12 +493,6 @@ def vagrant_up_laptop():
 def vagrant_acceptance_tests():
     log_green('running vagrant_acceptance_tests')
 
-    log_green('restarting tincd to obtain an ip address')
-    local('vagrant ssh laptop -- sudo systemctl restart tinc', capture=True)
-
-    log_green('waiting 90sec for an ip address')
-    sleep(90) 
-
     for ip in ['10.254.0.1', '10.254.0.2', '10.254.0.3', '10.254.0.10']:
         local('vagrant ssh laptop -- ping -c 1 -w 20 %s' %ip, capture=True)
 
@@ -536,10 +530,10 @@ def vagrant_test_cycle():
     execute(vagrant_up)
     execute(it)
     execute(vagrant_reload)
-    sleep(180) # give enough time for DHCP do its business
+    sleep(30) # give enough time for DHCP do its business
     execute(vagrant_up_laptop)
     execute(acceptance_tests)
-    sleep(360) # give enough time for the laptop to do its business
+    sleep(30) # give enough time for the laptop to do its business
     execute(vagrant_acceptance_tests)
 
 @task
