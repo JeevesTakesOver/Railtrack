@@ -1,0 +1,4 @@
+ipython==5.2.0
+jedi
+pylint
+flake8

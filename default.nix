@@ -27,6 +27,7 @@ stdenv.mkDerivation  {
   wget -q -c https://bootstrap.pypa.io/get-pip.py
   /tmp/$PID/venv/bin/python get-pip.py
   /tmp/$PID/venv/bin/pip install --quiet -r requirements.txt 
+  /tmp/$PID/venv/bin/pip install --quiet -r dev-requirements.txt
   export PATH=/tmp/$PID/venv/bin:$PATH
   ln -s /tmp/$PID/venv venv
   '';
