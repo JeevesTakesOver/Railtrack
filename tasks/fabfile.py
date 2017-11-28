@@ -1,3 +1,4 @@
+""" fabfile.py """
 # vim: ai ts=4 sts=4 et sw=4 ft=python fdm=indent et
 
 # Copyright (C) 2016 Jorge Costa
@@ -17,16 +18,23 @@
 
 import os
 import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from fabric.context_managers import settings
-
-import lib.clusters
-import lib.git2consul
-import lib.mycookbooks
-import shlex
 from time import sleep
 from subprocess import Popen, PIPE
-from tests.acceptance import (
+import shlex
+from fabric.context_managers import settings
+from fabric.api import (task, env, execute, local)
+from retrying import retry
+from profilehooks import timecall
+from pathos.multiprocessing import ProcessingPool as Pool
+from bookshelf.api_v2.ec2 import (connect_to_ec2, create_server_ec2)
+from bookshelf.api_v2.logging_helpers import log_green
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+import lib.clusters  # pylint: disable=F0401, wrong-import-position
+import lib.git2consul  # pylint: disable=F0401, wrong-import-position
+import lib.mycookbooks  # pylint: disable=F0401, wrong-import-position
+from tests.acceptance import (  # pylint: disable=F0401, wrong-import-position
     test_that_consul_binaries_were_installed_on,
     test_that_consul_client_config_exists_on,
     test_that_consul_client_init_exists_on,
@@ -62,24 +70,13 @@ from tests.acceptance import (
     test_that_dnsserver_binaries_were_installed_on,
     test_that_dnsserver_server_config_exists_on,
     test_that_dnsserver_server_init_exists_on,
-)
-
-from fabric.api import task, env, execute, local, sudo
-
-from bookshelf.api_v1 import (sleep_for_one_minute)
-
-from bookshelf.api_v2.ec2 import (connect_to_ec2, create_server_ec2)
-from bookshelf.api_v2.logging_helpers import log_green
-from retrying import retry
-from profilehooks import timecall
-from functools import partial
-from pathos.multiprocessing import ProcessingPool as Pool
-
+)  # pylint: disable=F0401, wrong-import-position
 
 
 @task
 @timecall(immediate=True)
-def it():
+def run_it():
+    """ provisions OBOR """
     execute(step_02_deploy_tinc_cluster)
     execute(step_03_deploy_consul_cluster)
     execute(step_04_deploy_git2consul_tinc_client)
@@ -92,8 +89,9 @@ def it():
 @task
 @timecall(immediate=True)
 def step_01_create_hosts():
+    """ provisions new EC2 instances """
 
-    for k_node, v_node in cfg['consul_servers']['servers'].items():
+    for k_node, v_node in CFG['consul_servers']['servers'].items():
 
         connection = connect_to_ec2(
             region=v_node['region'],
@@ -115,12 +113,12 @@ def step_01_create_hosts():
             security_groups=v_node['security_groups']
         )
 
-        log_green('new EC2 instance for %s is %s' % (
-            k_node,
-            instance.public_dns_name)
+        log_green(
+            'new EC2 instance for %s is %s' % (k_node,
+                                               instance.public_dns_name)
         )
 
-    v_node = cfg['git2consul']
+    v_node = CFG['git2consul']
 
     connection = connect_to_ec2(
         region=v_node['region'],
@@ -141,15 +139,15 @@ def step_01_create_hosts():
         security_groups=v_node['security_groups']
     )
 
-    log_green('new EC2 instance for %s is %s' % (
-        k_node,
-        instance.public_dns_name)
+    log_green(
+        'new EC2 instance for git2consul is %s' % instance.public_dns_name
     )
 
 
-@task
+@task  # noqa: C901
 @timecall(immediate=True)
 def step_02_deploy_tinc_cluster():
+    """ deploys the tinc cluster """
 
     tinc_cluster = lib.clusters.TincCluster()
 
@@ -161,15 +159,14 @@ def step_02_deploy_tinc_cluster():
     for stream in results:
         stream.get()
 
-
     for tinc_node in tinc_cluster.tinc_nodes:
         # we reboot the host which ocasionally gives back an ssh error message
         with settings(warn_only=True):
             tinc_node.reboot()
         sleep(30)
 
-
-    def flow(tinc_node):
+    def first_flow(tinc_node):
+        """ executes a chain of tasks """
         tinc_node.install_cron_apt()
         tinc_node.install_fail2ban()
         tinc_node.install_tinc_software()
@@ -177,12 +174,12 @@ def step_02_deploy_tinc_cluster():
     pool = Pool(processes=3)
     results = []
     for tinc_node in tinc_cluster.tinc_nodes:
-        results.append(pool.apipe(flow, tinc_node))
+        results.append(pool.apipe(first_flow, tinc_node))
     for stream in results:
         stream.get()
 
-
-    def flow(tinc_node, tinc_network):
+    def second_flow(tinc_node, tinc_network):
+        """ executes a chain of tasks """
         tinc_node.deploy_tinc_key_pair(
             tinc_network_name=tinc_network.tinc_network_name
         )
@@ -205,12 +202,11 @@ def step_02_deploy_tinc_cluster():
             tinc_network_name=tinc_network.tinc_network_name
         )
 
-
     for tinc_network in tinc_cluster.tinc_networks:
         pool = Pool(processes=3)
         results = []
         for tinc_node in tinc_network.tinc_nodes:
-            results.append(pool.apipe(flow, tinc_node, tinc_network))
+            results.append(pool.apipe(second_flow, tinc_node, tinc_network))
         for stream in results:
             stream.get()
 
@@ -223,10 +219,12 @@ def step_02_deploy_tinc_cluster():
 @task
 @timecall(immediate=True)
 def step_03_deploy_consul_cluster():
+    """ deploys the consul cluster """
 
     consul_cluster = lib.clusters.ConsulCluster()
 
     def flow(consul_node):
+        """ runs a chain of tasks """
         consul_node.deploy_consul_binary()
         consul_node.create_user_consul()
         consul_node.create_consul_directories()
@@ -234,14 +232,12 @@ def step_03_deploy_consul_cluster():
         consul_node.download_consul_web_ui_files()
         consul_node.create_consul_server_init_script()
 
-
     pool = Pool(processes=3)
     results = []
     for consul_node in consul_cluster.consul_nodes:
         results.append(pool.apipe(flow, consul_node))
     for stream in results:
         stream.get()
-
 
     consul_cluster.consul_nodes[0].create_consul_bootstrap_config()
     consul_cluster.consul_nodes[0].start_bootstrap_cluster_process()
@@ -261,7 +257,8 @@ def step_03_deploy_consul_cluster():
 
 @task
 @timecall(immediate=True)
-def step_04_deploy_git2consul_tinc_client():
+def step_04_deploy_git2consul_tinc_client():  # pylint: disable=invalid-name
+    """ deploys the git2consul tinc client """
 
     consul_cluster = lib.clusters.ConsulCluster()
     git2consul = lib.git2consul.Git2ConsulService(consul_cluster)
@@ -314,6 +311,7 @@ def step_04_deploy_git2consul_tinc_client():
 @task
 @timecall(immediate=True)
 def step_05_deploy_git2consul():
+    """ deploys the git2consul service """
     consul_cluster = lib.clusters.ConsulCluster()
     git2consul = lib.git2consul.Git2ConsulService(consul_cluster)
 
@@ -326,9 +324,11 @@ def step_05_deploy_git2consul():
 @task
 @timecall(immediate=True)
 def step_06_deploy_fsconsul():
+    """ deploys the FSConsul servers """
     fsconsul_cluster = lib.clusters.FSconsulCluster()
 
     def flow(fsconsul_node):
+        """ runs a chain of tasks """
         fsconsul_node.install_fsconsul()
         fsconsul_node.deploy_conf_fsconsul()
         fsconsul_node.deploy_init_fsconsul()
@@ -340,12 +340,15 @@ def step_06_deploy_fsconsul():
     for stream in results:
         stream.get()
 
+
 @task
 @timecall(immediate=True)
 def step_07_deploy_dhcpd():
+    """ deploys the DHCP server """
     dhcpd_cluster = lib.clusters.DHCPdCluster()
 
     def flow(dhcpd_node):
+        """ runs a chain of tasks """
         dhcpd_node.deploy_dhcpd_binary()
         dhcpd_node.deploy_conf_dhcpd()
         dhcpd_node.restart_dhcpd()
@@ -361,9 +364,11 @@ def step_07_deploy_dhcpd():
 @task
 @timecall(immediate=True)
 def step_08_deploy_dnsserver():
+    """ deploys the DNS server """
     dnsserver_cluster = lib.clusters.DNSSERVERCluster()
 
     def flow(dnsserver_node):
+        """ runs a chain of tasks """
         dnsserver_node.deploy_dnsserver_binary()
         dnsserver_node.deploy_conf_dnsserver()
         dnsserver_node.restart_dnsserver()
@@ -375,9 +380,11 @@ def step_08_deploy_dnsserver():
     for stream in results:
         stream.get()
 
+
 @task
 @timecall(immediate=True)
-def acceptance_tests():
+def acceptance_tests():  # pylint: disable=too-many-statements
+    """ runs the acceptance_tests """
     tinc_cluster = lib.clusters.TincCluster()
     consul_cluster = lib.clusters.ConsulCluster()
     git2consul = lib.git2consul.Git2ConsulService(consul_cluster)
@@ -460,6 +467,7 @@ def acceptance_tests():
 @task
 @timecall(immediate=True)
 def clean():
+    """ cleanup tasks """
     log_green('running clean')
     local('vagrant destroy -f', capture=True)
     local('rm -f *.box', capture=True)
@@ -468,22 +476,24 @@ def clean():
 @task
 @timecall(immediate=True)
 def vagrant_up():
+    """ vagrant up """
     log_green('running vagrant_up')
-    for vm in ['core01', 'core02', 'core03', 'git2consul']:
-        vagrant_up_with_retry(vm)
+    for vagrant_vm in ['core01', 'core02', 'core03', 'git2consul']:
+        vagrant_up_with_retry(vagrant_vm)
 
 
 @task
 @timecall(immediate=True)
 def vagrant_up_laptop():
+    """ boots the vagrant laptop box """
     log_green('running vagrant_up_laptop')
-    vm = 'laptop'
-    vagrant_up_with_retry(vm)
-    vagrant_provision_with_retry(vm)
+    vagrant_vm = 'laptop'
+    vagrant_up_with_retry(vagrant_vm)
+    vagrant_provision_with_retry(vagrant_vm)
     # vagrant provision will remove resolvconf and dnsmasq
     # which require a reboot of the VM
-    vagrant_halt_with_retry(vm)
-    vagrant_up_with_retry(vm)
+    vagrant_halt_with_retry(vagrant_vm)
+    vagrant_up_with_retry(vagrant_vm)
     sleep(30)
 
 
@@ -491,142 +501,199 @@ def vagrant_up_laptop():
 @timecall(immediate=True)
 @retry(stop_max_attempt_number=3, wait_fixed=30000)
 def vagrant_acceptance_tests():
+    """ runs the vagrant based acceptance tests """
     log_green('running vagrant_acceptance_tests')
 
-    for ip in ['10.254.0.1', '10.254.0.2', '10.254.0.3', '10.254.0.10']:
-        local('vagrant ssh laptop -- ping -c 1 -w 20 %s' %ip, capture=True)
+    for ip_addr in ['10.254.0.1', '10.254.0.2', '10.254.0.3', '10.254.0.10']:
+        local(
+            'vagrant ssh laptop -- ping -c 1 -w 20 %s' % ip_addr,
+            capture=True
+        )
 
-    local('vagrant ssh laptop -- /vagrant/laptop/tests/test-dns',
-            capture=True)
+    local(
+        'vagrant ssh laptop -- /vagrant/laptop/tests/test-dns',
+        capture=True
+    )
 
-    for vm in ['core01', 'core02', 'core03']:
+    for vagrant_vm in ['core01', 'core02', 'core03']:
         for svc in ['tinc', 'consul-server', 'fsconsul']:
-            local('vagrant ssh %s -- sudo systemctl status %s' % (vm, svc),
-                capture=True)
+            local(
+                'vagrant ssh %s -- sudo systemctl status %s' % (vagrant_vm,
+                                                                svc),
+                capture=True
+            )
 
     for svc in ['tinc', 'consul-client', 'git2consul']:
-        local('vagrant ssh git2consul -- sudo systemctl status %s' % svc,
-            capture=True)
+        local(
+            'vagrant ssh git2consul -- sudo systemctl status %s' % svc,
+            capture=True
+        )
 
-    local('vagrant ssh core01 -- sudo systemctl status isc-dhcp-server',
-          capture=True)
-    for vm in ['core01', 'core02']:
-        local('vagrant ssh %s -- sudo systemctl status bind9' % vm,
-              capture=True)
+    local(
+        'vagrant ssh core01 -- sudo systemctl status isc-dhcp-server',
+        capture=True
+    )
+    for vagrant_vm in ['core01', 'core02']:
+        local(
+            'vagrant ssh %s -- sudo systemctl status bind9' % vagrant_vm,
+            capture=True
+        )
+
 
 @task
 @timecall(immediate=True)
 def vagrant_reload():
+    """ reloads the vagrant boxes """
     log_green('running vagrant_reload')
-    for vm in ['core01', 'core02', 'core03', 'git2consul']:
-        vagrant_halt_with_retry(vm)
-        vagrant_up_with_retry(vm)
+    for vagrant_vm in ['core01', 'core02', 'core03', 'git2consul']:
+        vagrant_halt_with_retry(vagrant_vm)
+        vagrant_up_with_retry(vagrant_vm)
         sleep(30)
+
 
 @task
 @timecall(immediate=True)
 def vagrant_test_cycle():
+    """ runs a local test cycle using vagrant """
     log_green('running vagrant_test_cycle')
     execute(vagrant_up)
-    execute(it)
+    execute(run_it)
     execute(vagrant_reload)
-    sleep(30) # give enough time for DHCP do its business
+    sleep(30)  # give enough time for DHCP do its business
     execute(vagrant_up_laptop)
     execute(acceptance_tests)
-    sleep(30) # give enough time for the laptop to do its business
+    sleep(30)  # give enough time for the laptop to do its business
     execute(vagrant_acceptance_tests)
+
 
 @task
 @timecall(immediate=True)
 def vagrant_package():
+    """ packages a vagrant image """
     log_green('running vagrant_package')
-    for vm in ['core01', 'core02', 'core03', 'git2consul', 'laptop']:
-        local('vagrant package %s' % vm, capture=True)
-        local('mv package.box %s.box' % vm, capture=True)
+    for vagrant_vm in ['core01', 'core02', 'core03', 'git2consul', 'laptop']:
+        local('vagrant package %s' % vagrant_vm, capture=True)
+        local('mv package.box %s.box' % vagrant_vm, capture=True)
+
 
 @task
 @timecall(immediate=True)
 def vagrant_upload():
+    """ uploads vagrant image to the filestore """
     log_green('running vagrant_upload')
     # https://github.com/minio/mc
     local('wget -q -c https://dl.minio.io/client/mc/release/linux-amd64/mc')
     local('chmod +x mc')
     # SET MC_CONFIG_STRING to your S3 compatible endpoint
-    # minio http://192.168.1.51 BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
-    # s3 https://s3.amazonaws.com BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
-    # gcs  https://storage.googleapis.com BKIKJAA5BMMU2RHO6IBB V8f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v2
+    # minio http://192.168.1.51 \
+    #       BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
+    # s3 https://s3.amazonaws.com \
+    #       BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
+    # gcs https://storage.googleapis.com \
+    #       BKIKJAA5BMMU2RHO6IBB V8f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v2
     #
     # SET MC_SERVICE to the name of the S3 endpoint
     # (minio/s3/gcs) as the example above
     #
     # SET MC_PATH to the S3 bucket folder path
-    local('./mc config host add %s' % os.environ['MC_CONFIG_STRING'] )
-    for vm in ['core01', 'core02', 'core03', 'git2consul', 'laptop']:
-        local('./mc cp %s.box %s/%s/%s.box' % (
-            vm, os.environ['MC_SERVICE'], os.environ['MC_PATH'], vm
-        ) , capture=True)
+    local('./mc config host add %s' % os.environ['MC_CONFIG_STRING'])
+    for vagrant_vm in ['core01', 'core02', 'core03', 'git2consul', 'laptop']:
+        local(
+            './mc cp %s.box %s/%s/%s.box' % (vagrant_vm,
+                                             os.environ['MC_SERVICE'],
+                                             os.environ['MC_PATH'],
+                                             vagrant_vm),
+            capture=True
+        )
+
 
 @task
 @timecall(immediate=True)
 def vagrant_import_image():
+    """ imports a vagrant image from the filestore """
     log_green('running vagrant_import_image')
     # https://github.com/minio/mc
     local('wget -q -c https://dl.minio.io/client/mc/release/linux-amd64/mc')
     local('chmod +x mc')
     # SET MC_CONFIG_STRING to your S3 compatible endpoint
-    # minio http://192.168.1.51 BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
-    # s3 https://s3.amazonaws.com BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
-    # gcs  https://storage.googleapis.com BKIKJAA5BMMU2RHO6IBB V8f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v2
+    # minio http://192.168.1.51 \
+    #       BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
+    # s3 https://s3.amazonaws.com \
+    #       BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
+    # gcs https://storage.googleapis.com \
+    #       BKIKJAA5BMMU2RHO6IBB V8f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v2
     #
     # SET MC_SERVICE to the name of the S3 endpoint
     # (minio/s3/gcs) as the example above
     #
     # SET MC_PATH to the S3 bucket folder path
-    local('./mc config host add %s' % os.environ['MC_CONFIG_STRING'] )
-    for vm in ['core01', 'core02', 'core03', 'git2consul', 'laptop']:
-        local('./mc cp %s/%s/%s.box %s.box' % (
-            os.environ['MC_SERVICE'], os.environ['MC_PATH'], vm, vm
-        ) , capture=True)
-        local('vagrant box add RAILTRACK_%s_VM %s.box -f' % (vm.upper(), vm) )
+    local('./mc config host add %s' % os.environ['MC_CONFIG_STRING'])
+    for vagrant_vm in ['core01', 'core02', 'core03', 'git2consul', 'laptop']:
+        local(
+            './mc cp %s/%s/%s.box %s.box' % (os.environ['MC_SERVICE'],
+                                             os.environ['MC_PATH'],
+                                             vagrant_vm,
+                                             vagrant_vm),
+            capture=True
+        )
+        local(
+            'vagrant box add RAILTRACK_%s_VM %s.box -f' % (vagrant_vm.upper(),
+                                                           vagrant_vm)
+        )
     local('rm -f *.box')
+
 
 @task
 @timecall(immediate=True)
 def reset_consul():
+    """ resets the consul cluster """
     log_green('running reset_consul')
-    for vm in ['core01', 'core02', 'core03']:
-        local('vagrant ssh %s -- sudo rm -rf /etc/consul.d' % vm, capture=True)
+    for vagrant_vm in ['core01', 'core02', 'core03']:
+        local(
+            'vagrant ssh %s -- sudo rm -rf /etc/consul.d' % vagrant_vm,
+            capture=True
+        )
+
 
 def get_consul_encryption_key():
-    return cfg['consul']['encrypt']
+    """ returns the consul encryption key """
+    return CFG['consul']['encrypt']
+
 
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
 @timecall(immediate=True)
-def vagrant_up_with_retry(vm):
-    cmd = 'vagrant up %s --no-provision' % vm
+def vagrant_up_with_retry(vagrant_vm):
+    """ vagrant up and retry on errorx """
+    cmd = 'vagrant up %s --no-provision' % vagrant_vm
     process = Popen(shlex.split(cmd), stdout=PIPE)
     process.communicate()
     exit_code = process.wait()
     return exit_code
 
-@retry(stop_max_attempt_number=3, wait_fixed=10000)
-@timecall(immediate=True)
-def vagrant_run_with_retry(vm, command):
-    local('vagrant ssh %s -- %s' % (vm, command))
 
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
 @timecall(immediate=True)
-def vagrant_halt_with_retry(vm):
-    cmd = 'vagrant halt %s' % vm
+def vagrant_run_with_retry(vagrant_vm, command):
+    """ vagrant run and retry on errorx """
+    local('vagrant ssh %s -- %s' % (vagrant_vm, command))
+
+
+@retry(stop_max_attempt_number=3, wait_fixed=10000)
+@timecall(immediate=True)
+def vagrant_halt_with_retry(vagrant_vm):
+    """ vagrant halt and retry on errorx """
+    cmd = 'vagrant halt %s' % vagrant_vm
     process = Popen(shlex.split(cmd), stdout=PIPE)
     process.communicate()
     exit_code = process.wait()
     return exit_code
 
+
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
 @timecall(immediate=True)
-def vagrant_provision_with_retry(vm):
-    cmd = 'vagrant provision %s' % vm
+def vagrant_provision_with_retry(vagrant_vm):
+    """ vagrant provision and retry on errorx """
+    cmd = 'vagrant provision %s' % vagrant_vm
     process = Popen(shlex.split(cmd), stdout=PIPE)
     process.communicate()
     exit_code = process.wait()
@@ -636,38 +703,31 @@ def vagrant_provision_with_retry(vm):
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
 @timecall(immediate=True)
 def vagrant_box_update_with_retry():
+    """ updates the local vagrant box """
     local('vagrant box update')
 
 
 @task
 @timecall(immediate=True)
 def jenkins_build():
+    """ runs a full jenkins build """
     try:
         vagrant_box_update_with_retry()
         execute(vagrant_test_cycle)
         execute(clean)
-    except:
+    except:  # noqa: E722 pylint: disable=bare-except
         execute(clean)
         sys.exit(1)
 
 
-"""
-    ___main___
-"""
+#    ___main___
 
-cfg = lib.mycookbooks.parse_config(
+CFG = lib.mycookbooks.parse_config(
     os.getenv('CONFIG_YAML', 'config/config.yaml')
 )
 
-# tinc_network_name = cfg['roles']['core-vpn-node']['tinc_network_name']
-# tinc_network = cfg['roles']['core-vpn-node']['tinc_network']
-# tinc_netmask = cfg['roles']['core-vpn-node']['tinc_netmask']
-
-# consul_encryption_key = cfg['consul']['encrypt']
-
-
-env.user = cfg['ec2_common']['username']
-env.key_filename = cfg['ec2_common']['key_filename']
+env.user = CFG['ec2_common']['username']
+env.key_filename = CFG['ec2_common']['key_filename']
 env.connection_attempts = 10
 env.timeout = 30
 env.warn_only = False

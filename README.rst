@@ -205,7 +205,7 @@ On AWS:
 
    .. code-block:: bash
 
-      fabric -f tasks/fabfile.py it
+      fabric -f tasks/fabfile.py run_it
 
 
 Laptop Configuration
