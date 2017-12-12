@@ -1,7 +1,7 @@
 with import <nixpkgs> {};
 with pkgs.python27Packages;
 
-stdenv.mkDerivation  { 
+stdenv.mkDerivation  {
   name = "impurePythonEnv";
   buildInputs = [
     taglib
@@ -23,11 +23,11 @@ stdenv.mkDerivation  {
   export GIT_SSL_CAINFO=/etc/ssl/certs/ca-bundle.crt
    # set SOURCE_DATE_EPOCH so that we can use python wheels
    SOURCE_DATE_EPOCH=$(date +%s)
-  virtualenv --no-setuptools --clear --quiet /tmp/$PID/venv 
+  virtualenv --no-setuptools --clear --quiet /tmp/$PID/venv
   wget -q -c https://bootstrap.pypa.io/get-pip.py
   /tmp/$PID/venv/bin/python get-pip.py
-  /tmp/$PID/venv/bin/pip install --quiet -r requirements.txt 
-  /tmp/$PID/venv/bin/pip install --quiet -r dev-requirements.txt
+  /tmp/$PID/venv/bin/pip install --quiet --upgrade -r requirements.txt
+  /tmp/$PID/venv/bin/pip install --quiet --upgrade -r dev-requirements.txt
   export PATH=/tmp/$PID/venv/bin:$PATH
   ln -s /tmp/$PID/venv venv
   '';
