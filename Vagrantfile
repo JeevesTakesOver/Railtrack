@@ -13,7 +13,7 @@ Vagrant.configure("2") do |config|
   config.vm.define "core01" do |core01|
     core01.vm.box = UPSTREAM_VM_BOX
     core01.vm.hostname = 'core01'
-    core01.vm.network :private_network, ip: "192.168.56.101"
+    core01.vm.network :private_network, ip: "192.168.56.11"
     core01.ssh.insert_key = false
 
     core01.vm.provider :virtualbox do |v|
@@ -35,7 +35,7 @@ Vagrant.configure("2") do |config|
     core02.vm.box = UPSTREAM_VM_BOX
     core02.vm.hostname = 'core02'
 
-    core02.vm.network :private_network, ip: "192.168.56.102"
+    core02.vm.network :private_network, ip: "192.168.56.12"
     core02.ssh.insert_key = false
 
     core02.vm.provider :virtualbox do |v|
@@ -57,7 +57,7 @@ Vagrant.configure("2") do |config|
     core03.vm.box = UPSTREAM_VM_BOX
     core03.vm.hostname = 'core03'
 
-    core03.vm.network :private_network, ip: "192.168.56.103"
+    core03.vm.network :private_network, ip: "192.168.56.13"
     core03.ssh.insert_key = false
 
     core03.vm.provider :virtualbox do |v|
