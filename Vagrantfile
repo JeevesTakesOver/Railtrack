@@ -23,10 +23,11 @@ Vagrant.configure("2") do |config|
       v.customize ["modifyvm", :id, "--natdnsproxy1", "off"]
       v.customize ["modifyvm", :id, "--natdnshostresolver1", "off"]
       Vagrant::Util::Platform.linux? and v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
+      # https://forums.virtualbox.org/viewtopic.php?f=20&t=45245
       v.customize [
         "storagectl", :id, 
         "--name", "SATA Controller",
-        "--hostiocache", "on"
+        "--hostiocache", "off"
       ]
     end
   end
@@ -44,11 +45,12 @@ Vagrant.configure("2") do |config|
       v.customize ["modifyvm", :id, "--name", "core02"]
       v.customize ["modifyvm", :id, "--natdnsproxy1", "off"]
       v.customize ["modifyvm", :id, "--natdnshostresolver1", "off"]
+      # https://forums.virtualbox.org/viewtopic.php?f=20&t=45245
       Vagrant::Util::Platform.linux? and v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
       v.customize [
         "storagectl", :id, 
         "--name", "SATA Controller",
-        "--hostiocache", "on"
+        "--hostiocache", "off"
       ]
     end
   end
@@ -66,11 +68,12 @@ Vagrant.configure("2") do |config|
       v.customize ["modifyvm", :id, "--name", "core03"]
       v.customize ["modifyvm", :id, "--natdnsproxy1", "off"]
       v.customize ["modifyvm", :id, "--natdnshostresolver1", "off"]
+      # https://forums.virtualbox.org/viewtopic.php?f=20&t=45245
       Vagrant::Util::Platform.linux? and v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
       v.customize [
         "storagectl", :id, 
         "--name", "SATA Controller",
-        "--hostiocache", "on"
+        "--hostiocache", "off"
       ]
     end
   end
@@ -89,11 +92,12 @@ Vagrant.configure("2") do |config|
       v.customize ["modifyvm", :id, "--memory", 768]
       v.customize ["modifyvm", :id, "--name", "git2consul"]
       v.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+      # https://forums.virtualbox.org/viewtopic.php?f=20&t=45245
       Vagrant::Util::Platform.linux? and v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
       v.customize [
         "storagectl", :id, 
         "--name", "SATA Controller",
-        "--hostiocache", "on"
+        "--hostiocache", "off"
       ]
     end
   end
@@ -111,11 +115,12 @@ Vagrant.configure("2") do |config|
       v.customize ["modifyvm", :id, "--name", "laptop"]
       v.customize ["modifyvm", :id, "--natdnsproxy1", "off"]
       v.customize ["modifyvm", :id, "--natdnshostresolver1", "off"]
+      # https://forums.virtualbox.org/viewtopic.php?f=20&t=45245
       Vagrant::Util::Platform.linux? and v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
       v.customize [
         "storagectl", :id, 
         "--name", "SATA Controller",
-        "--hostiocache", "on"
+        "--hostiocache", "off"
       ]
     end
 
