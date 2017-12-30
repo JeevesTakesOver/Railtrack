@@ -77,13 +77,28 @@ from tests.acceptance import (  # pylint: disable=F0401, wrong-import-position
 @timecall(immediate=True)
 def run_it():
     """ provisions OBOR """
-    execute(step_02_deploy_tinc_cluster)
-    execute(step_03_deploy_consul_cluster)
-    execute(step_04_deploy_git2consul_tinc_client)
-    execute(step_05_deploy_git2consul)
-    execute(step_06_deploy_fsconsul)
-    execute(step_07_deploy_dhcpd)
-    execute(step_08_deploy_dnsserver)
+
+    # first deploy the tinc cluster, as all steps depend on it
+    local('fab -f tasks/fabfile.py step_02_deploy_tinc_cluster')
+
+    def tinc_flow():
+        local('fab -f tasks/fabfile.py step_03_deploy_consul_cluster')
+        local('fab -f tasks/fabfile.py step_06_deploy_fsconsul')
+        local('fab -f tasks/fabfile.py step_07_deploy_dhcpd')
+        local('fab -f tasks/fabfile.py step_08_deploy_dnsserver')
+
+    def git2consul_flow():
+        local('fab -f tasks/fabfile.py step_04_deploy_git2consul_tinc_client')
+        local('fab -f tasks/fabfile.py step_05_deploy_git2consul')
+
+
+    pool = Pool(processes=3)
+    results = []
+    results.append(pool.apipe(tinc_flow))
+    results.append(pool.apipe(git2consul_flow))
+
+    for stream in results:
+        stream.get()
 
 
 @task
