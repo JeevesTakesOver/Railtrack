@@ -159,11 +159,10 @@ def step_02_deploy_tinc_cluster():
     for stream in results:
         stream.get()
 
-    for tinc_node in tinc_cluster.tinc_nodes:
-        # we reboot the host which ocasionally gives back an ssh error message
-        with settings(warn_only=True):
+    with settings(warn_only=True):
+        for tinc_node in tinc_cluster.tinc_nodes:
             tinc_node.reboot()
-        sleep(30)
+            sleep(30)
 
     def first_flow(tinc_node):
         """ executes a chain of tasks """
@@ -469,7 +468,9 @@ def acceptance_tests():  # pylint: disable=too-many-statements
 def clean():
     """ cleanup tasks """
     log_green('running clean')
-    local('vagrant destroy -f', capture=True)
+    for vagrant_vm in ['core01', 'core02', 'core03', 'git2consul', 'laptop']:
+        local('VAGRANT_VAGRANTFILE=Vagrantfile.%s '
+              'vagrant destroy -f' % vagrant_vm, capture=True)
     local('rm -f *.box', capture=True)
 
 
@@ -478,8 +479,13 @@ def clean():
 def vagrant_up():
     """ vagrant up """
     log_green('running vagrant_up')
+    pool = Pool(processes=4)
+    results = []
     for vagrant_vm in ['core01', 'core02', 'core03', 'git2consul']:
-        vagrant_up_with_retry(vagrant_vm)
+        results.append(pool.apipe(vagrant_up_with_retry, vagrant_vm))
+
+    for stream in results:
+        stream.get()
 
 
 @task
@@ -506,36 +512,42 @@ def vagrant_acceptance_tests():
 
     for ip_addr in ['10.254.0.1', '10.254.0.2', '10.254.0.3', '10.254.0.10']:
         local(
-            'vagrant ssh laptop -- ping -c 1 -w 20 %s' % ip_addr,
+            'VAGRANT_VAGRANTFILE=Vagrantfile.laptop '
+            'vagrant ssh -- ping -c 1 -w 20 %s' % ip_addr,
             capture=True
         )
 
     local(
-        'vagrant ssh laptop -- /vagrant/laptop/tests/test-dns',
+        'VAGRANT_VAGRANTFILE=Vagrantfile.laptop '
+        'vagrant ssh -- /vagrant/laptop/tests/test-dns',
         capture=True
     )
 
     for vagrant_vm in ['core01', 'core02', 'core03']:
         for svc in ['tinc', 'consul-server', 'fsconsul']:
             local(
-                'vagrant ssh %s -- sudo systemctl status %s' % (vagrant_vm,
-                                                                svc),
+                'VAGRANT_VAGRANTFILE=Vagrantfile.%s '
+                'vagrant ssh -- sudo systemctl status %s' % (vagrant_vm,
+                                                             svc),
                 capture=True
             )
 
     for svc in ['tinc', 'consul-client', 'git2consul']:
         local(
-            'vagrant ssh git2consul -- sudo systemctl status %s' % svc,
+            'VAGRANT_VAGRANTFILE=Vagrantfile.git2consul '
+            'vagrant ssh -- sudo systemctl status %s' % svc,
             capture=True
         )
 
     local(
-        'vagrant ssh core01 -- sudo systemctl status isc-dhcp-server',
+        'VAGRANT_VAGRANTFILE=Vagrantfile.core01 '
+        'vagrant ssh -- sudo systemctl status isc-dhcp-server',
         capture=True
     )
     for vagrant_vm in ['core01', 'core02']:
         local(
-            'vagrant ssh %s -- sudo systemctl status bind9' % vagrant_vm,
+            'VAGRANT_VAGRANTFILE=Vagrantfile.%s '
+            'vagrant ssh -- sudo systemctl status bind9' % vagrant_vm,
             capture=True
         )
 
@@ -664,40 +676,24 @@ def get_consul_encryption_key():
 @timecall(immediate=True)
 def vagrant_up_with_retry(vagrant_vm):
     """ vagrant up and retry on errorx """
-    cmd = 'vagrant up %s --no-provision' % vagrant_vm
-    process = Popen(shlex.split(cmd), stdout=PIPE)
-    process.communicate()
-    exit_code = process.wait()
-    return exit_code
-
-
-@retry(stop_max_attempt_number=3, wait_fixed=10000)
-@timecall(immediate=True)
-def vagrant_run_with_retry(vagrant_vm, command):
-    """ vagrant run and retry on errorx """
-    local('vagrant ssh %s -- %s' % (vagrant_vm, command))
+    local('VAGRANT_VAGRANTFILE=Vagrantfile.%s '
+          'vagrant up --no-provision' % vagrant_vm)
 
 
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
 @timecall(immediate=True)
 def vagrant_halt_with_retry(vagrant_vm):
     """ vagrant halt and retry on errorx """
-    cmd = 'vagrant halt %s' % vagrant_vm
-    process = Popen(shlex.split(cmd), stdout=PIPE)
-    process.communicate()
-    exit_code = process.wait()
-    return exit_code
+    local('VAGRANT_VAGRANTFILE=Vagrantfile.%s '
+          'vagrant halt' % vagrant_vm)
 
 
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
 @timecall(immediate=True)
 def vagrant_provision_with_retry(vagrant_vm):
     """ vagrant provision and retry on errorx """
-    cmd = 'vagrant provision %s' % vagrant_vm
-    process = Popen(shlex.split(cmd), stdout=PIPE)
-    process.communicate()
-    exit_code = process.wait()
-    return exit_code
+    local('VAGRANT_VAGRANTFILE=Vagrantfile.%s '
+          'vagrant provision' % vagrant_vm)
 
 
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
