@@ -75,11 +75,14 @@ from tests.acceptance import (  # pylint: disable=F0401, wrong-import-position
 
 @task
 @timecall(immediate=True)
-def run_it():
+def run_it(parallel_reboot=False):
     """ provisions OBOR """
 
     # first deploy the tinc cluster, as all steps depend on it
-    local('fab -f tasks/fabfile.py step_02_deploy_tinc_cluster')
+    if parallel_reboot:
+        local('fab -f tasks/fabfile.py step_02_deploy_tinc_cluster:parallel_reboot=True')
+    else:
+        local('fab -f tasks/fabfile.py step_02_deploy_tinc_cluster')
 
     def tinc_flow():
         local('fab -f tasks/fabfile.py step_03_deploy_consul_cluster')
@@ -161,7 +164,7 @@ def step_01_create_hosts():
 
 @task  # noqa: C901
 @timecall(immediate=True)
-def step_02_deploy_tinc_cluster():
+def step_02_deploy_tinc_cluster(parallel_reboot=False):
     """ deploys the tinc cluster """
 
     tinc_cluster = lib.clusters.TincCluster()
@@ -174,10 +177,24 @@ def step_02_deploy_tinc_cluster():
     for stream in results:
         stream.get()
 
-    with settings(warn_only=True):
-        for tinc_node in tinc_cluster.tinc_nodes:
+    def reboot_flow(tinc_node):
+        with settings(warn_only=True):
             tinc_node.reboot()
             sleep(30)
+
+    if parallel_reboot:
+        concurrency = 3
+    else:
+        concurrency = 1
+
+    pool = Pool(processes=concurrency)
+    results = []
+    for tinc_node in tinc_cluster.tinc_nodes:
+        results.append(pool.apipe(reboot_flow, tinc_node))
+
+    for stream in results:
+        stream.get()
+
 
     def first_flow(tinc_node):
         """ executes a chain of tasks """
@@ -584,7 +601,7 @@ def vagrant_test_cycle():
     """ runs a local test cycle using vagrant """
     log_green('running vagrant_test_cycle')
     execute(vagrant_up)
-    execute(run_it)
+    execute(run_it, parallel_reboot=True)
     execute(vagrant_reload)
     sleep(30)  # give enough time for DHCP do its business
     execute(vagrant_up_laptop)
