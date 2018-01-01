@@ -24,7 +24,7 @@ Vagrant.configure("2") do |config|
       v.customize [
         "storagectl", :id, 
         "--name", "SATA Controller",
-        "--hostiocache", "on"
+        "--hostiocache", "off"
       ]
     end
   end
