@@ -86,6 +86,13 @@ def upgrade_kernel_and_grub(do_reboot=False, log=True):
              'apt-get update; '
              'apt-get -o Dpkg::Options::="--force-confnew" --force-yes -fuy '
              'dist-upgrade')
+        sudo('unset UCF_FORCE_CONFFOLD; '
+             'export UCF_FORCE_CONFFNEW=YES; '
+             'ucf --purge /boot/grub/menu.lst; '
+             'export DEBIAN_FRONTEND=noninteractive ; '
+             'apt-get update; '
+             'apt-get -o Dpkg::Options::="--force-confnew" --force-yes -fuy '
+             'upgrade')
         with settings(warn_only=True):
             if do_reboot:
                 if log:
