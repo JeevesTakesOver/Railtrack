@@ -511,7 +511,7 @@ def clean():
 def vagrant_up():
     """ vagrant up """
     log_green('running vagrant_up')
-    pool = Pool(processes=4)
+    pool = Pool(processes=2)
     results = []
     for vagrant_vm in ['core01', 'core02', 'core03', 'git2consul']:
         results.append(pool.apipe(vagrant_up_with_retry, vagrant_vm))
