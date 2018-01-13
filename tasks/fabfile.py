@@ -80,7 +80,7 @@ def run_it(parallel_reboot=False):
 
     # first deploy the tinc cluster, as all steps depend on it
     if parallel_reboot:
-        local('fab -f tasks/fabfile.py step_02_deploy_tinc_cluster:parallel_reboot=True')
+        local('fab -f tasks/fabfile.py step_02_deploy_tinc_cluster:parallel_reboot=False')
     else:
         local('fab -f tasks/fabfile.py step_02_deploy_tinc_cluster')
 
@@ -601,7 +601,7 @@ def vagrant_test_cycle():
     """ runs a local test cycle using vagrant """
     log_green('running vagrant_test_cycle')
     execute(vagrant_up)
-    execute(run_it, parallel_reboot=True)
+    execute(run_it, parallel_reboot=False)
     execute(vagrant_reload)
     sleep(30)  # give enough time for DHCP do its business
     execute(vagrant_up_laptop)
