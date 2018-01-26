@@ -17,3 +17,6 @@ get-pip.py
 *.box
 ctags
 mc
+*.log
+terraform*
+.terraform/
