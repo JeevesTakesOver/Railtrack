@@ -19,14 +19,11 @@
 import os
 import sys
 from time import sleep
-from subprocess import Popen, PIPE
-import shlex
 from fabric.context_managers import settings
 from fabric.api import (task, env, execute, local)
 from retrying import retry
 from profilehooks import timecall
 from pathos.multiprocessing import ProcessingPool as Pool
-from bookshelf.api_v2.ec2 import (connect_to_ec2, create_server_ec2)
 from bookshelf.api_v2.logging_helpers import log_green
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -80,7 +77,8 @@ def run_it(parallel_reboot=False):
 
     # first deploy the tinc cluster, as all steps depend on it
     if parallel_reboot:
-        local('fab -f tasks/fabfile.py step_02_deploy_tinc_cluster:parallel_reboot=True')
+        local('fab -f tasks/fabfile.py '
+              'step_02_deploy_tinc_cluster:parallel_reboot=True')
     else:
         local('fab -f tasks/fabfile.py step_02_deploy_tinc_cluster')
 
@@ -94,7 +92,6 @@ def run_it(parallel_reboot=False):
         local('fab -f tasks/fabfile.py step_04_deploy_git2consul_tinc_client')
         local('fab -f tasks/fabfile.py step_05_deploy_git2consul')
 
-
     pool = Pool(processes=3)
     results = []
     results.append(pool.apipe(tinc_flow))
@@ -103,63 +100,22 @@ def run_it(parallel_reboot=False):
     for stream in results:
         stream.get()
 
+    local('fab -f tasks/fabfile.py step_09_reboot_hosts')
+
 
 @task
 @timecall(immediate=True)
 def step_01_create_hosts():
     """ provisions new EC2 instances """
+    local("./terraform init")
+    local("echo yes | ./terraform apply")
 
-    for k_node, v_node in CFG['consul_servers']['servers'].items():
 
-        connection = connect_to_ec2(
-            region=v_node['region'],
-            access_key_id=v_node['access_key_id'],
-            secret_access_key=v_node['secret_access_key']
-        )
-
-        log_green('creating new EC2 instance for : %s' % k_node)
-
-        instance = create_server_ec2(
-            connection=connection,
-            region=v_node['region'],
-            disk_name=v_node['disk_name'],
-            disk_size=v_node['disk_size'],
-            ami=v_node['ami'],
-            key_pair=v_node['key_pair'],
-            instance_type=v_node['instance_type'],
-            tags=v_node['tags'],
-            security_groups=v_node['security_groups']
-        )
-
-        log_green(
-            'new EC2 instance for %s is %s' % (k_node,
-                                               instance.public_dns_name)
-        )
-
-    v_node = CFG['git2consul']
-
-    connection = connect_to_ec2(
-        region=v_node['region'],
-        access_key_id=v_node['access_key_id'],
-        secret_access_key=v_node['secret_access_key']
-    )
-    log_green('creating new EC2 instance for : %s' % v_node['tinc_node'])
-
-    instance = create_server_ec2(
-        connection=connection,
-        region=v_node['region'],
-        disk_name=v_node['disk_name'],
-        disk_size=v_node['disk_size'],
-        ami=v_node['ami'],
-        key_pair=v_node['key_pair'],
-        instance_type=v_node['instance_type'],
-        tags=v_node['tags'],
-        security_groups=v_node['security_groups']
-    )
-
-    log_green(
-        'new EC2 instance for git2consul is %s' % instance.public_dns_name
-    )
+@task
+@timecall(immediate=True)
+def step_10_destroy_vms():
+    """ destroys all instances """
+    local("echo yes | ./terraform destroy")
 
 
 @task  # noqa: C901
@@ -194,7 +150,6 @@ def step_02_deploy_tinc_cluster(parallel_reboot=False):
 
     for stream in results:
         stream.get()
-
 
     def first_flow(tinc_node):
         """ executes a chain of tasks """
@@ -414,6 +369,23 @@ def step_08_deploy_dnsserver():
 
 @task
 @timecall(immediate=True)
+def step_09_reboot_hosts():
+    """ reboot the VMs """
+    tinc_cluster = lib.clusters.TincCluster()
+
+    for tinc_node in tinc_cluster.tinc_nodes:
+        with settings(warn_only=True):
+            tinc_node.reboot()
+            sleep(30)
+
+    consul_cluster = lib.clusters.ConsulCluster()
+    git2consul = lib.git2consul.Git2ConsulService(consul_cluster)
+    with settings(warn_only=True):
+        git2consul.reboot()
+
+
+@task
+@timecall(immediate=True)
 def acceptance_tests():  # pylint: disable=too-many-statements
     """ runs the acceptance_tests """
     tinc_cluster = lib.clusters.TincCluster()
@@ -500,24 +472,11 @@ def acceptance_tests():  # pylint: disable=too-many-statements
 def clean():
     """ cleanup tasks """
     log_green('running clean')
-    for vagrant_vm in ['core01', 'core02', 'core03', 'git2consul', 'laptop']:
+    execute(step_10_destroy_vms)
+    for vagrant_vm in ['laptop']:
         local('VAGRANT_VAGRANTFILE=Vagrantfile.%s '
               'vagrant destroy -f' % vagrant_vm, capture=True)
     local('rm -f *.box', capture=True)
-
-
-@task
-@timecall(immediate=True)
-def vagrant_up():
-    """ vagrant up """
-    log_green('running vagrant_up')
-    pool = Pool(processes=4)
-    results = []
-    for vagrant_vm in ['core01', 'core02', 'core03', 'git2consul']:
-        results.append(pool.apipe(vagrant_up_with_retry, vagrant_vm))
-
-    for stream in results:
-        stream.get()
 
 
 @task
@@ -542,7 +501,7 @@ def vagrant_acceptance_tests():
     """ runs the vagrant based acceptance tests """
     log_green('running vagrant_acceptance_tests')
 
-    for ip_addr in ['10.254.0.1', '10.254.0.2', '10.254.0.3', '10.254.0.10']:
+    for ip_addr in ['10.254.0.1', '10.254.0.2', '10.254.0.3', '10.254.0.4']:
         local(
             'VAGRANT_VAGRANTFILE=Vagrantfile.laptop '
             'vagrant ssh -- ping -c 1 -w 20 %s' % ip_addr,
@@ -554,137 +513,6 @@ def vagrant_acceptance_tests():
         'vagrant ssh -- /vagrant/laptop/tests/test-dns',
         capture=True
     )
-
-    for vagrant_vm in ['core01', 'core02', 'core03']:
-        for svc in ['tinc', 'consul-server', 'fsconsul']:
-            local(
-                'VAGRANT_VAGRANTFILE=Vagrantfile.%s '
-                'vagrant ssh -- sudo systemctl status %s' % (vagrant_vm,
-                                                             svc),
-                capture=True
-            )
-
-    for svc in ['tinc', 'consul-client', 'git2consul']:
-        local(
-            'VAGRANT_VAGRANTFILE=Vagrantfile.git2consul '
-            'vagrant ssh -- sudo systemctl status %s' % svc,
-            capture=True
-        )
-
-    local(
-        'VAGRANT_VAGRANTFILE=Vagrantfile.core01 '
-        'vagrant ssh -- sudo systemctl status isc-dhcp-server',
-        capture=True
-    )
-    for vagrant_vm in ['core01', 'core02']:
-        local(
-            'VAGRANT_VAGRANTFILE=Vagrantfile.%s '
-            'vagrant ssh -- sudo systemctl status bind9' % vagrant_vm,
-            capture=True
-        )
-
-
-@task
-@timecall(immediate=True)
-def vagrant_reload():
-    """ reloads the vagrant boxes """
-    log_green('running vagrant_reload')
-    for vagrant_vm in ['core01', 'core02', 'core03', 'git2consul']:
-        vagrant_halt_with_retry(vagrant_vm)
-        vagrant_up_with_retry(vagrant_vm)
-        sleep(30)
-
-
-@task
-@timecall(immediate=True)
-def vagrant_test_cycle():
-    """ runs a local test cycle using vagrant """
-    log_green('running vagrant_test_cycle')
-    execute(vagrant_up)
-    execute(run_it, parallel_reboot=True)
-    execute(vagrant_reload)
-    sleep(30)  # give enough time for DHCP do its business
-    execute(vagrant_up_laptop)
-    execute(acceptance_tests)
-    sleep(30)  # give enough time for the laptop to do its business
-    execute(vagrant_acceptance_tests)
-
-
-@task
-@timecall(immediate=True)
-def vagrant_package():
-    """ packages a vagrant image """
-    log_green('running vagrant_package')
-    for vagrant_vm in ['core01', 'core02', 'core03', 'git2consul', 'laptop']:
-        local('vagrant package %s' % vagrant_vm, capture=True)
-        local('mv package.box %s.box' % vagrant_vm, capture=True)
-
-
-@task
-@timecall(immediate=True)
-def vagrant_upload():
-    """ uploads vagrant image to the filestore """
-    log_green('running vagrant_upload')
-    # https://github.com/minio/mc
-    local('wget -q -c https://dl.minio.io/client/mc/release/linux-amd64/mc')
-    local('chmod +x mc')
-    # SET MC_CONFIG_STRING to your S3 compatible endpoint
-    # minio http://192.168.1.51 \
-    #       BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
-    # s3 https://s3.amazonaws.com \
-    #       BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
-    # gcs https://storage.googleapis.com \
-    #       BKIKJAA5BMMU2RHO6IBB V8f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v2
-    #
-    # SET MC_SERVICE to the name of the S3 endpoint
-    # (minio/s3/gcs) as the example above
-    #
-    # SET MC_PATH to the S3 bucket folder path
-    local('./mc config host add %s' % os.environ['MC_CONFIG_STRING'])
-    for vagrant_vm in ['core01', 'core02', 'core03', 'git2consul', 'laptop']:
-        local(
-            './mc cp %s.box %s/%s/%s.box' % (vagrant_vm,
-                                             os.environ['MC_SERVICE'],
-                                             os.environ['MC_PATH'],
-                                             vagrant_vm),
-            capture=True
-        )
-
-
-@task
-@timecall(immediate=True)
-def vagrant_import_image():
-    """ imports a vagrant image from the filestore """
-    log_green('running vagrant_import_image')
-    # https://github.com/minio/mc
-    local('wget -q -c https://dl.minio.io/client/mc/release/linux-amd64/mc')
-    local('chmod +x mc')
-    # SET MC_CONFIG_STRING to your S3 compatible endpoint
-    # minio http://192.168.1.51 \
-    #       BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
-    # s3 https://s3.amazonaws.com \
-    #       BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
-    # gcs https://storage.googleapis.com \
-    #       BKIKJAA5BMMU2RHO6IBB V8f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v2
-    #
-    # SET MC_SERVICE to the name of the S3 endpoint
-    # (minio/s3/gcs) as the example above
-    #
-    # SET MC_PATH to the S3 bucket folder path
-    local('./mc config host add %s' % os.environ['MC_CONFIG_STRING'])
-    for vagrant_vm in ['core01', 'core02', 'core03', 'git2consul', 'laptop']:
-        local(
-            './mc cp %s/%s/%s.box %s.box' % (os.environ['MC_SERVICE'],
-                                             os.environ['MC_PATH'],
-                                             vagrant_vm,
-                                             vagrant_vm),
-            capture=True
-        )
-        local(
-            'vagrant box add RAILTRACK_%s_VM %s.box -f' % (vagrant_vm.upper(),
-                                                           vagrant_vm)
-        )
-    local('rm -f *.box')
 
 
 @task
@@ -728,20 +556,24 @@ def vagrant_provision_with_retry(vagrant_vm):
           'vagrant provision' % vagrant_vm)
 
 
-@retry(stop_max_attempt_number=3, wait_fixed=10000)
-@timecall(immediate=True)
-def vagrant_box_update_with_retry():
-    """ updates the local vagrant box """
-    local('vagrant box update')
-
-
 @task
 @timecall(immediate=True)
 def jenkins_build():
     """ runs a full jenkins build """
     try:
-        vagrant_box_update_with_retry()
-        execute(vagrant_test_cycle)
+        local('wget -c https://releases.hashicorp.com/terraform/0.11.2/'
+              'terraform_0.11.2_linux_amd64.zip')
+        local('rm -f terraform')
+        local('unzip terraform_0.11.2_linux_amd64.zip')
+        local('chmod +x terraform')
+
+        execute(step_01_create_hosts)
+        execute(run_it, parallel_reboot=True)
+        sleep(30)  # give enough time for DHCP do its business
+        execute(vagrant_up_laptop)
+        execute(acceptance_tests)
+        sleep(30)  # give enough time for the laptop to do its business
+        execute(vagrant_acceptance_tests)
         execute(clean)
     except:  # noqa: E722 pylint: disable=bare-except
         execute(clean)
