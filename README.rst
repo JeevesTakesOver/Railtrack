@@ -79,60 +79,6 @@ Requirements
 * python virtualenv
 * vagrant and virtualbox (for testing locally)
 
-Playing with Railtrack Locally/Testing using Vagrant
-====================================================
-
-To test locally using Vagrant and VirtualBox, install vagrant plugins and
-set the following environment variables:
-
-.. code-block:: bash
-
-   vagrant plugin install vagrant-hostmanager
-   vagrant plugin install hostupdater
-
-   export AWS_ACCESS_KEY_ID=VAGRANT
-   export AWS_SECRET_ACCESS_KEY=VAGRANT
-
-   export KEY_PAIR_NAME=vagrant-tinc-vpn
-   export KEY_FILENAME=$HOME/.vagrant.d/insecure_private_key
-
-   export TINC_KEY_FILENAME_CORE_NETWORK_01=key-pairs/core01.priv
-   export TINC_KEY_FILENAME_CORE_NETWORK_02=key-pairs/core02.priv
-   export TINC_KEY_FILENAME_CORE_NETWORK_03=key-pairs/core03.priv
-   export TINC_KEY_FILENAME_GIT2CONSUL=key-pairs/git2consul.priv
-   export CONFIG_YAML=config/config.yaml
-
-   make vagrant_test_cycle
-
-This will create a set of virtual machines.
-
-central vpn boxes:
-
-* ``core01``
-* ``core02``
-* ``core03``
-
-git2consul host:
-
-* ``git2consul``
-
-road warrior - laptop box:
-
-* ``laptop``
-
-
-After provisioning all hosts should be accessible from a private virtual
-network.
-Boxes ``core01``, ``core02``, ``core03``, and ``git2consul`` have fixed IP addresses.
-``laptop`` will get a dynamic IP address on connecting to the network.
-
-Run the following to login in to the laptop:
-
-.. code-block:: bash
-
-   vagrant ssh laptop
-   ifconfig -a
-
 
 Configuration and Deployment
 =============================
@@ -181,19 +127,11 @@ On AWS:
       export TINC_KEY_FILENAME_GIT2CONSUL=key_pairs/git2consul.priv
 
 #. Create the same EC2 Key-Pair in every region.
-   In this example, it is named ``tinc-vpn``.
+   In this example, it is named ``ci``.
 
-#. Create Security Groups across the different regions:
 
-   .. code-block:: bash
+#. Edit the ``main.tf`` if needed.
 
-      scripts/create-security-groups.sh
-
-#. Create VMs on EC2:
-
-   .. code-block:: bash
-
-      fabric -f tasks/fabfile.py step_01
 
 #. Edit the ``config/config.yaml`` file or set CONFIG_YAML to your config.yaml file:
 
@@ -201,11 +139,14 @@ On AWS:
    * Add the public key contents to the different blocks.
    * Choose a Consul Encryption Key.
 
+
 #. To deploy, run the following:
 
    .. code-block:: bash
 
+      fabric -f tasks/fabfile.py step_01_create_hosts
       fabric -f tasks/fabfile.py run_it
+      fabric -f tasks/fabfile.py acceptance_tests
 
 
 Laptop Configuration
@@ -229,6 +170,84 @@ just run:
       nix-shell
 
 
+Development using Vagrant and EC2
+====================================================
+
+To test locally using Vagrant and VirtualBox, install vagrant plugins and
+set the following environment variables:
+
+.. code-block:: bash
+
+   vagrant plugin install vagrant-hostmanager
+   vagrant plugin install hostupdater
+
+   export AWS_ACCESS_KEY_ID=VAGRANT
+   export AWS_SECRET_ACCESS_KEY=VAGRANT
+
+   export KEY_PAIR_NAME=vagrant-tinc-vpn
+   export KEY_FILENAME=$HOME/.vagrant.d/insecure_private_key
+
+   export TINC_KEY_FILENAME_CORE_NETWORK_01=key-pairs/core01.priv
+   export TINC_KEY_FILENAME_CORE_NETWORK_02=key-pairs/core02.priv
+   export TINC_KEY_FILENAME_CORE_NETWORK_03=key-pairs/core03.priv
+   export TINC_KEY_FILENAME_GIT2CONSUL=key-pairs/git2consul.priv
+   export CONFIG_YAML=config/config.yaml
+
+#. Prepare a python virtualenv
+
+   .. code-block:: bash
+
+      virtualenv venv
+      . venv/bin/activate
+      pip install -r requirements.txt
+
+
+#. Edit the ``main.tf`` if needed.
+
+
+#. Edit the ``config/config.yaml`` file or set CONFIG_YAML to your config.yaml file:
+
+   * Add new public DNS names, IP addresses of the EC2 instances.
+   * Add the public key contents to the different blocks.
+   * Choose a Consul Encryption Key.
+
+#. create the VMs
+
+   .. code-block:: bash
+
+   fab -f tasks/fabfile.py step_01_create_hosts
+   fab -f tasks/fabfile.py run_it
+   fab -f tasks/fabfile.py vagrant_up_laptop
+
+This will create a set of virtual machines.
+
+central vpn boxes:
+
+* ``core01``
+* ``core02``
+* ``core03``
+
+git2consul host:
+
+* ``git2consul``
+
+road warrior - laptop box:
+
+* ``laptop``
+
+
+After provisioning all hosts should be accessible from a private virtual
+network.
+Boxes ``core01``, ``core02``, ``core03``, and ``git2consul`` have fixed IP addresses.
+``laptop`` will get a dynamic IP address on connecting to the network.
+
+Run the following to login in to the laptop:
+
+.. code-block:: bash
+
+   vagrant ssh laptop
+   ifconfig -a
+
 
 Jenkins Builds on NixOS using Mesos
 =====================================
@@ -250,10 +269,6 @@ This is my Jenkins build job for RailTrack CI
       export HOME=/var/lib/mesos
       export PYTHONUNBUFFERED=no
 
-      rm -rf "/var/lib/mesos/VirtualBox VMs/core01"
-      rm -rf "/var/lib/mesos/VirtualBox VMs/core02"
-      rm -rf "/var/lib/mesos/VirtualBox VMs/core03"
-      rm -rf "/var/lib/mesos/VirtualBox VMs/git2consul"
       rm -rf "/var/lib/mesos/VirtualBox VMs/laptop"
 
       set -e	
