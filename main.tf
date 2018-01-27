@@ -52,7 +52,7 @@ resource "aws_security_group" "allow_all_udp" {
 
 resource "aws_instance" "core01" {
   ami           = "${data.aws_ami.ubuntu.id}"
-  instance_type = "t1.micro"
+  instance_type = "c3.large"
   associate_public_ip_address = true
   security_groups = [ "allow_all_tcp", "allow_all_udp" ]
   key_name = "railtrack"
@@ -70,7 +70,7 @@ resource "aws_instance" "core01" {
 
 resource "aws_instance" "core02" {
   ami           = "${data.aws_ami.ubuntu.id}"
-  instance_type = "t1.micro"
+  instance_type = "c3.large"
   associate_public_ip_address = true
   security_groups = [ "allow_all_tcp", "allow_all_udp" ]
   key_name = "railtrack"
@@ -88,7 +88,7 @@ resource "aws_instance" "core02" {
 
 resource "aws_instance" "core03" {
   ami           = "${data.aws_ami.ubuntu.id}"
-  instance_type = "t1.micro"
+  instance_type = "c3.large"
   associate_public_ip_address = true
   security_groups = [ "allow_all_tcp", "allow_all_udp" ]
   key_name = "railtrack"
@@ -106,7 +106,7 @@ resource "aws_instance" "core03" {
 
 resource "aws_instance" "git2consul" {
   ami           = "${data.aws_ami.ubuntu.id}"
-  instance_type = "t1.micro"
+  instance_type = "c3.large"
   associate_public_ip_address = true
   security_groups = [ "allow_all_tcp", "allow_all_udp" ]
   key_name = "railtrack"
