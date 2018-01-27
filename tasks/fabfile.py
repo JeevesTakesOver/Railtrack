@@ -112,13 +112,6 @@ def step_01_create_hosts():
     local("echo yes | ./terraform apply")
 
 
-@task
-@timecall(immediate=True)
-def step_10_destroy_vms():
-    """ destroys all instances """
-    local("echo yes | ./terraform destroy")
-
-
 @task  # noqa: C901
 @timecall(immediate=True)
 def step_02_deploy_tinc_cluster(parallel_reboot=False):
@@ -473,88 +466,49 @@ def acceptance_tests():  # pylint: disable=too-many-statements
 def clean():
     """ cleanup tasks """
     log_green('running clean')
-    execute(step_10_destroy_vms)
-    for vagrant_vm in ['laptop']:
-        local('VAGRANT_VAGRANTFILE=Vagrantfile.%s '
-              'vagrant destroy -f' % vagrant_vm, capture=True)
-    local('rm -f *.box', capture=True)
+    local("echo yes | ./terraform destroy")
+
 
 
 @task
 @timecall(immediate=True)
-def vagrant_up_laptop():
-    """ boots the vagrant laptop box """
-    log_green('running vagrant_up_laptop')
-    vagrant_vm = 'laptop'
-    vagrant_up_with_retry(vagrant_vm)
-    vagrant_provision_with_retry(vagrant_vm)
-    # vagrant provision will remove resolvconf and dnsmasq
-    # which require a reboot of the VM
-    vagrant_halt_with_retry(vagrant_vm)
-    vagrant_up_with_retry(vagrant_vm)
-    sleep(30)
+def provision_laptop():
+    """ provisions box """
+    log_green('running provision_laptop')
+
+    local('tar -C laptop/ -cvzf /tmp/laptop.tgz .')
+
+    with settings(
+        host_string='ubuntu@laptop-public.aws.azulinho.com',
+    ):
+        put('/tmp/laptop.tgz', '/tmp/laptop.tgz')
+        sudo('tar -C / -xf /tmp/laptop.tgz')
+        sudo('DEBIAN_FRONTEND=noninteractive apt-get -y --allow-remove-essential remove resolvconf dnsmasq')
+
+    with settings(
+        host_string='ubuntu@laptop-public.aws.azulinho.com',
+        warn_only=True
+    ):
+        sudo('reboot')
+
+
 
 
 @task
 @timecall(immediate=True)
 @retry(stop_max_attempt_number=3, wait_fixed=30000)
-def vagrant_acceptance_tests():
-    """ runs the vagrant based acceptance tests """
-    log_green('running vagrant_acceptance_tests')
+def laptop_acceptance_tests():
+    """ runs the laptop based acceptance tests """
+    log_green('running laptop_acceptance_tests')
 
-    for ip_addr in ['10.254.0.1', '10.254.0.2', '10.254.0.3', '10.254.0.4']:
-        local(
-            'VAGRANT_VAGRANTFILE=Vagrantfile.laptop '
-            'vagrant ssh -- ping -c 1 -w 20 %s' % ip_addr,
-            capture=True
-        )
+    with settings(
+        host_string='ubuntu@laptop-public.aws.azulinho.com',
+    ):
+        for ip_addr in ['10.254.0.1', '10.254.0.2', '10.254.0.3', '10.254.0.4']:
+            sudo('ping -c 1 -w 20 %s' % ip_addr)
 
-    local(
-        'VAGRANT_VAGRANTFILE=Vagrantfile.laptop '
-        'vagrant ssh -- /vagrant/laptop/tests/test-dns',
-        capture=True
-    )
+        sudo('/tests/test-dns')
 
-
-@task
-@timecall(immediate=True)
-def reset_consul():
-    """ resets the consul cluster """
-    log_green('running reset_consul')
-    for vagrant_vm in ['core01', 'core02', 'core03']:
-        local(
-            'vagrant ssh %s -- sudo rm -rf /etc/consul.d' % vagrant_vm,
-            capture=True
-        )
-
-
-def get_consul_encryption_key():
-    """ returns the consul encryption key """
-    return CFG['consul']['encrypt']
-
-
-@retry(stop_max_attempt_number=3, wait_fixed=10000)
-@timecall(immediate=True)
-def vagrant_up_with_retry(vagrant_vm):
-    """ vagrant up and retry on errorx """
-    local('VAGRANT_VAGRANTFILE=Vagrantfile.%s '
-          'vagrant up --no-provision' % vagrant_vm)
-
-
-@retry(stop_max_attempt_number=3, wait_fixed=10000)
-@timecall(immediate=True)
-def vagrant_halt_with_retry(vagrant_vm):
-    """ vagrant halt and retry on errorx """
-    local('VAGRANT_VAGRANTFILE=Vagrantfile.%s '
-          'vagrant halt' % vagrant_vm)
-
-
-@retry(stop_max_attempt_number=3, wait_fixed=10000)
-@timecall(immediate=True)
-def vagrant_provision_with_retry(vagrant_vm):
-    """ vagrant provision and retry on errorx """
-    local('VAGRANT_VAGRANTFILE=Vagrantfile.%s '
-          'vagrant provision' % vagrant_vm)
 
 
 @task
@@ -571,10 +525,10 @@ def jenkins_build():
         execute(step_01_create_hosts)
         execute(run_it, parallel_reboot=True)
         sleep(30)  # give enough time for DHCP do its business
-        execute(vagrant_up_laptop)
+        execute(provision_laptop)
         execute(acceptance_tests)
         sleep(30)  # give enough time for the laptop to do its business
-        execute(vagrant_acceptance_tests)
+        execute(laptop_acceptance_tests)
         execute(clean)
     except:  # noqa: E722 pylint: disable=bare-except
         execute(clean)
