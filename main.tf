@@ -122,6 +122,25 @@ resource "aws_instance" "git2consul" {
   ]
 }
 
+resource "aws_instance" "laptop" {
+  ami           = "${data.aws_ami.ubuntu.id}"
+  instance_type = "c3.large"
+  associate_public_ip_address = true
+  security_groups = [ "allow_all_tcp", "allow_all_udp" ]
+  key_name = "railtrack"
+
+  tags {
+    Name = "laptop"
+  }
+
+  depends_on = [ 
+    "aws_key_pair.railtrack",
+    "aws_security_group.allow_all_tcp",
+    "aws_security_group.allow_all_udp"
+  ]
+}
+
+
 
 data "aws_route53_zone" "selected" {
   name         = "aws.azulinho.com."
@@ -214,5 +233,16 @@ resource "aws_route53_record" "git2consul-public" {
   records = ["${aws_instance.git2consul.public_ip}"]
   depends_on = [ 
     "aws_instance.git2consul"
+  ]
+}
+
+resource "aws_route53_record" "laptop-public" {
+  zone_id = "${data.aws_route53_zone.selected.zone_id}"
+  name    = "laptop-public.${data.aws_route53_zone.selected.name}"
+  type    = "A"
+  ttl     = "300"
+  records = ["${aws_instance.laptop.public_ip}"]
+  depends_on = [ 
+    "aws_instance.laptop"
   ]
 }
