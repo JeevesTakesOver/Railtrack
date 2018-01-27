@@ -20,7 +20,8 @@ import os
 import sys
 from time import sleep
 from fabric.context_managers import settings
-from fabric.api import (task, env, execute, local)
+from fabric.api import (task, env, execute, local, sudo)
+from fabric.operations import put
 from retrying import retry
 from profilehooks import timecall
 from pathos.multiprocessing import ProcessingPool as Pool
