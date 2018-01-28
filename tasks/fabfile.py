@@ -114,7 +114,7 @@ def step_01_create_hosts():
 
 @task  # noqa: C901
 @timecall(immediate=True)
-def step_02_deploy_tinc_cluster(parallel_reboot=False):
+def step_02_deploy_tinc_cluster():
     """ deploys the tinc cluster """
 
     tinc_cluster = lib.clusters.TincCluster()
@@ -123,24 +123,6 @@ def step_02_deploy_tinc_cluster(parallel_reboot=False):
     results = []
     for tinc_node in tinc_cluster.tinc_nodes:
         results.append(pool.apipe(tinc_node.install_patches))
-
-    for stream in results:
-        stream.get()
-
-    def reboot_flow(tinc_node):
-        with settings(warn_only=True):
-            tinc_node.reboot()
-            sleep(30)
-
-    if parallel_reboot:
-        concurrency = 3
-    else:
-        concurrency = 1
-
-    pool = Pool(processes=concurrency)
-    results = []
-    for tinc_node in tinc_cluster.tinc_nodes:
-        results.append(pool.apipe(reboot_flow, tinc_node))
 
     for stream in results:
         stream.get()
@@ -534,7 +516,7 @@ def jenkins_build():
         local('chmod +x terraform')
 
         execute(step_01_create_hosts)
-        execute(run_it, parallel_reboot=True)
+        execute(run_it)
         sleep(30)  # give enough time for DHCP do its business
         execute(provision_laptop)
         execute(acceptance_tests)
