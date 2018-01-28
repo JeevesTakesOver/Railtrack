@@ -497,6 +497,7 @@ def laptop_acceptance_tests():
     with settings(
         host_string='ubuntu@laptop-public.aws.azulinho.com',
     ):
+        sudo('ifconfig -a | grep "10.254.0."')
         for ip_addr in ['10.254.0.1', '10.254.0.2', '10.254.0.3', '10.254.0.4']:
             sudo('ping -c 1 -w 20 %s' % ip_addr)
 
