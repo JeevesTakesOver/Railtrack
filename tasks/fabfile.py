@@ -475,14 +475,10 @@ def provision_laptop():
         host_string='ubuntu@laptop-public.aws.azulinho.com',
     ):
         put('/tmp/laptop.tgz', '/tmp/laptop.tgz')
-        sudo('tar -C / -xf /tmp/laptop.tgz')
+        sudo('tar -C / -xvf /tmp/laptop.tgz')
+        sudo('apt-get update')
         sudo('DEBIAN_FRONTEND=noninteractive apt-get -y --allow-remove-essential remove resolvconf dnsmasq')
-
-    with settings(
-        host_string='ubuntu@laptop-public.aws.azulinho.com',
-        warn_only=True
-    ):
-        sudo('reboot')
+        sudo('DEBIAN_FRONTEND=noninteractive apt-get -y install tinc')
 
 
 
