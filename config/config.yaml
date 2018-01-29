@@ -17,6 +17,7 @@ ec2_common: &ec2_common
   tags: {'name': 'core-vpn-boxes'}
   username: 'ubuntu'
   region: 'eu-west-1'
+  aws_dns_domain: 'aws.azulinho.com.'
 
 tinc_common: &tinc_common
   env: 'development'
