@@ -9,7 +9,7 @@ ec2_common: &ec2_common
   secret_access_key: <%= ENV['AWS_SECRET_ACCESS_KEY'] %>
   disk_name: '/dev/sda1'
   disk_size: '8'
-  instance_type: 't1.micro'
+  instance_type: 'c3.large'
   security_groups: [ 'ssh', 'tinc']
   ami: 'something'
   description: 'core-vpn boxes'
