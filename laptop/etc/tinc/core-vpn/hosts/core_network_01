@@ -1,5 +1,5 @@
 Name=core_network_01
-Address=192.168.56.11
+Address=core01-public.aws.azulinho.com
 Port=655
 Compression=0
 Subnet=10.254.0.1/32

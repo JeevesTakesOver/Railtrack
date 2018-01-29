@@ -14,6 +14,7 @@ stdenv.mkDerivation  {
     python27Packages.virtualenv
     python27Packages.pip
     stdenv
+    unzip
     zlib ];
   src = null;
   # When used as `nix-shell --pure`

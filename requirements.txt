@@ -53,3 +53,4 @@ profilehooks
 pathos
 dill
 six>=1.10.0
+timeout_decorator

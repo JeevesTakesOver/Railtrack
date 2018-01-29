@@ -77,61 +77,6 @@ Requirements
 ============
 
 * python virtualenv
-* vagrant and virtualbox (for testing locally)
-
-Playing with Railtrack Locally/Testing using Vagrant
-====================================================
-
-To test locally using Vagrant and VirtualBox, install vagrant plugins and
-set the following environment variables:
-
-.. code-block:: bash
-
-   vagrant plugin install vagrant-hostmanager
-   vagrant plugin install hostupdater
-
-   export AWS_ACCESS_KEY_ID=VAGRANT
-   export AWS_SECRET_ACCESS_KEY=VAGRANT
-
-   export KEY_PAIR_NAME=vagrant-tinc-vpn
-   export KEY_FILENAME=$HOME/.vagrant.d/insecure_private_key
-
-   export TINC_KEY_FILENAME_CORE_NETWORK_01=key-pairs/core01.priv
-   export TINC_KEY_FILENAME_CORE_NETWORK_02=key-pairs/core02.priv
-   export TINC_KEY_FILENAME_CORE_NETWORK_03=key-pairs/core03.priv
-   export TINC_KEY_FILENAME_GIT2CONSUL=key-pairs/git2consul.priv
-   export CONFIG_YAML=config/config.yaml
-
-   make vagrant_test_cycle
-
-This will create a set of virtual machines.
-
-central vpn boxes:
-
-* ``core01``
-* ``core02``
-* ``core03``
-
-git2consul host:
-
-* ``git2consul``
-
-road warrior - laptop box:
-
-* ``laptop``
-
-
-After provisioning all hosts should be accessible from a private virtual
-network.
-Boxes ``core01``, ``core02``, ``core03``, and ``git2consul`` have fixed IP addresses.
-``laptop`` will get a dynamic IP address on connecting to the network.
-
-Run the following to login in to the laptop:
-
-.. code-block:: bash
-
-   vagrant ssh laptop
-   ifconfig -a
 
 
 Configuration and Deployment
@@ -172,28 +117,12 @@ On AWS:
       export AWS_ACCESS_KEY_ID=MY_AWS_KEY
       export AWS_SECRET_ACCESS_KEY=MY_SECRET_KEY
 
-      export KEY_PAIR_NAME=key_pairs/tinc-vpn
-      export KEY_FILENAME=key_pairs/tinc-vpn.pem
-
-      export TINC_KEY_FILENAME_CORE_NETWORK_01=key_pairs/core01.priv
-      export TINC_KEY_FILENAME_CORE_NETWORK_02=key_pairs/core02.priv
-      export TINC_KEY_FILENAME_CORE_NETWORK_03=key_pairs/core03.priv
-      export TINC_KEY_FILENAME_GIT2CONSUL=key_pairs/git2consul.priv
-
 #. Create the same EC2 Key-Pair in every region.
-   In this example, it is named ``tinc-vpn``.
+   In this example, it is named ``ci``.
 
-#. Create Security Groups across the different regions:
 
-   .. code-block:: bash
+#. Edit the ``main.tf`` if needed.
 
-      scripts/create-security-groups.sh
-
-#. Create VMs on EC2:
-
-   .. code-block:: bash
-
-      fabric -f tasks/fabfile.py step_01
 
 #. Edit the ``config/config.yaml`` file or set CONFIG_YAML to your config.yaml file:
 
@@ -201,19 +130,22 @@ On AWS:
    * Add the public key contents to the different blocks.
    * Choose a Consul Encryption Key.
 
+
 #. To deploy, run the following:
 
    .. code-block:: bash
 
+      fabric -f tasks/fabfile.py step_01_create_hosts
       fabric -f tasks/fabfile.py run_it
+      fabric -f tasks/fabfile.py acceptance_tests
 
 
 Laptop Configuration
 =============================
 
-To consume a DHCP IP address from the VPN, see the Vagrant provision block for
+To consume a DHCP IP address from the VPN, see the provision block for
 the laptop, and the up_laptop task in the Makefile.
-The laptop vagrant VM is an example for configuring a client to obtain an IP
+The laptop VM is an example for configuring a client to obtain an IP
 address from the VPN which is automatically registered in DNS.
 
 
@@ -250,26 +182,14 @@ This is my Jenkins build job for RailTrack CI
       export HOME=/var/lib/mesos
       export PYTHONUNBUFFERED=no
 
-      rm -rf "/var/lib/mesos/VirtualBox VMs/core01"
-      rm -rf "/var/lib/mesos/VirtualBox VMs/core02"
-      rm -rf "/var/lib/mesos/VirtualBox VMs/core03"
-      rm -rf "/var/lib/mesos/VirtualBox VMs/git2consul"
       rm -rf "/var/lib/mesos/VirtualBox VMs/laptop"
 
       set -e	
 
-      vagrant plugin install vagrant-hostmanager
-      vagrant plugin install hostupdater
 
-      export AWS_ACCESS_KEY_ID=VAGRANT
-      export AWS_SECRET_ACCESS_KEY=VAGRANT
-      export KEY_PAIR_NAME=vagrant-tinc-vpn
-      export KEY_FILENAME=$HOME/.vagrant.d/insecure_private_key
+      export AWS_ACCESS_KEY_ID=XXXXXXXXXXXXXXXXXXXX
+      export AWS_SECRET_ACCESS_KEY=YYYYYYYYYYYYYYYYY
 
-      export TINC_KEY_FILENAME_CORE_NETWORK_01=key-pairs/core01.priv
-      export TINC_KEY_FILENAME_CORE_NETWORK_02=key-pairs/core02.priv
-      export TINC_KEY_FILENAME_CORE_NETWORK_03=key-pairs/core03.priv
-      export TINC_KEY_FILENAME_GIT2CONSUL=key-pairs/git2consul.priv
       export CONFIG_YAML=config/config.yaml
 
       nix-shell --run "fab -f tasks/fabfile.py jenkins_build"

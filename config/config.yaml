@@ -1,74 +1,21 @@
 # vim: ai ts=2 sts=2 et sw=2 ft=yaml fdm=indent et foldlevel=0
 #
 # config.yaml
-
 ec2_common: &ec2_common
-  key_pair: <%= ENV['KEY_PAIR_NAME'] %>
-  key_filename: <%= ENV['KEY_FILENAME'] %>
+  key_pair: 'railtrack'
+  key_filename: '~/.ssh/id_rsa.pub'
   access_key_id: <%= ENV['AWS_ACCESS_KEY_ID'] %>
   secret_access_key: <%= ENV['AWS_SECRET_ACCESS_KEY'] %>
-  disk_name: '/dev/sda1'
-  disk_size: '8'
-  instance_type: 't1.micro'
-  security_groups: [ 'ssh', 'tinc']
-  ami: 'something'
-  description: 'core-vpn boxes'
-  instance_name: 'core-vpn-box'
-  tags: {'name': 'core-vpn-boxes'}
-  username: 'vagrant'
+  instance_type: 'c3.large'
   region: 'eu-west-1'
+  aws_dns_domain: 'aws.azulinho.com.'
+  username: 'ubuntu'
 
 tinc_common: &tinc_common
   env: 'development'
   tinc_netmask: '255.255.255.0'
   tinc_network_name: 'core-vpn'
   tinc_network: '10.254.0.0'
-
-regions:
-  us-east-1: &us_east_1
-    <<: *ec2_common
-    ami: 'ami-7b290711'
-    region: 'us-east-1'
-
-  eu-central-1: &eu_central_1
-    <<: *ec2_common
-    ami: 'ami-229c844e'
-    region: 'eu-central-1'
-
-  eu-west-1: &eu_west_1
-    <<: *ec2_common
-    ami: 'ami-943583e7'
-    region: 'eu-west-1'
-
-  ap-southeast-1: &ap_southeast_1
-    <<: *ec2_common
-    ami: 'ami-ea7db289'
-    region: 'ap-southeast-1'
-
-  ap-northeast-1: &ap_northeast_1
-    <<: *ec2_common
-    ami: 'ami-0b102a65'
-    region: 'ap-northeast-1'
-
-  ap-southeast-2: &ap_southeast_2
-    <<: *ec2_common
-    ami: 'ami-7ca88c1f'
-    region: 'ap-southeast-2'
-
-  sa-east-1: &sa_east_1
-    <<: *ec2_common
-    ami: 'ami-4822a224'
-    region: 'sa-east-1'
-
-  us-west-1: &us_west_1
-    <<: *ec2_common
-    ami: 'ami-e21d6b82'
-    region: 'us-west-1'
-
-  us-west-2: &us_west_2
-    <<: *ec2_common
-    ami: 'ami-d235d3b2'
-    region: 'us-west-2'
 
 consul:
   encrypt: &consul_encryption_key 'WrR5ddqjK9M2JMCeVlD3vQ=='
@@ -78,13 +25,12 @@ roles:
     <<: *tinc_common
     servers:
       core_network_01: &core_network_01
-        <<: *us_east_1
+        <<: *ec2_common
         tinc_node: 'core_network_01'
-        region: 'us-east-1'
         tinc_ip: &core_network_01_tinc_ip '10.254.0.1'
-        public_ip_address: &core_network_01_public_ip_address '192.168.56.11'
-        public_dns_name: &core_network_01_public_dns_name '192.168.56.11' # use ip address on vagrant
-        tinc_private_key: <%= ENV['TINC_KEY_FILENAME_CORE_NETWORK_01'] %>
+        public_ip_address: &core_network_01_public_ip_address '1.1.1.1'
+        public_dns_name: &core_network_01_public_dns_name 'core01-public.aws.azulinho.com'
+        tinc_private_key: 'key-pairs/core01.priv'
         tinc_public_key: &core_network_01_tinc_public_key |
           -----BEGIN RSA PUBLIC KEY-----
           MIICCgKCAgEAozzeSS7NSQsb3s9vJS1rJAV3Z4c9ib422bAEOeK8oGcKjTKxFtaE
@@ -101,13 +47,12 @@ roles:
           -----END RSA PUBLIC KEY-----
 
       core_network_02: &core_network_02
-        <<: *us_west_2
+        <<: *ec2_common
         tinc_node: 'core_network_02'
-        region: 'us-west-2'
         tinc_ip: &core_network_02_tinc_ip '10.254.0.2'
-        public_ip_address: &core_network_02_public_ip_address '192.168.56.12'
-        public_dns_name: &core_network_02_public_dns_name '192.168.56.12' # use ip address on vagrant
-        tinc_private_key: <%= ENV['TINC_KEY_FILENAME_CORE_NETWORK_02'] %>
+        public_ip_address: &core_network_02_public_ip_address '1.1.1.1'
+        public_dns_name: &core_network_02_public_dns_name 'core02-public.aws.azulinho.com'
+        tinc_private_key: 'key-pairs/core02.priv'
         tinc_public_key: &core_network_02_tinc_public_key |
           -----BEGIN RSA PUBLIC KEY-----
           MIICCgKCAgEA1pZWhTHR20c98RkwbHjvrVlDziK49c4nlaz1IxG3byLCKCVxNWt5
@@ -124,13 +69,12 @@ roles:
           -----END RSA PUBLIC KEY-----
 
       core_network_03: &core_network_03
-        <<: *eu_west_1
+        <<: *ec2_common
         tinc_node: 'core_network_03'
-        region: 'eu-west-1'
         tinc_ip: &core_network_03_tinc_ip '10.254.0.3'
-        public_ip_address: &core_network_03_public_ip_address '192.168.56.13'
-        public_dns_name: &core_network_03_public_dns_name '192.168.56.13' # use ip address on vagrant
-        tinc_private_key: <%= ENV['TINC_KEY_FILENAME_CORE_NETWORK_03'] %>
+        public_ip_address: &core_network_03_public_ip_address '1.1.1.1'
+        public_dns_name: &core_network_03_public_dns_name 'core03-public.aws.azulinho.com'
+        tinc_private_key: 'key-pairs/core03.priv'
         tinc_public_key: &core_network_03_tinc_public_key |
           -----BEGIN RSA PUBLIC KEY-----
           MIICCgKCAgEAlimDWppur7zym2LHca10GRipVSVTz4XSPE4bEEsjI3pGkUAt1s/9
@@ -178,9 +122,8 @@ consul_servers:
 
 git2consul: &git2consul
   <<: *tinc_common
+  <<: *ec2_common
   tinc_node: 'git2consul'
-  <<: *eu_west_1
-  region: 'eu-west-1'
   service_name: 'self_service_vpn'
   git_url: 'https://github.com/JeevesTakesOver/menagerie.git'
   git_branches: '["core-vpn"]'
@@ -190,9 +133,9 @@ git2consul: &git2consul
   version: '0.6.3'
   encrypt: *consul_encryption_key
   tinc_ip: '10.254.0.4'
-  public_ip_address: '192.168.56.110'
-  public_dns_name:  '192.168.56.110' # use ip address on vagrant
-  tinc_private_key: <%= ENV['TINC_KEY_FILENAME_GIT2CONSUL'] %>
+  public_ip_address: '1.1.1.1'
+  public_dns_name:  'git2consul-public.aws.azulinho.com'
+  tinc_private_key: 'key-pairs/git2consul.priv'
   tinc_public_key: |
     -----BEGIN RSA PUBLIC KEY-----
     MIICCgKCAgEAuLiaWPdvzqfeUY8elIp+OTD0kGhSvRyO5zGbjlfdClpgz6hs8QVl
@@ -262,4 +205,7 @@ dhcpd_servers:
       ns1: *core_network_01_tinc_ip
       ns2: *core_network_02_tinc_ip
 
+laptop:
+  <<: *tinc_common
+  host_string: 'ubuntu@laptop-public.aws.azulinho.com'
 
