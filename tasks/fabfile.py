@@ -483,18 +483,20 @@ def provision_laptop():
     """ provisions box """
     log_green('running provision_laptop')
 
-    local('tar -C laptop/ -cvzf /tmp/laptop.tgz .')
+    local('tar -C laptop/ -czf /tmp/laptop.tgz .')
 
     with settings(
         host_string='ubuntu@laptop-public.aws.azulinho.com',
     ):
+        # sudo calls will timeout until we sort this one out
+        sudo('echo "127.0.0.1 `hostname`" >> /etc/hosts')
+        sudo('/etc/init.d/apparmor stop')
+        sudo('update-rc.d -f apparmor remove')
         put('/tmp/laptop.tgz', '/tmp/laptop.tgz')
-        sudo('tar -C / -xvf /tmp/laptop.tgz')
+        sudo('tar -C / -xzvf /tmp/laptop.tgz')
         sudo('apt-get update')
         sudo('DEBIAN_FRONTEND=noninteractive apt-get -y --allow-remove-essential remove resolvconf dnsmasq')
         sudo('DEBIAN_FRONTEND=noninteractive apt-get -y install tinc')
-
-
 
 
 @task
@@ -514,16 +516,15 @@ def laptop_acceptance_tests():
         sudo('/tests/test-dns')
 
 
-
 @task
 @timecall(immediate=True)
 def jenkins_build():
     """ runs a full jenkins build """
     try:
-        local('wget -c https://releases.hashicorp.com/terraform/0.11.2/'
+        local('wget -q -c https://releases.hashicorp.com/terraform/0.11.2/'
               'terraform_0.11.2_linux_amd64.zip')
         local('rm -f terraform')
-        local('unzip terraform_0.11.2_linux_amd64.zip')
+        local('unzip -qq terraform_0.11.2_linux_amd64.zip')
         local('chmod +x terraform')
 
         execute(step_01_create_hosts)
