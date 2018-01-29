@@ -117,14 +117,6 @@ On AWS:
       export AWS_ACCESS_KEY_ID=MY_AWS_KEY
       export AWS_SECRET_ACCESS_KEY=MY_SECRET_KEY
 
-      export KEY_PAIR_NAME=key_pairs/tinc-vpn
-      export KEY_FILENAME=~/.ssh/id_rsa.pub
-
-      export TINC_KEY_FILENAME_CORE_NETWORK_01=key_pairs/core01.priv
-      export TINC_KEY_FILENAME_CORE_NETWORK_02=key_pairs/core02.priv
-      export TINC_KEY_FILENAME_CORE_NETWORK_03=key_pairs/core03.priv
-      export TINC_KEY_FILENAME_GIT2CONSUL=key_pairs/git2consul.priv
-
 #. Create the same EC2 Key-Pair in every region.
    In this example, it is named ``ci``.
 
@@ -197,13 +189,7 @@ This is my Jenkins build job for RailTrack CI
 
       export AWS_ACCESS_KEY_ID=XXXXXXXXXXXXXXXXXXXX
       export AWS_SECRET_ACCESS_KEY=YYYYYYYYYYYYYYYYY
-      export KEY_PAIR_NAME=ci
-      export KEY_FILENAME=$HOME/.ssh/id_rsa.pub
 
-      export TINC_KEY_FILENAME_CORE_NETWORK_01=key-pairs/core01.priv
-      export TINC_KEY_FILENAME_CORE_NETWORK_02=key-pairs/core02.priv
-      export TINC_KEY_FILENAME_CORE_NETWORK_03=key-pairs/core03.priv
-      export TINC_KEY_FILENAME_GIT2CONSUL=key-pairs/git2consul.priv
       export CONFIG_YAML=config/config.yaml
 
       nix-shell --run "fab -f tasks/fabfile.py jenkins_build"
