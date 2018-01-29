@@ -1,11 +1,11 @@
 provider "aws" {
-  region     = "eu-west-1"
+  region     = "{{ region }}"
 }
 
 
 resource "aws_key_pair" "railtrack" {
-  key_name   = "railtrack"
-  public_key = "${file("~/.ssh/id_rsa.pub")}"
+  key_name   = "{{ key_pair }}"
+  public_key = "${file("{{ key_filename }}")}"
 }
 
 
@@ -52,10 +52,10 @@ resource "aws_security_group" "allow_all_udp" {
 
 resource "aws_instance" "core01" {
   ami           = "${data.aws_ami.ubuntu.id}"
-  instance_type = "c3.large"
+  instance_type = "{{instance_type}}"
   associate_public_ip_address = true
   security_groups = [ "allow_all_tcp", "allow_all_udp" ]
-  key_name = "railtrack"
+  key_name = "{{ key_pair }}"
 
   tags {
     Name = "core01"
@@ -70,10 +70,10 @@ resource "aws_instance" "core01" {
 
 resource "aws_instance" "core02" {
   ami           = "${data.aws_ami.ubuntu.id}"
-  instance_type = "c3.large"
+  instance_type = "{{instance_type}}"
   associate_public_ip_address = true
   security_groups = [ "allow_all_tcp", "allow_all_udp" ]
-  key_name = "railtrack"
+  key_name = "{{ key_pair }}"
 
   tags {
     Name = "core02"
@@ -88,10 +88,10 @@ resource "aws_instance" "core02" {
 
 resource "aws_instance" "core03" {
   ami           = "${data.aws_ami.ubuntu.id}"
-  instance_type = "c3.large"
+  instance_type = "{{instance_type}}"
   associate_public_ip_address = true
   security_groups = [ "allow_all_tcp", "allow_all_udp" ]
-  key_name = "railtrack"
+  key_name = "{{ key_pair }}"
 
   tags {
     Name = "core03"
@@ -106,10 +106,10 @@ resource "aws_instance" "core03" {
 
 resource "aws_instance" "git2consul" {
   ami           = "${data.aws_ami.ubuntu.id}"
-  instance_type = "c3.large"
+  instance_type = "{{instance_type}}"
   associate_public_ip_address = true
   security_groups = [ "allow_all_tcp", "allow_all_udp" ]
-  key_name = "railtrack"
+  key_name = "{{ key_pair }}"
 
   tags {
     Name = "git2consul"
@@ -124,10 +124,10 @@ resource "aws_instance" "git2consul" {
 
 resource "aws_instance" "laptop" {
   ami           = "${data.aws_ami.ubuntu.id}"
-  instance_type = "c3.large"
+  instance_type = "{{instance_type}}"
   associate_public_ip_address = true
   security_groups = [ "allow_all_tcp", "allow_all_udp" ]
-  key_name = "railtrack"
+  key_name = "{{ key_pair }}"
 
   tags {
     Name = "laptop"
@@ -143,7 +143,7 @@ resource "aws_instance" "laptop" {
 
 
 data "aws_route53_zone" "selected" {
-  name         = "aws.azulinho.com."
+  name         = "{{aws_dns_domain}}"
   private_zone = false
 }
 

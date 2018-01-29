@@ -26,6 +26,7 @@ from retrying import retry
 from profilehooks import timecall
 from pathos.multiprocessing import ProcessingPool as Pool
 from bookshelf.api_v2.logging_helpers import log_green
+from jinja2 import Template
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -108,6 +109,19 @@ def run_it(parallel_reboot=False):
 @timecall(immediate=True)
 def step_01_create_hosts():
     """ provisions new EC2 instances """
+    t = Template(open('templates/main.tf.j2').read())
+
+    with open('main.tf' ,'w') as f:
+        f.write(
+            t.render(
+                key_pair = CFG['ec2_common']['key_pair'],
+                key_filename = CFG['ec2_common']['key_filename'],
+                aws_dns_domain = CFG['ec2_common']['aws_dns_domain'],
+                region = CFG['ec2_common']['region'],
+                instance_type = CFG['ec2_common']['instance_type']
+            )
+        )
+
     local("./terraform init")
     local("echo yes | ./terraform apply")
 
