@@ -486,7 +486,7 @@ def provision_laptop():
     local('tar -C laptop/ -czf /tmp/laptop.tgz .')
 
     with settings(
-        host_string='ubuntu@laptop-public.aws.azulinho.com',
+        host_string=CFG['laptop']['host_string']
     ):
         # sudo calls will timeout until we sort this one out
         sudo('echo "127.0.0.1 `hostname`" >> /etc/hosts')
