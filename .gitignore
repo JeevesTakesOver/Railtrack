@@ -20,3 +20,4 @@ mc
 *.log
 terraform*
 .terraform/
+main.tf
