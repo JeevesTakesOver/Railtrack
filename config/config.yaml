@@ -3,8 +3,8 @@
 # config.yaml
 
 ec2_common: &ec2_common
-  key_pair: <%= ENV['KEY_PAIR_NAME'] %>
-  key_filename: <%= ENV['KEY_FILENAME'] %>
+  key_pair: 'railtrack'
+  key_filename: '~/.ssh/id_rsa.pub'
   access_key_id: <%= ENV['AWS_ACCESS_KEY_ID'] %>
   secret_access_key: <%= ENV['AWS_SECRET_ACCESS_KEY'] %>
   disk_name: '/dev/sda1'
@@ -84,7 +84,7 @@ roles:
         tinc_ip: &core_network_01_tinc_ip '10.254.0.1'
         public_ip_address: &core_network_01_public_ip_address '1.1.1.1'
         public_dns_name: &core_network_01_public_dns_name 'core01-public.aws.azulinho.com'
-        tinc_private_key: <%= ENV['TINC_KEY_FILENAME_CORE_NETWORK_01'] %>
+        tinc_private_key: 'key-pairs/core01.priv'
         tinc_public_key: &core_network_01_tinc_public_key |
           -----BEGIN RSA PUBLIC KEY-----
           MIICCgKCAgEAozzeSS7NSQsb3s9vJS1rJAV3Z4c9ib422bAEOeK8oGcKjTKxFtaE
@@ -107,7 +107,7 @@ roles:
         tinc_ip: &core_network_02_tinc_ip '10.254.0.2'
         public_ip_address: &core_network_02_public_ip_address '1.1.1.1'
         public_dns_name: &core_network_02_public_dns_name 'core02-public.aws.azulinho.com'
-        tinc_private_key: <%= ENV['TINC_KEY_FILENAME_CORE_NETWORK_02'] %>
+        tinc_private_key: 'key-pairs/core02.priv'
         tinc_public_key: &core_network_02_tinc_public_key |
           -----BEGIN RSA PUBLIC KEY-----
           MIICCgKCAgEA1pZWhTHR20c98RkwbHjvrVlDziK49c4nlaz1IxG3byLCKCVxNWt5
@@ -130,7 +130,7 @@ roles:
         tinc_ip: &core_network_03_tinc_ip '10.254.0.3'
         public_ip_address: &core_network_03_public_ip_address '1.1.1.1'
         public_dns_name: &core_network_03_public_dns_name 'core03-public.aws.azulinho.com'
-        tinc_private_key: <%= ENV['TINC_KEY_FILENAME_CORE_NETWORK_03'] %>
+        tinc_private_key: 'key-pairs/core03.priv'
         tinc_public_key: &core_network_03_tinc_public_key |
           -----BEGIN RSA PUBLIC KEY-----
           MIICCgKCAgEAlimDWppur7zym2LHca10GRipVSVTz4XSPE4bEEsjI3pGkUAt1s/9
@@ -192,7 +192,7 @@ git2consul: &git2consul
   tinc_ip: '10.254.0.4'
   public_ip_address: '1.1.1.1'
   public_dns_name:  'git2consul-public.aws.azulinho.com'
-  tinc_private_key: <%= ENV['TINC_KEY_FILENAME_GIT2CONSUL'] %>
+  tinc_private_key: 'key-pairs/git2consul.priv'
   tinc_public_key: |
     -----BEGIN RSA PUBLIC KEY-----
     MIICCgKCAgEAuLiaWPdvzqfeUY8elIp+OTD0kGhSvRyO5zGbjlfdClpgz6hs8QVl
