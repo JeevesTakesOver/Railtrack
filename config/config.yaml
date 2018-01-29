@@ -263,4 +263,7 @@ dhcpd_servers:
       ns1: *core_network_01_tinc_ip
       ns2: *core_network_02_tinc_ip
 
+laptop:
+  <<: *tinc_common
+  host_string: 'ubuntu@laptop-public.aws.azulinho.com'
 
