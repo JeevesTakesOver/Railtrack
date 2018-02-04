@@ -6,7 +6,7 @@ ec2_common: &ec2_common
   key_filename: '~/.ssh/id_rsa.pub'
   access_key_id: <%= ENV['AWS_ACCESS_KEY_ID'] %>
   secret_access_key: <%= ENV['AWS_SECRET_ACCESS_KEY'] %>
-  instance_type: 'c3.large'
+  instance_type: 't1.micro'
   region: 'eu-west-1'
   aws_dns_domain: 'aws.azulinho.com.'
   username: 'ubuntu'
