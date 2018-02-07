@@ -388,6 +388,7 @@ def step_09_reboot_hosts():
 
 @task
 @timecall(immediate=True)
+@retry(stop_max_attempt_number=3, wait_fixed=30000)
 def acceptance_tests():  # pylint: disable=too-many-statements
     """ runs the acceptance_tests """
     tinc_cluster = lib.clusters.TincCluster()
