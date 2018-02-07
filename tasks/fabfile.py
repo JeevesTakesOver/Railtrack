@@ -72,6 +72,17 @@ from tests.acceptance import (  # pylint: disable=F0401, wrong-import-position
 )  # pylint: disable=F0401, wrong-import-position
 
 
+@timecall(immediate=True)
+def install_terraform():
+    """ Installs Terraform locally """
+
+    local('wget -q -c https://releases.hashicorp.com/terraform/0.11.2/'
+          'terraform_0.11.2_linux_amd64.zip')
+    local('rm -f terraform')
+    local('unzip -qq terraform_0.11.2_linux_amd64.zip')
+    local('chmod +x terraform')
+
+
 @task
 @timecall(immediate=True)
 def run_it(parallel_reboot=False):
@@ -111,17 +122,18 @@ def step_01_create_hosts():
     """ provisions new EC2 instances """
     t = Template(open('templates/main.tf.j2').read())
 
-    with open('main.tf' ,'w') as f:
+    with open('main.tf', 'w') as f:
         f.write(
             t.render(
-                key_pair = CFG['ec2_common']['key_pair'],
-                key_filename = CFG['ec2_common']['key_filename'],
-                aws_dns_domain = CFG['ec2_common']['aws_dns_domain'],
-                region = CFG['ec2_common']['region'],
-                instance_type = CFG['ec2_common']['instance_type']
+                key_pair=CFG['ec2_common']['key_pair'],
+                key_filename=CFG['ec2_common']['key_filename'],
+                aws_dns_domain=CFG['ec2_common']['aws_dns_domain'],
+                region=CFG['ec2_common']['region'],
+                instance_type=CFG['ec2_common']['instance_type']
             )
         )
 
+    install_terraform()
     local("./terraform init")
     local("echo yes | ./terraform apply")
 
@@ -392,80 +404,114 @@ def acceptance_tests():  # pylint: disable=too-many-statements
     pool = Pool()
     results = []
     for node in nodes:
-        results.append(pool.apipe(test_that_patches_were_installed_on, node))
-        results.append(pool.apipe(test_that_cron_apt_is_installed_on, node))
-        results.append(pool.apipe(test_that_tinc_binaries_were_installed_on, node))
-        results.append(pool.apipe(test_that_tinc_is_running_on, node))
-        results.append(pool.apipe(test_that_fail2ban_is_running_on, node))
+        results.append(pool.apipe(
+            test_that_patches_were_installed_on, node))
+        results.append(pool.apipe(
+            test_that_cron_apt_is_installed_on, node))
+        results.append(pool.apipe(
+            test_that_tinc_binaries_were_installed_on, node))
+        results.append(pool.apipe(
+            test_that_tinc_is_running_on, node))
+        results.append(pool.apipe(
+            test_that_fail2ban_is_running_on, node))
 
     for network in tinc_cluster.tinc_networks:
-        results.append(pool.apipe(test_that_tinc_key_pairs_were_deployed_on, network))
-        results.append(pool.apipe(test_that_tinc_conf_files_were_deployed_on, network))
-        results.append(pool.apipe(test_that_tinc_interface_files_were_deployed_on, network))
-        results.append(pool.apipe(test_that_tinc_nets_boot_files_were_deployed_on, network))
-        results.append(pool.apipe(test_that_tinc_peers_host_files_were_deployed_on, network))
-        results.append(pool.apipe(test_that_tinc_peers_are_pingable_on, network))
-
+        results.append(pool.apipe(
+            test_that_tinc_key_pairs_were_deployed_on, network))
+        results.append(pool.apipe(
+            test_that_tinc_conf_files_were_deployed_on, network))
+        results.append(pool.apipe(
+            test_that_tinc_interface_files_were_deployed_on, network))
+        results.append(pool.apipe(
+            test_that_tinc_nets_boot_files_were_deployed_on, network))
+        results.append(pool.apipe(
+            test_that_tinc_peers_host_files_were_deployed_on, network))
+        results.append(pool.apipe(
+            test_that_tinc_peers_are_pingable_on, network))
 
     nodes = []
     nodes.extend(consul_cluster.consul_nodes)
     nodes.append(git2consul)
 
     for node in nodes:
-        results.append(pool.apipe(test_that_consul_binaries_were_installed_on, node))
-        results.append(pool.apipe(test_that_consul_user_exists_on, node))
-        results.append(pool.apipe(test_that_consul_directories_exists_on, node))
-        results.append(pool.apipe(test_that_consul_web_ui_files_exists_on, node))
-        results.append(pool.apipe(test_that_consul_peers_are_reachable_on, node))
-
+        results.append(pool.apipe(
+            test_that_consul_binaries_were_installed_on, node))
+        results.append(pool.apipe(
+            test_that_consul_user_exists_on, node))
+        results.append(pool.apipe(
+            test_that_consul_directories_exists_on, node))
+        results.append(pool.apipe(
+            test_that_consul_web_ui_files_exists_on, node))
+        results.append(pool.apipe(
+            test_that_consul_peers_are_reachable_on, node))
 
     nodes = consul_cluster.consul_nodes
     for node in nodes:
-        results.append(pool.apipe(test_that_consul_server_config_exists_on, node))
-        results.append(pool.apipe(test_that_consul_server_init_exists_on, node))
-        results.append(pool.apipe(test_that_consul_server_is_running_on, node))
-        results.append(pool.apipe(test_that_fail2ban_is_running_on, node))
-
+        results.append(pool.apipe(
+            test_that_consul_server_config_exists_on, node))
+        results.append(pool.apipe(
+            test_that_consul_server_init_exists_on, node))
+        results.append(pool.apipe(
+            test_that_consul_server_is_running_on, node))
+        results.append(pool.apipe(
+            test_that_fail2ban_is_running_on, node))
 
     nodes = fsconsul_cluster.fsconsul_nodes
     for node in nodes:
-        results.append(pool.apipe(test_that_fsconsul_binaries_were_installed_on, node))
-        results.append(pool.apipe(test_that_fsconsul_init_exists_on, node))
-        results.append(pool.apipe(test_that_fsconsul_service_is_running_on, node))
-        results.append(pool.apipe(test_that_fail2ban_is_running_on, node))
+        results.append(pool.apipe(
+            test_that_fsconsul_binaries_were_installed_on, node))
+        results.append(pool.apipe(
+            test_that_fsconsul_init_exists_on, node))
+        results.append(pool.apipe(
+            test_that_fsconsul_service_is_running_on, node))
+        results.append(pool.apipe(
+            test_that_fail2ban_is_running_on, node))
 
+    results.append(pool.apipe(
+        test_that_consul_client_config_exists_on, git2consul))
+    results.append(pool.apipe(
+        test_that_consul_client_init_exists_on, git2consul))
+    results.append(pool.apipe(
+        test_that_consul_client_is_running_on, git2consul))
 
-    results.append(pool.apipe(test_that_consul_client_config_exists_on, git2consul))
-    results.append(pool.apipe(test_that_consul_client_init_exists_on, git2consul))
-    results.append(pool.apipe(test_that_consul_client_is_running_on, git2consul))
+    results.append(pool.apipe(
+        test_that_git2consul_service_is_running_on, git2consul))
+    results.append(pool.apipe(
+        test_that_git2consul_init_exists_on, git2consul))
 
-    results.append(pool.apipe(test_that_git2consul_service_is_running_on, git2consul))
-    results.append(pool.apipe(test_that_git2consul_init_exists_on, git2consul))
-
-    results.append(pool.apipe(test_that_fail2ban_is_running_on, git2consul))
-
+    results.append(pool.apipe(
+        test_that_fail2ban_is_running_on, git2consul))
 
     nodes = dhcpd_cluster.dhcpd_nodes
 
     for node in nodes:
-        results.append(pool.apipe(test_that_dhcpd_binaries_were_installed_on, node))
-        results.append(pool.apipe(test_that_dhcpd_server_config_exists_on, node))
-        results.append(pool.apipe(test_that_dhcpd_server_init_exists_on, node))
-        results.append(pool.apipe(test_that_dhcpd_server_is_running_on, node))
-        results.append(pool.apipe(test_that_fail2ban_is_running_on, node))
+        results.append(pool.apipe(
+            test_that_dhcpd_binaries_were_installed_on, node))
+        results.append(pool.apipe(
+            test_that_dhcpd_server_config_exists_on, node))
+        results.append(pool.apipe(
+            test_that_dhcpd_server_init_exists_on, node))
+        results.append(pool.apipe(
+            test_that_dhcpd_server_is_running_on, node))
+        results.append(pool.apipe(
+            test_that_fail2ban_is_running_on, node))
 
     nodes = dnsserver_cluster.dnsserver_nodes
 
     for node in nodes:
-        results.append(pool.apipe(test_that_dnsserver_binaries_were_installed_on, node))
-        results.append(pool.apipe(test_that_dnsserver_server_config_exists_on, node))
-        results.append(pool.apipe(test_that_dnsserver_server_init_exists_on, node))
-        results.append(pool.apipe(test_that_dnsserver_server_is_running_on, node))
-        results.append(pool.apipe(test_that_fail2ban_is_running_on, node))
+        results.append(pool.apipe(
+            test_that_dnsserver_binaries_were_installed_on, node))
+        results.append(pool.apipe(
+            test_that_dnsserver_server_config_exists_on, node))
+        results.append(pool.apipe(
+            test_that_dnsserver_server_init_exists_on, node))
+        results.append(pool.apipe(
+            test_that_dnsserver_server_is_running_on, node))
+        results.append(pool.apipe(
+            test_that_fail2ban_is_running_on, node))
 
     for stream in results:
         stream.get()
-
 
 
 @task
@@ -473,8 +519,8 @@ def acceptance_tests():  # pylint: disable=too-many-statements
 def clean():
     """ cleanup tasks """
     log_green('running clean')
+    install_terraform()
     local("echo yes | ./terraform destroy")
-
 
 
 @task
@@ -495,7 +541,8 @@ def provision_laptop():
         put('/tmp/laptop.tgz', '/tmp/laptop.tgz')
         sudo('tar -C / -xzvf /tmp/laptop.tgz')
         sudo('apt-get update')
-        sudo('DEBIAN_FRONTEND=noninteractive apt-get -y --allow-remove-essential remove resolvconf dnsmasq')
+        sudo('DEBIAN_FRONTEND=noninteractive '
+             'apt-get -y --allow-remove-essential remove resolvconf dnsmasq')
         sudo('DEBIAN_FRONTEND=noninteractive apt-get -y install tinc')
 
 
@@ -510,7 +557,9 @@ def laptop_acceptance_tests():
         host_string='ubuntu@laptop-public.aws.azulinho.com',
     ):
         sudo('ifconfig -a | grep "10.254.0."')
-        for ip_addr in ['10.254.0.1', '10.254.0.2', '10.254.0.3', '10.254.0.4']:
+        for ip_addr in [
+            '10.254.0.1', '10.254.0.2', '10.254.0.3', '10.254.0.4'
+        ]:
             sudo('ping -c 1 -w 20 %s' % ip_addr)
 
         sudo('/tests/test-dns')
@@ -521,12 +570,7 @@ def laptop_acceptance_tests():
 def jenkins_build():
     """ runs a full jenkins build """
     try:
-        local('wget -q -c https://releases.hashicorp.com/terraform/0.11.2/'
-              'terraform_0.11.2_linux_amd64.zip')
-        local('rm -f terraform')
-        local('unzip -qq terraform_0.11.2_linux_amd64.zip')
-        local('chmod +x terraform')
-
+        install_terraform()
         execute(step_01_create_hosts)
         execute(run_it)
         sleep(30)  # give enough time for DHCP do its business
