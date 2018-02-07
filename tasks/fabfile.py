@@ -72,6 +72,17 @@ from tests.acceptance import (  # pylint: disable=F0401, wrong-import-position
 )  # pylint: disable=F0401, wrong-import-position
 
 
+@timecall(immediate=True)
+def install_terraform():
+    """ Installs Terraform locally """
+
+    local('wget -q -c https://releases.hashicorp.com/terraform/0.11.2/'
+          'terraform_0.11.2_linux_amd64.zip')
+    local('rm -f terraform')
+    local('unzip -qq terraform_0.11.2_linux_amd64.zip')
+    local('chmod +x terraform')
+
+
 @task
 @timecall(immediate=True)
 def run_it(parallel_reboot=False):
