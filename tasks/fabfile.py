@@ -122,6 +122,7 @@ def step_01_create_hosts():
             )
         )
 
+    install_terraform()
     local("./terraform init")
     local("echo yes | ./terraform apply")
 
@@ -473,6 +474,7 @@ def acceptance_tests():  # pylint: disable=too-many-statements
 def clean():
     """ cleanup tasks """
     log_green('running clean')
+    install_terraform()
     local("echo yes | ./terraform destroy")
 
 
@@ -521,12 +523,7 @@ def laptop_acceptance_tests():
 def jenkins_build():
     """ runs a full jenkins build """
     try:
-        local('wget -q -c https://releases.hashicorp.com/terraform/0.11.2/'
-              'terraform_0.11.2_linux_amd64.zip')
-        local('rm -f terraform')
-        local('unzip -qq terraform_0.11.2_linux_amd64.zip')
-        local('chmod +x terraform')
-
+        install_terraform()
         execute(step_01_create_hosts)
         execute(run_it)
         sleep(30)  # give enough time for DHCP do its business
