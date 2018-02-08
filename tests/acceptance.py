@@ -622,25 +622,7 @@ def test_that_git2consul_service_is_running_on(git2consul):
 
 
 @echo
-@retry(stop_max_attempt_number=3, wait_fixed=5000)
-def test_that_dhcpd_binaries_were_installed_on(dhcpd_server):
-
-    with settings(
-        hide('stdout', 'running'),
-        host_string=dhcpd_server.host_string,
-        private_key_filename=dhcpd_server.private_key
-    ):
-        print(" running on %s" % dhcpd_server.host_string)
-
-        cmd = sudo('systemctl is-active dhcpd')
-        try:
-            assert 'active' in cmd.stdout
-        except Exception as detail:
-            raise Exception("%s %s" % (cmd.stdout, detail))
-
-
-@echo
-@retry(stop_max_attempt_number=3, wait_fixed=5000)
+@retry(stop_max_attempt_number=3, wait_fixed=30000)
 def test_that_dhcpd_server_is_running_on(dhcpd_node):
 
     with settings(
@@ -751,25 +733,6 @@ def test_that_dnsserver_server_is_running_on(dnsserver_node):
             assert cmd.return_code == 0
         except Exception as detail:
             raise Exception("%s %s" % (cmd.return_code, detail))
-
-
-@echo
-@retry(stop_max_attempt_number=3, wait_fixed=5000)
-def test_that_dnsserver_binaries_were_installed_on(dnsserver_node):
-
-    line = 'named'
-    with settings(
-        hide('stdout', 'running'),
-        host_string=dnsserver_node.host_string,
-        private_key_filename=dnsserver_node.private_key
-    ):
-        print(" running on %s" % dnsserver_node.host_string)
-
-        cmd = sudo('which named')
-        try:
-            assert line in cmd.stdout
-        except Exception as detail:
-            raise Exception("%s %s" % (cmd.stdout, detail))
 
 
 @echo
