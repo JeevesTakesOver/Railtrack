@@ -17,9 +17,6 @@ import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-import lib.clusters
-import lib.git2consul
-
 from fabric.context_managers import settings, hide
 from fabric.api import sudo, env
 
