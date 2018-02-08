@@ -227,7 +227,7 @@ def test_that_tinc_peers_host_files_were_deployed_on(tinc_network):
 
 
 @echo
-@retry(stop_max_attempt_number=3, wait_fixed=5000)
+@retry(stop_max_attempt_number=3, wait_fixed=30000)
 def test_that_tinc_is_running_on(node):
 
     with settings(
@@ -251,7 +251,7 @@ def test_that_tinc_is_running_on(node):
 
 
 @echo
-@retry(stop_max_attempt_number=3, wait_fixed=5000)
+@retry(stop_max_attempt_number=3, wait_fixed=30000)
 def test_that_fail2ban_is_running_on(node):
 
     with settings(
@@ -275,7 +275,7 @@ def test_that_fail2ban_is_running_on(node):
 
 
 @echo
-@retry(stop_max_attempt_number=3, wait_fixed=5000)
+@retry(stop_max_attempt_number=3, wait_fixed=30000)
 def test_that_tinc_peers_are_pingable_on(tinc_network):
 
     for tinc_node in tinc_network.tinc_nodes:
@@ -454,7 +454,7 @@ def test_that_consul_client_init_exists_on(consul_node):
 
 
 @echo
-@retry(stop_max_attempt_number=3, wait_fixed=5000)
+@retry(stop_max_attempt_number=3, wait_fixed=30000)
 def test_that_consul_server_is_running_on(consul_node):
 
     with settings(
@@ -479,7 +479,7 @@ def test_that_consul_server_is_running_on(consul_node):
 
 
 @echo
-@retry(stop_max_attempt_number=3, wait_fixed=5000)
+@retry(stop_max_attempt_number=3, wait_fixed=30000)
 def test_that_consul_client_is_running_on(consul_node):
 
     with settings(
@@ -504,7 +504,7 @@ def test_that_consul_client_is_running_on(consul_node):
 
 
 @echo
-@retry(stop_max_attempt_number=3, wait_fixed=5000)
+@retry(stop_max_attempt_number=3, wait_fixed=30000)
 def test_that_consul_peers_are_reachable_on(consul_node):
 
     with settings(
@@ -523,7 +523,7 @@ def test_that_consul_peers_are_reachable_on(consul_node):
 
 
 @echo
-@retry(stop_max_attempt_number=3, wait_fixed=5000)
+@retry(stop_max_attempt_number=3, wait_fixed=30000)
 def test_that_fsconsul_service_is_running_on(consul_node):
 
     with settings(
@@ -603,7 +603,7 @@ def test_that_git2consul_init_exists_on(git2consul):
 
 
 @echo
-@retry(stop_max_attempt_number=3, wait_fixed=5000)
+@retry(stop_max_attempt_number=3, wait_fixed=30000)
 def test_that_git2consul_service_is_running_on(git2consul):
 
     with settings(
@@ -735,7 +735,7 @@ def test_that_dnsserver_binaries_were_installed_on(dnsserver_server):
 
 
 @echo
-@retry(stop_max_attempt_number=3, wait_fixed=5000)
+@retry(stop_max_attempt_number=3, wait_fixed=30000)
 def test_that_dnsserver_server_is_running_on(dnsserver_node):
 
     with settings(
