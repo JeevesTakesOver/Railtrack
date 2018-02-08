@@ -324,8 +324,9 @@ def test_that_consul_user_exists_on(consul_node):
     ):
         print(" running on %s" % consul_node.host_string)
 
+        cmd = sudo('getent passwd consul')
         try:
-            assert sudo('getent passwd consul').return_code == 0
+            assert cmd.return_code == 0
         except Exception as detail:
             raise Exception("%s %s" % (cmd.return_code, detail))
 
