@@ -7,7 +7,7 @@ Requires=consul-server.service
 User=root
 Group=root
 # allow 30 seconds for consul to establish a quorum
-ExecStart=/bin/sh -ec 'sleep 30 ; /usr/local/bin/fsconsul -configFile=/etc/fsconsul.json'
+ExecStart=/usr/local/bin/fsconsul -configFile=/etc/fsconsul.json
 
 ExecReload=/bin/kill -HUP $MAINPID
 ExecStop=/bin/kill $MAINPID

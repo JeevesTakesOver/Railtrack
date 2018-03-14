@@ -7,7 +7,7 @@ Requires=tinc.service
 User=consul
 Group=consul
 # allow 30 seconds for tinc to acquire an ip address
-ExecStart=/bin/sh -ec "sleep 30 ; /usr/local/bin/consul agent -config-dir /etc/consul.d/client -bind {{ node_ip }}"
+ExecStart=/usr/local/bin/consul agent -config-dir /etc/consul.d/client -bind {{ node_ip }}
 ExecReload=/bin/kill -HUP $MAINPID
 ExecStop=/bin/kill $MAINPID
 KillMode=process
