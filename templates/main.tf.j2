@@ -152,7 +152,7 @@ resource "aws_route53_record" "core01-private" {
   zone_id = "${data.aws_route53_zone.selected.zone_id}"
   name    = "core01-private.${data.aws_route53_zone.selected.name}"
   type    = "A"
-  ttl     = "300"
+  ttl     = "30"
   records = ["${aws_instance.core01.private_ip}"]
   depends_on = [ 
     "aws_instance.core01"
@@ -163,7 +163,7 @@ resource "aws_route53_record" "core02-private" {
   zone_id = "${data.aws_route53_zone.selected.zone_id}"
   name    = "core02-private.${data.aws_route53_zone.selected.name}"
   type    = "A"
-  ttl     = "300"
+  ttl     = "30"
   records = ["${aws_instance.core02.private_ip}"]
   depends_on = [ 
     "aws_instance.core02"
@@ -174,7 +174,7 @@ resource "aws_route53_record" "core03-private" {
   zone_id = "${data.aws_route53_zone.selected.zone_id}"
   name    = "core03-private.${data.aws_route53_zone.selected.name}"
   type    = "A"
-  ttl     = "300"
+  ttl     = "30"
   records = ["${aws_instance.core03.private_ip}"]
   depends_on = [ 
     "aws_instance.core03"
@@ -185,7 +185,7 @@ resource "aws_route53_record" "git2consul-private" {
   zone_id = "${data.aws_route53_zone.selected.zone_id}"
   name    = "git2consul-private.${data.aws_route53_zone.selected.name}"
   type    = "A"
-  ttl     = "300"
+  ttl     = "30"
   records = ["${aws_instance.git2consul.private_ip}"]
   depends_on = [ 
     "aws_instance.git2consul"
@@ -196,7 +196,7 @@ resource "aws_route53_record" "core01-public" {
   zone_id = "${data.aws_route53_zone.selected.zone_id}"
   name    = "core01-public.${data.aws_route53_zone.selected.name}"
   type    = "A"
-  ttl     = "300"
+  ttl     = "30"
   records = ["${aws_instance.core01.public_ip}"]
   depends_on = [ 
     "aws_instance.core01"
@@ -207,7 +207,7 @@ resource "aws_route53_record" "core02-public" {
   zone_id = "${data.aws_route53_zone.selected.zone_id}"
   name    = "core02-public.${data.aws_route53_zone.selected.name}"
   type    = "A"
-  ttl     = "300"
+  ttl     = "30"
   records = ["${aws_instance.core02.public_ip}"]
   depends_on = [ 
     "aws_instance.core02"
@@ -218,7 +218,7 @@ resource "aws_route53_record" "core03-public" {
   zone_id = "${data.aws_route53_zone.selected.zone_id}"
   name    = "core03-public.${data.aws_route53_zone.selected.name}"
   type    = "A"
-  ttl     = "300"
+  ttl     = "30"
   records = ["${aws_instance.core03.public_ip}"]
   depends_on = [ 
     "aws_instance.core03"
@@ -229,7 +229,7 @@ resource "aws_route53_record" "git2consul-public" {
   zone_id = "${data.aws_route53_zone.selected.zone_id}"
   name    = "git2consul-public.${data.aws_route53_zone.selected.name}"
   type    = "A"
-  ttl     = "300"
+  ttl     = "30"
   records = ["${aws_instance.git2consul.public_ip}"]
   depends_on = [ 
     "aws_instance.git2consul"
@@ -240,7 +240,7 @@ resource "aws_route53_record" "laptop-public" {
   zone_id = "${data.aws_route53_zone.selected.zone_id}"
   name    = "laptop-public.${data.aws_route53_zone.selected.name}"
   type    = "A"
-  ttl     = "300"
+  ttl     = "30"
   records = ["${aws_instance.laptop.public_ip}"]
   depends_on = [ 
     "aws_instance.laptop"
