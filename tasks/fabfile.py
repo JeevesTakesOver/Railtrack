@@ -73,6 +73,7 @@ from tests.acceptance import (  # pylint: disable=F0401, wrong-import-position
 
 
 @timecall(immediate=True)
+@retry(stop_max_attempt_number=3, wait_fixed=30000)
 def install_terraform():
     """ Installs Terraform locally """
 
@@ -118,6 +119,7 @@ def run_it(parallel_reboot=False):
 
 @task
 @timecall(immediate=True)
+@retry(stop_max_attempt_number=3, wait_fixed=30000)
 def step_01_create_hosts():
     """ provisions new EC2 instances """
     t = Template(open('templates/main.tf.j2').read())
@@ -140,6 +142,7 @@ def step_01_create_hosts():
 
 @task  # noqa: C901
 @timecall(immediate=True)
+@retry(stop_max_attempt_number=3, wait_fixed=30000)
 def step_02_deploy_tinc_cluster():
     """ deploys the tinc cluster """
 
@@ -206,6 +209,7 @@ def step_02_deploy_tinc_cluster():
 
 @task
 @timecall(immediate=True)
+@retry(stop_max_attempt_number=3, wait_fixed=30000)
 def step_03_deploy_consul_cluster():
     """ deploys the consul cluster """
 
@@ -245,6 +249,7 @@ def step_03_deploy_consul_cluster():
 
 @task
 @timecall(immediate=True)
+@retry(stop_max_attempt_number=3, wait_fixed=30000)
 def step_04_deploy_git2consul_tinc_client():  # pylint: disable=invalid-name
     """ deploys the git2consul tinc client """
 
@@ -298,6 +303,7 @@ def step_04_deploy_git2consul_tinc_client():  # pylint: disable=invalid-name
 
 @task
 @timecall(immediate=True)
+@retry(stop_max_attempt_number=3, wait_fixed=30000)
 def step_05_deploy_git2consul():
     """ deploys the git2consul service """
     consul_cluster = lib.clusters.ConsulCluster()
@@ -311,6 +317,7 @@ def step_05_deploy_git2consul():
 
 @task
 @timecall(immediate=True)
+@retry(stop_max_attempt_number=3, wait_fixed=30000)
 def step_06_deploy_fsconsul():
     """ deploys the FSConsul servers """
     fsconsul_cluster = lib.clusters.FSconsulCluster()
@@ -331,6 +338,7 @@ def step_06_deploy_fsconsul():
 
 @task
 @timecall(immediate=True)
+@retry(stop_max_attempt_number=3, wait_fixed=30000)
 def step_07_deploy_dhcpd():
     """ deploys the DHCP server """
     dhcpd_cluster = lib.clusters.DHCPdCluster()
@@ -351,6 +359,7 @@ def step_07_deploy_dhcpd():
 
 @task
 @timecall(immediate=True)
+@retry(stop_max_attempt_number=3, wait_fixed=30000)
 def step_08_deploy_dnsserver():
     """ deploys the DNS server """
     dnsserver_cluster = lib.clusters.DNSSERVERCluster()
@@ -517,6 +526,7 @@ def acceptance_tests():  # pylint: disable=too-many-statements
 
 @task
 @timecall(immediate=True)
+@retry(stop_max_attempt_number=3, wait_fixed=30000)
 def clean():
     """ cleanup tasks """
     log_green('running clean')
@@ -526,6 +536,7 @@ def clean():
 
 @task
 @timecall(immediate=True)
+@retry(stop_max_attempt_number=3, wait_fixed=30000)
 def provision_laptop():
     """ provisions box """
     log_green('running provision_laptop')
