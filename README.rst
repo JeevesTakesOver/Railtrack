@@ -1,6 +1,9 @@
 .. image:: https://badge.waffle.io/Azulinho/Board.png?label=ready&title=Ready 
  :target: https://waffle.io/Azulinho/Board 
  :alt: 'Stories in Ready'
+.. image:: https://api.codacy.com/project/badge/Grade/5360e3ee056647b3931899b2079a4be7
+   :alt: Codacy Badge
+   :target: https://app.codacy.com/app/Azulinho/Railtrack?utm_source=github.com&utm_medium=referral&utm_content=JeevesTakesOver/Railtrack&utm_campaign=badger
 
 
 =========
@@ -218,8 +221,3 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-
-.. image:: https://api.codacy.com/project/badge/Grade/5360e3ee056647b3931899b2079a4be7
-   :alt: Codacy Badge
-   :target: https://app.codacy.com/app/Azulinho/Railtrack?utm_source=github.com&utm_medium=referral&utm_content=JeevesTakesOver/Railtrack&utm_campaign=badger
