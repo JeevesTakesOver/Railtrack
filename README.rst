@@ -13,11 +13,12 @@ Railtrack
 * A building block for a cloud based infrastructure.
 * A distributed L2 switch across multiple cloud providers.
 * A resilient, meshed VPN/Network layer.
+* Built on `Tinc <https://www.tinc-vpn.org/>`_
 * Self-serviceable.
 * Access control provided by GitHub/GitLab/Bitbucket.
 * Manages Pets
 * Static or DHCP IP allocation of Pets on the VPN.
-* Python based, built on Fabric
+* Python based, built on Fabric and `Bookshelf <https://github.com/pyBookshelf/bookshelf>`_
 
 
 The code in this repository provisions a fully meshed, geographically
@@ -40,16 +41,14 @@ central tinc nodes, and add the public key to the following repository:
 
 https://github.com/JeevesTakesOver/menagerie
 
-Each branch in the repository above represents a virtual network, with a
-different addressing space.
-
 
 Workflow
 ========
 
 The expected workflow is that any team member can add new team members or
 services to the virtual network by commiting the tinc public keys of the tinc
-clients to the github repository and submit a pull request.
+clients to the `github repository <https://github.com/JeevesTakesOver/menagerie>`_ 
+and submit a pull request.
 This PR is peer reviewed and once approved, brings the new service online on
 the virtual network.
 This workflow allows for teams to self-service themselves, adding new hosts or 
@@ -76,6 +75,31 @@ Usage cases
 * Mobile workers
 
 
+How does it do it?
+===================
+
+There are four hosts:
+
+3 core hosts (core01..03), running `tinc <https://www.tinc-vpn.org/>`_, `isc-dhcp-server <https://www.isc.org/>`_, `bind9 <http://www.bind9.net/>`_, `consul <https://www.consul.io/>`_, `fsconsul <https://github.com/Cimpress-MCP/fsconsul>`_.
+
+1 git2consul host, running `git2consul <https://github.com/breser/git2consul>`_ and a `consul client <https://www.consul.io/>`_
+
+
+As soon a public key is commited to the `menagerie github repository <https://github.com/JeevesTakesOver/menagerie>`_
+a process running in the `git2consul host <https://github.com/breser/git2consul>`_ 
+will forward the new key to a `consul cluster <https://www.consul.io/>`_ running on the three core vpn nodes.
+On each one of the core vpn master, another process `fsconsul <https://github.com/Cimpress-MCP/fsconsul>`_
+will write down the ssh keys into the `tinc host directories <https://www.tinc-vpn.org/>`_ and reload the daemons.
+At this point the new tinc client is allowed access to the VPN and all its services.
+
+On the client side, the tinc interface-up scripts will ask for a DHCP ip address through the VPN link.
+On the first core-vpn server `isc-dhcp-server <https://www.isc.org/downloads/dhcp/>`_ is running and will
+provide an ip address from a DHCP pool. That ip address is then added to a local `bind9 <http://www.bind9.net/>`_
+DNS zone.
+The DNS servers are configured as caching DNS servers and will forward queries upstream, so they can be configured on
+the client as the main DNS servers, or simply for the VPN zone domains.
+
+
 Requirements
 ============
 
@@ -86,6 +110,7 @@ Configuration and Deployment
 =============================
 
 #. Prepare a python virtualenv
+
    .. code-block:: bash
 
       virtualenv venv
@@ -121,13 +146,13 @@ On AWS:
       export AWS_SECRET_ACCESS_KEY=MY_SECRET_KEY
 
 #. Create the same EC2 Key-Pair in every region.
-   In this example, it is named ``ci``.
+   In this example, it is named ``railtrack``.
 
 
-#. Edit the ``main.tf`` if needed.
+#. Edit the `main.tf <https://github.com/JeevesTakesOver/Railtrack/blob/feature/improve_docs/templates/main.tf.j2>`_ if needed.
 
 
-#. Edit the ``config/config.yaml`` file or set CONFIG_YAML to your config.yaml file:
+#. Edit the `config/config.yaml <https://github.com/JeevesTakesOver/Railtrack/blob/feature/improve_docs/config/config.yaml>`_ file or set CONFIG_YAML to your config.yaml file:
 
    * Add new public DNS names, IP addresses of the EC2 instances.
    * Add the public key contents to the different blocks.
@@ -155,7 +180,7 @@ address from the VPN which is automatically registered in DNS.
 NIXOS
 ==============================
 
-My local development laptop is NIXOS, there's is a local default.nix file to
+My local development laptop is `NixOS <https://nixos.org/>`_, there's is a local default.nix file to
 help with consuming the python code in a more standard virtualenv way.
 
 just run:
@@ -174,21 +199,12 @@ This is my Jenkins build job for RailTrack CI
 
       #!/usr/bin/env bash
 
-      # Jenkins job parameters:
-      # IMPORT_VMS
-      # UPLOAD_VMS
-      # RESET_CONSUL
-      # BRANCH_TO_BUILD
-
       source /etc/profile
 
       export HOME=/var/lib/mesos
       export PYTHONUNBUFFERED=no
 
-      rm -rf "/var/lib/mesos/VirtualBox VMs/laptop"
-
       set -e	
-
 
       export AWS_ACCESS_KEY_ID=XXXXXXXXXXXXXXXXXXXX
       export AWS_SECRET_ACCESS_KEY=YYYYYYYYYYYYYYYYY
@@ -196,12 +212,6 @@ This is my Jenkins build job for RailTrack CI
       export CONFIG_YAML=config/config.yaml
 
       nix-shell --run "fab -f tasks/fabfile.py jenkins_build"
-
-
-Future Work
-===========
-
-Provide a REST api service for management of the access key git repository.
 
 
 License
