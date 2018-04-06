@@ -7,11 +7,11 @@ subnet {{ subnet }} netmask {{ netmask }}            # zone to issue addresses f
 {
         option domain-name "{{ domain_name }}.";              # the domain name issued
         option domain-name-servers {{ nameservers }};        # name servers issued
-        option subnet-mask 255.255.255.0;
+        option subnet-mask {{ netmask }};
         allow unknown-clients;
 
         pool {
-                deny dynamic bootp clients;         
+                deny dynamic bootp clients;
                 range {{ pool_range }};
                 max-lease-time 300;
                 default-lease-time 120;
@@ -22,10 +22,10 @@ on commit {
         set ClientIP = binary-to-ascii(10, 8, ".", leased-address);
         set ClientMac = binary-to-ascii(16, 8, ":", substring(hardware, 1, 6));
         set ClientHost = pick-first-value( 
-		option fqdn.hostname,
-		option host-name,
-		"none"
-	);
+        option fqdn.hostname,
+        option host-name,
+        "none"
+    );
         log(concat("Commit: IP: ", ClientIP,  " Hostname: ", ClientHost, " Mac: ", ClientMac));
         execute("/etc/dhcp/add2dns", ClientIP, ClientHost);
 }
@@ -34,10 +34,10 @@ on expiry {
         set ClientIP = binary-to-ascii(10, 8, ".", leased-address);
         set ClientMac = binary-to-ascii(16, 8, ":", substring(hardware, 1, 6));
         set ClientHost = pick-first-value( 
-		option fqdn.hostname,
-		option host-name,
-		"none"
-	);
+        option fqdn.hostname,
+        option host-name,
+        "none"
+    );
         log(concat("Commit: IP: ", ClientIP,  " Hostname: ", ClientHost, " Mac: ", ClientMac));
         execute("/etc/dhcp/removefromdns", ClientIP, ClientHost);
 }
@@ -46,10 +46,10 @@ on release {
         set ClientIP = binary-to-ascii(10, 8, ".", leased-address);
         set ClientMac = binary-to-ascii(16, 8, ":", substring(hardware, 1, 6));
         set ClientHost = pick-first-value( 
-		option fqdn.hostname,
-		option host-name,
-		"none"
-	);
+        option fqdn.hostname,
+        option host-name,
+        "none"
+    );
         log(concat("Commit: IP: ", ClientIP,  " Hostname: ", ClientHost, " Mac: ", ClientMac));
         execute("/etc/dhcp/removefromdns", ClientIP, ClientHost);
 }
