@@ -22,9 +22,10 @@ stdenv.mkDerivation  {
   PID=$$
   unset http_proxy
   export GIT_SSL_CAINFO=/etc/ssl/certs/ca-bundle.crt
-   # set SOURCE_DATE_EPOCH so that we can use python wheels
-   SOURCE_DATE_EPOCH=$(date +%s)
+  # set SOURCE_DATE_EPOCH so that we can use python wheels
+  SOURCE_DATE_EPOCH=$(date +%s)
   virtualenv --no-setuptools --clear --quiet /tmp/$PID/venv
+  rm -f get-pip.py
   wget -q -c https://bootstrap.pypa.io/get-pip.py
   /tmp/$PID/venv/bin/python get-pip.py
   /tmp/$PID/venv/bin/pip install --quiet --upgrade -r requirements.txt
