@@ -109,35 +109,6 @@ Requirements
 Configuration and Deployment
 =============================
 
-#. Prepare a python virtualenv
-
-   .. code-block:: bash
-
-      virtualenv venv
-      . venv/bin/activate
-      pip install -r requirements.txt
-
-
-On AWS:
-
-#. Generate private and public keys for the different hosts:
-
-   .. code-block:: bash
-
-      openssl genrsa -out key_pairs/core01.priv 4096
-      openssl rsa -pubout -in key_pairs/core01.priv -out key_pairs/core01.pub
-
-      openssl genrsa -out key_pairs/core02.priv 4096
-      openssl rsa -pubout -in key_pairs/core02.priv -out key_pairs/core02.pub
-
-      openssl genrsa -out key_pairs/core03.priv 4096
-      openssl rsa -pubout -in key_pairs/core03.priv -out key_pairs/core03.pub
-
-      openssl genrsa -out key_pairs/git2consul.priv 4096
-      openssl rsa -pubout -in key_pairs/git2consul.priv -out key_pairs/git2consul.pub
-
-      ssh-keygen -f key_pairs/tinc-vpn.pem
-
 #. Set the following environment variables
 
    .. code-block:: bash
@@ -145,18 +116,89 @@ On AWS:
       export AWS_ACCESS_KEY_ID=MY_AWS_KEY
       export AWS_SECRET_ACCESS_KEY=MY_SECRET_KEY
 
-#. Create the same EC2 Key-Pair in every region.
-   In this example, it is named ``railtrack``.
+#. prepare a git repository for holding your secrets
+
+   .. code-block:: bash
+
+      mkdir deployment-secrets
+      cd deployment-secrets
+      echo "Railtrack" > .gitignore
+      git init
+      git add .gitignore
+      git commit -m "ignore all Railtrack dir"
+      mkdir key-pairs
 
 
-#. Edit the `main.tf <https://github.com/JeevesTakesOver/Railtrack/blob/feature/improve_docs/templates/main.tf.j2>`_ if needed.
+#. Generate private and public keys for the different hosts:
 
+   .. code-block:: bash
 
-#. Edit the `config/config.yaml <https://github.com/JeevesTakesOver/Railtrack/blob/feature/improve_docs/config/config.yaml>`_ file or set CONFIG_YAML to your config.yaml file:
+      openssl genrsa -out key-pairs/core01.priv 4096
+      openssl rsa -pubout -in key-pairs/core01.priv -out key-pairs/core01.pub
 
+      openssl genrsa -out key-pairs/core02.priv 4096
+      openssl rsa -pubout -in key-pairs/core02.priv -out key-pairs/core02.pub
+
+      openssl genrsa -out key-pairs/core03.priv 4096
+      openssl rsa -pubout -in key-pairs/core03.priv -out key-pairs/core03.pub
+
+      openssl genrsa -out key-pairs/git2consul.priv 4096
+      openssl rsa -pubout -in key-pairs/git2consul.priv -out key-pairs/git2consul.pub
+
+      ssh-keygen -f key-pairs/tinc-vpn.pem
+
+#. commit your keys
+
+   .. code-block:: bash
+
+      git add key-pairs
+      git commit -m "added tinc keys"
+
+#. clone the Railtrack repo
+
+   .. code-block:: bash
+
+      git clone git@github.com:JeevesTakesOver/Railtrack.git
+      cd Railtrack
+      git checkout v1.0.1
+      cd -
+
+#. copy the config.yaml sample file
+
+   .. code-block:: bash
+
+      cp Railtrack/config/config.yaml config.yaml
+      export CONFIG_YAML=$PWD/config.yaml
+
+#. edit the config.yaml deployment file:
+
+   * update any file paths so that they point to the newly created key-pair files
    * Add new public DNS names, IP addresses of the EC2 instances.
    * Add the public key contents to the different blocks.
    * Choose a Consul Encryption Key.
+
+   .. code-block:: bash
+
+      vim $CONFIG_YAML
+
+#. commit your config.yaml
+
+   .. code-block:: bash
+
+      git add config.yaml
+      git commit -m "added config.yaml"
+
+#. Prepare a python virtualenv
+
+   .. code-block:: bash
+
+      cd Railtrack
+      virtualenv venv
+      . venv/bin/activate
+      pip install -r requirements.txt
+
+
+#. Edit the `main.tf <https://github.com/JeevesTakesOver/Railtrack/blob/feature/improve_docs/templates/main.tf.j2>`_ if needed.
 
 
 #. To deploy, run the following:
