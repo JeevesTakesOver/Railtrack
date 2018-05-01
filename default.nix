@@ -12,7 +12,6 @@ stdenv.mkDerivation  {
     libzip
     python27Full
     python27Packages.virtualenv
-    python27Packages.pip
     stdenv
     unzip
     zlib ];
