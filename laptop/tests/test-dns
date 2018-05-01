@@ -4,4 +4,3 @@ ADDRESS=`ifconfig core-vpn | grep 'inet addr' | cut -f2 -d ":" | cut -f 1 -d " "
 host ${ADDRESS}.tinc-core-vpn 10.254.0.1
 
 host mesos-masters.tinc-core-vpn
-host wildcard.service.tinc-core-vpn

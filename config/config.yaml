@@ -159,7 +159,7 @@ dnsserver_servers:
     mesos-masters  IN      A     10.254.0.11 
                    IN      A     10.254.0.12 
                    IN      A     10.254.0.13 
-    *.service      IN      CNAME mesos-masters.tinc-core-vpn.
+    *.service      IN      CNAME leader.mesos.
   servers: 
     node1: &dnsserver01
       <<: *core_network_01
