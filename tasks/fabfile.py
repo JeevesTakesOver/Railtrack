@@ -521,7 +521,7 @@ def acceptance_tests():  # pylint: disable=too-many-statements
             test_that_fail2ban_is_running_on, node))
 
     for stream in results:
-        stream.get()
+        stream.get(timeout=180)
 
 
 @task
