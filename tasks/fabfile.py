@@ -411,7 +411,7 @@ def acceptance_tests():  # pylint: disable=too-many-statements
     nodes.extend(tinc_cluster.tinc_nodes)
     nodes.append(git2consul)
 
-    pool = Pool()
+    pool = Pool(processes=3)
     results = []
     for node in nodes:
         results.append(pool.apipe(
