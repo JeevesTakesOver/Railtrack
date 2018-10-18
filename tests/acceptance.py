@@ -22,6 +22,10 @@ from fabric.api import sudo, env
 
 from retrying import retry
 
+# reopen stdout file descriptor with write mode
+# and 0 as the buffer size (unbuffered)
+sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+
 env.abort_on_prompts = True
 env.colorize_errors = True
 env.disable_known_hosts = True
