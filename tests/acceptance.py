@@ -49,7 +49,10 @@ def echo(func):
 @retry(stop_max_attempt_number=3, wait_fixed=5000)
 def test_that_patches_were_installed_on(node):
 
-    line = '0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded'
+    line = ''.join(
+        ['No packages found that can be upgraded unattended',
+         ' and no pending auto-removals']
+    )
 
     with settings(
         hide('stdout', 'running'),
@@ -58,7 +61,7 @@ def test_that_patches_were_installed_on(node):
     ):
         print(" running on %s" % node.host_string)
 
-        cmd = sudo('apt-get -u upgrade --assume-no')
+        cmd = sudo('unattended-upgrades --dry-run -v')
         try:
             assert line in cmd.stdout
         except Exception as detail:
