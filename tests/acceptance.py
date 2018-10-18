@@ -755,12 +755,12 @@ def test_that_dnsserver_server_config_exists_on(dnsserver_node):
 
         cmd = sudo('ls -l /var/cache/bind/')
         try:
-            assert 'tinc-core-vpn.hosts' in cmd.stdout
+            assert 'core-vpn.hosts' in cmd.stdout
         except Exception as detail:
             raise Exception("%s %s" % (cmd.stdout, detail))
 
         try:
-            assert '0.254.10.in-addr.arpa.hosts' in cmd.stdout
+            assert '.in-addr.arpa.hosts' in cmd.stdout
         except Exception as detail:
             raise Exception("%s %s" % (cmd.stdout, detail))
 
