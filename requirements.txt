@@ -2,7 +2,7 @@ Babel==2.0
 boto==2.38.0
 cuisine==0.7.10
 debtcollector==0.7.0
-decorator==4.0.2
+decorator==4.3.0
 ecdsa==0.13
 envassert==0.1.8.
 Fabric==1.10.2
