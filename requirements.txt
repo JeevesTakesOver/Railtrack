@@ -23,7 +23,7 @@ oslo.config==2.2.0
 oslo.i18n==2.3.0
 oslo.serialization==1.8.0
 oslo.utils==2.2.0
-paramiko==1.15.2
+paramiko==2.4.2
 path.py==7.6
 pbr==1.5.0
 pexpect==3.3
