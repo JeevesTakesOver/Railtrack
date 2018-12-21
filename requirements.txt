@@ -7,7 +7,7 @@ ecdsa==0.13
 envassert==0.1.8.
 Fabric==1.10.2
 funcsigs==0.4
-ipython==4.0.0
+ipython==7.2.0
 ipython-genutils==0.1.0
 iso8601==0.1.10
 keyring==5.4
