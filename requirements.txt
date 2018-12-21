@@ -46,7 +46,7 @@ stevedore==1.7.0
 traitlets==4.0.0
 wheel==0.24.0
 wrapt==1.10.5
-jinja2
+jinja2==2.10
 pyBookshelf
 retrying
 profilehooks
