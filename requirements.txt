@@ -45,7 +45,7 @@ simplejson==3.8.0
 stevedore==1.7.0
 traitlets==4.0.0
 wheel==0.24.0
-wrapt==1.10.5
+wrapt==1.10.11
 jinja2
 pyBookshelf
 retrying
