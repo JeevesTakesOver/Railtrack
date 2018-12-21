@@ -1,6 +1,6 @@
 Babel==2.0
 boto==2.38.0
-cuisine==0.7.10
+cuisine==0.7.15
 debtcollector==0.7.0
 decorator==4.0.2
 ecdsa==0.13
