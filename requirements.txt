@@ -5,7 +5,7 @@ debtcollector==0.7.0
 decorator==4.0.2
 ecdsa==0.13
 envassert==0.1.8.
-Fabric==1.10.2
+Fabric==2.4.0
 funcsigs==0.4
 ipython==4.0.0
 ipython-genutils==0.1.0
