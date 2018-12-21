@@ -22,6 +22,10 @@ from fabric.api import sudo, env
 
 from retrying import retry
 
+# reopen stdout file descriptor with write mode
+# and 0 as the buffer size (unbuffered)
+sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+
 env.abort_on_prompts = True
 env.colorize_errors = True
 env.disable_known_hosts = True
@@ -45,7 +49,10 @@ def echo(func):
 @retry(stop_max_attempt_number=3, wait_fixed=5000)
 def test_that_patches_were_installed_on(node):
 
-    line = '0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded'
+    line = ''.join(
+        ['No packages found that can be upgraded unattended',
+         ' and no pending auto-removals']
+    )
 
     with settings(
         hide('stdout', 'running'),
@@ -54,7 +61,7 @@ def test_that_patches_were_installed_on(node):
     ):
         print(" running on %s" % node.host_string)
 
-        cmd = sudo('apt-get -u upgrade --assume-no')
+        cmd = sudo('unattended-upgrades --dry-run -v')
         try:
             assert line in cmd.stdout
         except Exception as detail:
@@ -748,12 +755,12 @@ def test_that_dnsserver_server_config_exists_on(dnsserver_node):
 
         cmd = sudo('ls -l /var/cache/bind/')
         try:
-            assert 'tinc-core-vpn.hosts' in cmd.stdout
+            assert 'core-vpn.hosts' in cmd.stdout
         except Exception as detail:
             raise Exception("%s %s" % (cmd.stdout, detail))
 
         try:
-            assert '0.254.10.in-addr.arpa.hosts' in cmd.stdout
+            assert '.in-addr.arpa.hosts' in cmd.stdout
         except Exception as detail:
             raise Exception("%s %s" % (cmd.stdout, detail))
 
