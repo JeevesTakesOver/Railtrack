@@ -50,7 +50,7 @@ jinja2
 pyBookshelf
 retrying
 profilehooks
-pathos
+pathos==0.2.2.1
 dill
 six>=1.10.0
 timeout_decorator
