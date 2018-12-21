@@ -1,4 +1,4 @@
-ipython==5.2.0
+ipython==7.2.0
 jedi
 pylint
 flake8
