@@ -31,7 +31,7 @@ pickleshare==0.5
 prettytable==0.7.2
 pycrypto==2.6.1
 pyrax==1.9.4
-python-keystoneclient==1.6.0
+python-keystoneclient==3.18.0
 python-novaclient==2.26.0
 pytz==2015.4
 PyYAML==3.11
