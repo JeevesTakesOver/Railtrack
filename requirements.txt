@@ -30,7 +30,7 @@ pexpect==3.3
 pickleshare==0.5
 prettytable==0.7.2
 pycrypto==2.6.1
-pyrax==1.9.4
+pyrax==1.9.8
 python-keystoneclient==1.6.0
 python-novaclient==2.26.0
 pytz==2015.4
