@@ -51,6 +51,6 @@ pyBookshelf
 retrying
 profilehooks
 pathos
-dill
+dill==0.2.8.2
 six>=1.10.0
 timeout_decorator
