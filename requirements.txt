@@ -49,7 +49,7 @@ wrapt==1.10.5
 jinja2
 pyBookshelf
 retrying
-profilehooks
+profilehooks==1.10.0
 pathos
 dill
 six>=1.10.0
