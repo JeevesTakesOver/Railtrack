@@ -14,7 +14,7 @@ ec2_common: &ec2_common
 tinc_common: &tinc_common
   env: 'development'
   tinc_netmask: '255.255.255.0'
-  tinc_network_name: 'core-vpn'
+  tinc_network_name: &tinc_network_name 'core-vpn'
   tinc_network: '10.254.0.0'
 
 consul:
@@ -28,6 +28,7 @@ roles:
         <<: *ec2_common
         tinc_node: 'core_network_01'
         tinc_ip: &core_network_01_tinc_ip '10.254.0.1'
+        tinc_network_name: *tinc_network_name
         public_ip_address: &core_network_01_public_ip_address '1.1.1.1'
         public_dns_name: &core_network_01_public_dns_name 'core01-public.aws.azulinho.com'
         tinc_private_key: 'key-pairs/core01.priv'
@@ -50,6 +51,7 @@ roles:
         <<: *ec2_common
         tinc_node: 'core_network_02'
         tinc_ip: &core_network_02_tinc_ip '10.254.0.2'
+        tinc_network_name: *tinc_network_name
         public_ip_address: &core_network_02_public_ip_address '1.1.1.1'
         public_dns_name: &core_network_02_public_dns_name 'core02-public.aws.azulinho.com'
         tinc_private_key: 'key-pairs/core02.priv'
@@ -72,6 +74,7 @@ roles:
         <<: *ec2_common
         tinc_node: 'core_network_03'
         tinc_ip: &core_network_03_tinc_ip '10.254.0.3'
+        tinc_network_name: *tinc_network_name
         public_ip_address: &core_network_03_public_ip_address '1.1.1.1'
         public_dns_name: &core_network_03_public_dns_name 'core03-public.aws.azulinho.com'
         tinc_private_key: 'key-pairs/core03.priv'
@@ -93,7 +96,7 @@ roles:
 
 tinc_networks:
   core-vpn:
-    tinc_network_name: &tinc_network_name 'core-vpn'
+    tinc_network_name: *tinc_network_name
     tinc_netmask: '255.255.255.0'
     tinc_network: '10.254.0.0'
     servers:
@@ -124,6 +127,7 @@ git2consul: &git2consul
   <<: *tinc_common
   <<: *ec2_common
   tinc_node: 'git2consul'
+  tinc_network_name: *tinc_network_name
   service_name: 'self_service_vpn'
   git_url: 'https://github.com/JeevesTakesOver/menagerie.git'
   git_branches: '["core-vpn"]'

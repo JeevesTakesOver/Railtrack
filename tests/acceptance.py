@@ -74,6 +74,92 @@ def test_that_patches_were_installed_on(node):
 
 @echo
 @retry(stop_max_attempt_number=3, wait_fixed=5000)
+def test_that_sysctl_conf_exist_on(node):
+
+    with settings(
+        hide('stdout', 'running'),
+        host_string=node.host_string,
+        private_key_filename=node.private_key
+    ):
+        print(" running on %s" % node.host_string)
+
+        cmd = sudo('ls -l /etc/sysctl.d/')
+        try:
+            assert '60-disable-ipv6.conf' in cmd.stdout
+        except Exception as detail:
+            raise Exception("%s %s" % (cmd.stdout, detail))
+
+
+@echo
+@retry(stop_max_attempt_number=3, wait_fixed=5000)
+def test_that_ipv6_is_disabled_on(node):
+
+    line = '1'
+
+    with settings(
+        hide('stdout', 'running'),
+        host_string=node.host_string,
+        private_key_filename=node.private_key
+    ):
+        print(" running on %s" % node.host_string)
+
+        cmd = sudo('cat /proc/sys/net/ipv6/conf/all/disable_ipv6')
+        try:
+            assert line == cmd.stdout
+        except Exception as detail:
+            raise Exception("%s %s" % (cmd.stdout, detail))
+
+        try:
+            assert cmd.return_code == 0
+        except Exception as detail:
+            raise Exception("%s %s" % (cmd.return_code, detail))
+
+
+@echo
+@retry(stop_max_attempt_number=3, wait_fixed=5000)
+def test_that_iptables_persistent_is_installed_on(node):
+
+    line = 'iptables-persistent'
+
+    with settings(
+        hide('stdout', 'running'),
+        host_string=node.host_string,
+        private_key_filename=node.private_key
+    ):
+        print(" running on %s" % node.host_string)
+
+        cmd = sudo('dpkg -l')
+        try:
+            assert line in cmd.stdout
+        except Exception as detail:
+            raise Exception("%s %s" % (cmd.stdout, detail))
+
+        try:
+            assert cmd.return_code == 0
+        except Exception as detail:
+            raise Exception("%s %s" % (cmd.return_code, detail))
+
+
+@echo
+@retry(stop_max_attempt_number=3, wait_fixed=5000)
+def test_that_iptables_rules_exist_on(node):
+
+    with settings(
+        hide('stdout', 'running'),
+        host_string=node.host_string,
+        private_key_filename=node.private_key
+    ):
+        print(" running on %s" % node.host_string)
+
+        cmd = sudo('ls -l /etc/iptables')
+        try:
+            assert 'rules.v4' in cmd.stdout
+        except Exception as detail:
+            raise Exception("%s %s" % (cmd.stdout, detail))
+
+
+@echo
+@retry(stop_max_attempt_number=3, wait_fixed=5000)
 def test_that_cron_apt_is_installed_on(node):
 
     line = 'cron-apt'

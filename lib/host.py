@@ -15,6 +15,8 @@
 
 import os
 import sys
+import textwrap
+import StringIO
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from fabric.context_managers import settings, hide
@@ -33,6 +35,10 @@ from lib.mycookbooks import (
 )
 from retrying import retry
 from fabric.api import sudo
+from fabric.operations import put
+
+
+
 
 
 class SshCredentials(object):
@@ -90,7 +96,7 @@ class Host(object):
 
     @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def reboot(self):
-        """ reboots the VM 
+        """ reboots the VM
             This function blocks until ssh is available after reboot
         """
         with settings(
@@ -123,3 +129,87 @@ class Host(object):
         ):
             log_green(self.host_string)
             apt_install(packages=['fail2ban'])
+
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
+    def install_iptables_persistent(self):
+        """ installs iptables-persistent"""
+        with settings(
+            hide('running', 'stdout'),
+            host_string=self.host_string,
+            private_key_filename=self.private_key
+        ):
+            log_green(self.host_string)
+            apt_install(packages=['iptables-persistent'])
+            text = textwrap.dedent('''
+                *nat
+                :PREROUTING ACCEPT [827:49612]
+                :INPUT ACCEPT [826:49560]
+                :OUTPUT ACCEPT [313:18810]
+                :POSTROUTING ACCEPT [313:18810]
+                COMMIT
+
+                *filter
+                :INPUT ACCEPT [0:0]
+                :FORWARD DROP [0:0]
+                :OUTPUT ACCEPT [5951:667571]
+
+                :localrule-fw - [0:0]
+                :localrule-fw-accept - [0:0]
+                :localrule-fw-log-refuse - [0:0]
+                :localrule-fw-refuse - [0:0]
+
+                -A INPUT -j localrule-fw
+
+                -A localrule-fw -i {} -j localrule-fw-accept
+
+                -A localrule-fw -i lo -j localrule-fw-accept
+
+                -A localrule-fw -m conntrack --ctstate RELATED,ESTABLISHED -j localrule-fw-accept
+
+                -A localrule-fw -p tcp -m tcp --dport 22 -j localrule-fw-accept
+                -A localrule-fw -p tcp -m tcp --dport 655 -j localrule-fw-accept
+                -A localrule-fw -p udp -m udp --dport 655 -j localrule-fw-accept
+
+                -A localrule-fw -p icmp -m icmp --icmp-type 8 -j localrule-fw-accept
+
+                -A localrule-fw -j localrule-fw-log-refuse
+
+                -A localrule-fw-accept -j ACCEPT
+
+                -A localrule-fw-log-refuse -p tcp -m tcp --tcp-flags FIN,SYN,RST,ACK SYN -j LOG --log-prefix "refused connection: " --log-level 6
+                -A localrule-fw-log-refuse -m pkttype ! --pkt-type unicast -j localrule-fw-refuse
+                -A localrule-fw-log-refuse -j localrule-fw-refuse
+                -A localrule-fw-refuse -j DROP
+                COMMIT
+            '''.format(self.tinc_network_name))
+            put(
+                StringIO.StringIO(text),
+                '/etc/iptables/rules.v4',
+                use_sudo=True
+            )
+
+
+
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
+    def deploy_sysctl_conf(self):
+        """ deploys sysctl.conf files"""
+        with settings(
+            hide('running', 'stdout'),
+            host_string=self.host_string,
+            private_key_filename=self.private_key
+        ):
+            log_green(self.host_string)
+            text = textwrap.dedent('''
+                net.ipv6.conf.all.disable_ipv6 = 1
+                net.ipv6.conf.default.disable_ipv6 = 1
+                net.ipv6.conf.lo.disable_ipv6 = 1
+            ''')
+            put(
+                StringIO.StringIO(text),
+                '/etc/sysctl.d/60-disable-ipv6.conf',
+                use_sudo=True
+            )
+            sudo('sysctl -p /etc/sysctl.conf')
+
+
+

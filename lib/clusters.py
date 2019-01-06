@@ -67,6 +67,7 @@ class TincCluster(object):
                         tinc_ip=v_node['tinc_ip'],
                         tinc_private_key=v_node['tinc_private_key'],
                         tinc_public_key=v_node['tinc_public_key'],
+                        tinc_network_name=v_node['tinc_network_name'],
                         public_dns_name=v_node['public_dns_name'],
                         tinc_peers=[],
                         ssh_credentials=lib.host.SshCredentials(
