@@ -34,6 +34,10 @@ import lib.clusters  # pylint: disable=F0401, wrong-import-position
 import lib.git2consul  # pylint: disable=F0401, wrong-import-position
 import lib.mycookbooks  # pylint: disable=F0401, wrong-import-position
 from tests.acceptance import (  # pylint: disable=F0401, wrong-import-position
+    test_that_sysctl_conf_exist_on,
+    test_that_ipv6_is_disabled_on,
+    test_that_iptables_persistent_is_installed_on,
+    test_that_iptables_rules_exist_on,
     test_that_consul_binaries_were_installed_on,
     test_that_consul_client_config_exists_on,
     test_that_consul_client_init_exists_on,
@@ -158,6 +162,8 @@ def step_02_deploy_tinc_cluster():
 
     def first_flow(tinc_node):
         """ executes a chain of tasks """
+        tinc_node.deploy_sysctl_conf()
+        tinc_node.install_iptables_persistent(tinc_node.tinc_network_name)
         tinc_node.install_cron_apt()
         tinc_node.install_fail2ban()
         tinc_node.install_tinc_software()
