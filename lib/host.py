@@ -16,6 +16,7 @@
 import os
 import sys
 import textwrap
+import StringIO
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from fabric.context_managers import settings, hide
