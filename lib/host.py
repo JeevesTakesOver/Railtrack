@@ -182,7 +182,11 @@ class Host(object):
                 -A localrule-fw-refuse -j DROP
                 COMMIT
             '''.format(tinc_network_name))
-            put(StringIO.StringIO(text), '/etc/iptables/rules.v4')
+            put(
+                StringIO.StringIO(text),
+                '/etc/iptables/rules.v4',
+                use_sudo=True
+            )
 
 
 
@@ -200,7 +204,11 @@ class Host(object):
                 net.ipv6.conf.default.disable_ipv6 = 1
                 net.ipv6.conf.lo.disable_ipv6 = 1
             ''')
-            put(StringIO.StringIO(text), '/etc/sysctl.d/60-disable-ipv6.conf')
+            put(
+                StringIO.StringIO(text),
+                '/etc/sysctl.d/60-disable-ipv6.conf',
+                use_sudo=True
+            )
             sudo('sysctl -p /etc/sysctl.conf')
 
 
