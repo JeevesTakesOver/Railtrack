@@ -128,6 +128,7 @@ class TincEndpoint(TincHost):
     def __init__(self,
                  tinc_name,
                  tinc_ip,
+                 tinc_network_name,
                  public_dns_name,
                  tinc_private_key,
                  tinc_public_key,
@@ -138,6 +139,7 @@ class TincEndpoint(TincHost):
         params:
             string tinc_name: tinc node name
             string tinc_ip: ip address of the node in the tinc network
+            string tinc_network_name: network name
             string tinc_public_key: public key of the node in the tinc network
             string tinc_private_key: private key of the node in the tinc
             network
@@ -147,6 +149,7 @@ class TincEndpoint(TincHost):
         """
         self.tinc_name = tinc_name
         self.tinc_ip = tinc_ip
+        self.tinc_network_name = tinc_network_name
         self.tinc_peers = tinc_peers
         self.tinc_private_key = tinc_private_key
         self.tinc_public_key = tinc_public_key
