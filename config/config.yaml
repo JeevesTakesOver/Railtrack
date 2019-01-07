@@ -96,7 +96,7 @@ roles:
 
 tinc_networks:
   core-vpn:
-    tinc_network_name: &tinc_network_name 'core-vpn'
+    tinc_network_name: *tinc_network_name
     tinc_netmask: '255.255.255.0'
     tinc_network: '10.254.0.0'
     servers:
