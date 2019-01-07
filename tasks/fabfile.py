@@ -163,7 +163,7 @@ def step_02_deploy_tinc_cluster():
     def first_flow(tinc_node):
         """ executes a chain of tasks """
         tinc_node.deploy_sysctl_conf()
-        tinc_node.install_iptables_persistent(tinc_node.tinc_network_name)
+        tinc_node.install_iptables_persistent()
         tinc_node.install_cron_apt()
         tinc_node.install_fail2ban()
         tinc_node.install_tinc_software()

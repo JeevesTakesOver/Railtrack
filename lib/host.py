@@ -131,7 +131,7 @@ class Host(object):
             apt_install(packages=['fail2ban'])
 
     @retry(stop_max_attempt_number=3, wait_fixed=10000)
-    def install_iptables_persistent(self, tinc_network_name):
+    def install_iptables_persistent(self):
         """ installs iptables-persistent"""
         with settings(
             hide('running', 'stdout'),
@@ -181,7 +181,7 @@ class Host(object):
                 -A localrule-fw-log-refuse -j localrule-fw-refuse
                 -A localrule-fw-refuse -j DROP
                 COMMIT
-            '''.format(tinc_network_name))
+            '''.format(self.tinc_network_name))
             put(
                 StringIO.StringIO(text),
                 '/etc/iptables/rules.v4',
