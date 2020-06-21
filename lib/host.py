@@ -117,7 +117,11 @@ class Host(object):
             private_key_filename=self.private_key
         ):
             log_green(self.host_string)
-            apt_install(packages=['cron-apt'])
+            apt_install(packages=['cron-apt', 'unattended-upgrades'])
+            sudo('''echo \
+                unattended-upgrades unattended-upgrades/enable_auto_updates \
+                boolean true | debconf-set-selections''')
+            sudo("dpkg-reconfigure -f noninteractive unattended-upgrades")
 
     @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def install_fail2ban(self):
